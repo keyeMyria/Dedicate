@@ -1,4 +1,4 @@
-# dedicate
+# Dedicate
 
 A cross-platform mobile application, used to help motivate & dedicate yourself towards completing daily, weekly, monthly, & yearly tasks.
 
