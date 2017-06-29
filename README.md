@@ -1,10 +1,10 @@
 # Dedicate
 
-A cross-platform mobile application, used to help motivate & dedicate yourself towards completing daily, weekly, monthly, & yearly tasks.
+A web application you can use to help motivate & dedicate yourself towards completing tasks on daily, weekly, monthly, & yearly basis.
 
 ## Support This Project
 
-Purchase the app on the Google Play Store or the Apple App Store to help further the development of this application.
+Purchase the app on the Google Play Store or the Apple App Store to help further the development of this web application.
 
 ## How It Works
 Create tasks that you'd like to track & complete. For example, you could create a task called "pushups", and any time you'd like to do some pushups throughout the day, you could track how many pushups you did. Or, you could create a task called "ate something", and any time you ate something, you could track how many calories, carbs, fats, sugars, & proteins you consumed. It's up to you. You create the task, you provide the input fields to track, and then you choose when to track your tasks.
