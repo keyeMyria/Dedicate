@@ -1,0 +1,26 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none" x="0px" y="0px" width="64px" height="64px" viewBox="0 0 64 64">
+<defs>
+<g id="buttonAdd_0_Layer1_0_FILL">
+<path fill="#6666CC" stroke="none" d="
+M 64 32
+Q 64 18.75 54.6 9.35 45.25 0 32 0 18.75 0 9.35 9.35 0 18.75 0 32 0 45.25 9.35 54.6 18.75 64 32 64 45.25 64 54.6 54.6 64 45.25 64 32 Z"/>
+</g>
+
+<g id="buttonAdd_0_Layer0_0_FILL">
+<path fill="#FFFFFF" stroke="none" d="
+M 50 34
+L 50 30 34 30 34 14 30 14 30 30 14 30 14 34 30 34 30 50 34 50 34 34 50 34 Z"/>
+</g>
+</defs>
+
+<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+<use xlink:href="#buttonAdd_0_Layer1_0_FILL"/>
+</g>
+
+<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+<use xlink:href="#buttonAdd_0_Layer0_0_FILL"/>
+</g>
+</g>
+</svg>

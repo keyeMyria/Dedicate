@@ -1,6 +1,6 @@
 import Svg,{ G, Path} from 'react-native-svg';
 
-export function IconHome() {
+export default function IconHome() {
     return (
         <Svg width="32" height="32">
             <G id="a">
