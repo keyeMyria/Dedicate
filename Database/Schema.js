@@ -1,4 +1,4 @@
-const Realm = require('realm');
+import Realm from 'realm'
 
  export default class Schema {
      constructor(){

@@ -11,7 +11,7 @@ import AnalyticsScreen from './Screens/Analytics';
 import SettingsScreen from './Screens/Settings';
 
 // import realm database schema
-//import Schema from './Database/Schema';
+import Schema from './Database/Schema';
 
 // set up navigation
 const Navigation = DrawerNavigator(
