@@ -1,25 +1,20 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import Header from 'components/UI/Header';
-import DrawerIcon from 'components/UI/DrawerIcon';
+import Body from 'ui/Body';
+
 
 export default class TasksScreen extends React.Component {
-  constructor(props){
-    super(props);
-  }
+    constructor(props) {
+        super(props);
+    }
 
-  // Drawer Navigation options
-  static navigationOptions = {
-    drawerLabel: 'Tasks',
-    drawerIcon: ({ tintColor }) => DrawerIcon(require('icons/Home.png'), tintColor),
-  };
-
-
-  render() {
-    return (
-      <View>
-        <Header {...this.props} title="Tasks" />
-      </View> 
-    );
-  }
+    render() {
+        return (
+            <Body {...this.props} title="Tasks">
+                <View>
+                    
+                </View>
+            </Body>
+        );
+    }
 }

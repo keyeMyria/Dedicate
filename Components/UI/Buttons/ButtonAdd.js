@@ -4,7 +4,6 @@ import {
     View, TouchableOpacity
 } from 'react-native';
 import {Svg, Circle, G, Path} from 'react-native-svg';
-import IconHome from 'icons/IconHome.js';
 
 //import IconMenu from 'icons/IconMenu';
 
@@ -16,7 +15,7 @@ export default class ButtonAdd extends React.Component {
     render() {
         return (
             <View style={[styles.container, this.props.style]}>
-                <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask')}>
+                <TouchableOpacity onPress={() => this.props.navigation.navigate('NewTask')}>
                     <Svg viewBox="0 0 64 64" width="48" height="48" preserveAspectRatio="true">
                         <G>
                             <Circle r="32" cx="32" cy="32" fill="#6666cc" />

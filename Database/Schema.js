@@ -1,11 +1,13 @@
 import Realm from 'realm'
 
- export default class Schema {
-     constructor(){
-        global.realm = new Realm({
-            schema: [Task, Input, Record, RecordInput]
-        });
-     }
+ export default function Schema() {
+    global.realm = new Realm({
+        schema: [Task, Input, Record, RecordInput],
+        schemaVersion: 1,
+        migration: function(oldRealm, newRealm) {
+            newRealm.deleteAll();
+        }
+    });
  }
 
  ///////////////////////////////////////////////////////////////////////////
@@ -21,7 +23,7 @@ import Realm from 'realm'
         name: 'string',
         icon: {type: 'int', default: 0},
         color: {type: 'int', default: 0},
-        inputs: {type: 'list', objectType: 'Input', optional: true}
+        inputs: {type: 'list', objectType: 'Input'}
     }
  };
 
@@ -48,10 +50,7 @@ import Realm from 'realm'
         inputs: {type: 'list', objectType: 'RecordInput'},
 
         //task information for record
-        taskId: {type: 'int', indexed: true},
-        taskName: {type: 'linkingObjects', objectType: 'Task', property: 'name'},
-        taskIcon: {type: 'linkingObjects', objectType: 'Task', property: 'icon'},
-        taskColor: {type: 'linkingObjects', objectType: 'Task', property: 'color'}
+        task: {type: 'Task'}
      }
  }
 
@@ -64,8 +63,6 @@ import Realm from 'realm'
         date: {type: 'date', optional: true},
 
         //input information for record input
-        inputId: {type: 'int', indexed: true},
-        inputName: {type: 'linkingObjects', objectType: 'Input', property: 'name'},
-        inputType: {type: 'linkingObjects', objectType: 'Input', property: 'type'}
+        input: {type: 'Input'}
      }
  }
