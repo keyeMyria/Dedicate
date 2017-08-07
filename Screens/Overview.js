@@ -2,9 +2,8 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
-import DrawerIcon from 'components/UI/DrawerIcon';
-import ButtonAdd from 'components/UI/Buttons/ButtonAdd';
-
+import DrawerIcon from 'ui/DrawerIcon';
+import ButtonAdd from 'buttons/ButtonAdd';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -28,7 +27,6 @@ export default class OverviewScreen extends React.Component {
     // Screen Orientation changes
     onLayoutChange = event => {
         var {height, width} = Dimensions.get('window');
-        console.log([width, height]);
         if(width > height){
             //landscape
             this.setState({styles: stylesLandscape});
@@ -56,7 +54,7 @@ export default class OverviewScreen extends React.Component {
                 <Text style={[styles.p, this.state.styles.tooltip]}>
                     To begin, create a task that you'd like to dedicate yourself to.
                 </Text>
-                <ButtonAdd {...this.props} style={styles.buttonAdd}/>
+                <ButtonAdd {...this.props} style={styles.buttonAdd} onPress={() => this.props.navigation.navigate('NewTask')}/>
             </Body>
         );
     }
@@ -79,6 +77,6 @@ const stylesLandscape = StyleSheet.create({
 });
 
 const stylesPortrait = StyleSheet.create({
-    tooltip: {position:'absolute', bottom:15, left:30, maxWidth:250},
+    tooltip: {position:'absolute', bottom:10, left:30, height:60, maxWidth:'75%'},
     logo: {marginTop:60, marginBottom:30}
 });

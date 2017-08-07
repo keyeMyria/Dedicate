@@ -1,8 +1,8 @@
 import React from 'react';
 import { AppRegistry, View, StyleSheet } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
-import StatusBarComponent from './StatusBarComponent';
-import TitleBar from './TitleBar';
+import StatusBarComponent from 'ui/StatusBarComponent';
+import TitleBar from 'ui/TitleBar';
 
 export default class Header extends React.Component {
     constructor(props){

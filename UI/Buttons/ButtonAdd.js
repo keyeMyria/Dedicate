@@ -13,10 +13,13 @@ export default class ButtonAdd extends React.Component {
     }
 
     render() {
+        if(this.props.size == "small"){
+
+        }
         return (
             <View style={[styles.container, this.props.style]}>
-                <TouchableOpacity onPress={() => this.props.navigation.navigate('NewTask')}>
-                    <Svg viewBox="0 0 64 64" width="48" height="48" preserveAspectRatio="true">
+                <TouchableOpacity onPress={this.props.onPress}>
+                    <SvgSize {...this.props}>
                         <G>
                             <Circle r="32" cx="32" cy="32" fill="#6666cc" />
                             <Path 
@@ -24,10 +27,28 @@ export default class ButtonAdd extends React.Component {
                                 fill="#fff"
                             />
                         </G>
-                    </Svg>
+                    </SvgSize>
                 </TouchableOpacity>
             </View>
         );
+    }
+}
+
+const SvgSize = props => {
+    switch(props.size){
+        default:
+            return (
+                <Svg viewBox="0 0 64 64" width="48" height="48" preserveAspectRatio="true">
+                    {props.children}
+                </Svg>
+            );
+
+        case 'small':
+            return (
+                <Svg viewBox="0 0 64 64" width="36" height="36" preserveAspectRatio="true">
+                    {props.children}
+                </Svg>
+            );
     }
 }
 

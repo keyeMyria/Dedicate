@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import Header from 'components/UI/Header';
+import Header from 'ui/Header';
 
 
 export default class Body extends React.Component {
