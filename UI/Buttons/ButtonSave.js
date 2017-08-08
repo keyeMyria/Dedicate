@@ -16,11 +16,8 @@ export default class ButtonAdd extends React.Component {
                 <TouchableOpacity onPress={this.props.onPress}>
                     <SvgIcon {...this.props}>
                         <G>
-                            <Circle r="32" cx="32" cy="32" fill="#6666cc" />
-                            <Path 
-                                d="m50 34v-4h-16v-16h-4v16h-16v4h16v16h4v-16h16z" 
-                                fill="#fff"
-                            />
+                            <Path d="m4 14l-4 4 14 14 18-29-5-3-14 23-9-9z" fill="#fff"/>
+                            <Path d="m32 0h-32v32h32v-32z" fill="#fff" fill-opacity="0"/>
                         </G>
                     </SvgIcon>
                 </TouchableOpacity>

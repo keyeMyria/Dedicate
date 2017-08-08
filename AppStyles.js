@@ -9,5 +9,5 @@ export default AppStyles = {
     altSeparatorColor: '#ccc',
 
     // font styling //////////////////////////
-    titleFontSize: 20
+    titleFontSize: 24
 };

@@ -4,12 +4,13 @@ import {
     Text, View, Image,
     TouchableOpacity
 } from 'react-native';
-//import IconMenu from 'icons/IconMenu';
 
 export default class TitleBar extends React.Component {
     constructor(props){
         super(props);
     }
+
+
     render() {
         return (
             <View style={styles.container}>
@@ -21,32 +22,29 @@ export default class TitleBar extends React.Component {
                 <View style={styles.container_title}>
                     <Text style={styles.title}>{this.props.title}</Text>
                 </View>
+                <View style={styles.container_buttons}>
+                    <TitleBarButtons/>
+                </View>
             </View>
         );
     }
 }
 
-const styles = StyleSheet.create({
-    container: {
-        padding: 15
-    },
-    container_menu: {
-        alignSelf: 'flex-start'
-    },
-    container_title: {
-        position:'absolute',
-        paddingTop: 14,
-        alignSelf: 'center'
-    },
-    menu: {
-        width:25,
-        height:25,
-        tintColor: 'white'
-    },
-    title:{
-        fontSize:19,
-        color:'white'
+const TitleBarButtons = (props) => {
+    if(props.titleBarButtons){
+        return props.titleBarButtons;
+    }else{
+        return <View></View>
     }
+}
+
+const styles = StyleSheet.create({
+    container: { },
+    container_menu: { alignSelf: 'flex-start', padding: 15 },
+    container_title: { position:'absolute', top: 14, alignSelf: 'center' },
+    container_buttons: {position: 'absolute', top:0, right:0, width:50, height:55},
+    menu: { width:25, height:25, tintColor: 'white' },
+    title:{ fontSize:19, color:'white' }
 });
 
 AppRegistry.registerComponent("TitleBar", () => TitleBar);
