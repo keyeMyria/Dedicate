@@ -15,7 +15,7 @@ import SettingsScreen from './Screens/Settings';
 import NewTaskScreen from './Screens/NewTask';
 
 // import realm database schema
-import Schema from './Database/Schema';
+import Schema from 'db/Schema';
 Schema();
 
 // set up navigation

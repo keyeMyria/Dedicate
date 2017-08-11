@@ -8,8 +8,12 @@ export default function SvgIcon(props) {
 
     switch(props.size){
         case 'small':
-        width = 36; height = 36;
-        break;
+            width = 36; height = 36;
+            break;
+
+        case 'smaller':
+            width = 32; height = 32;
+            break;
     }
 
     return (

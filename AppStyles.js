@@ -4,9 +4,13 @@ export default AppStyles = {
     textColor: '#444',
     logoColor: '#6666cc',
     headerColor: '#6666cc',
+    headerDarkColor: '#4D4DAD',
+    headerTextColor: '#fff',
     backgroundColor: '#fff',
     altBackgroundColor: '#eee',
     altSeparatorColor: '#ccc',
+    buttonColor: '#6666cc',
+    buttonTextColor: '#fff',
 
     // font styling //////////////////////////
     titleFontSize: 24
