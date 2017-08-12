@@ -5,6 +5,7 @@ import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
 import ButtonAdd from 'buttons/ButtonAdd';
 import ButtonSave from 'buttons/ButtonSave';
+import ButtonClose from 'buttons/ButtonClose';
 import DbTasks from 'db/DbTasks';
 
 export default class NewTaskScreen extends React.Component {
@@ -12,7 +13,7 @@ export default class NewTaskScreen extends React.Component {
         super(props);
         this.state = {
             task:{
-                name:"New Task",
+                name:"",
                 inputs:[], // {name:'', type:0}
             },
             taskForm:{
@@ -22,7 +23,8 @@ export default class NewTaskScreen extends React.Component {
             styles:stylesLandscape,
             ButtonAddTop: {},
             ButtonAddShow: {},
-            nameIndex: Math.floor(Math.random() * (this.names.length))
+            nameIndex: Math.floor(Math.random() * (this.names.length)),
+            edited: false
         }
 
 
@@ -35,35 +37,28 @@ export default class NewTaskScreen extends React.Component {
     // Screen Orientation changes
     onLayoutChange = event => {
         var {height, width} = Dimensions.get('window');
-        var inputsOffset = 0;
-        if(this.state.task.inputs.length > 3){
-            inputsOffset -= 50;
-        }
+        var taskForm = this.state.taskForm;
         
         if(width > height){
             //landscape
-            this.setState({styles: stylesLandscape, taskForm:{inputsOffset:inputsOffset}});
+            if(this.state.task.inputs.length > 1){
+                taskForm.inputsOffset = 50;
+            }
+            this.setState({styles: stylesLandscape, taskForm:taskForm});
         }else{
             //portrait
-            this.setState({styles: stylesPortrait, taskForm:{inputsOffset:inputsOffset}});
+            if(this.state.task.inputs.length > 3){
+                taskForm.inputsOffset = 50;
+            }
+            this.setState({styles: stylesPortrait, taskForm:taskForm});
         }
     }
 
     // Element Measurements
     measureTaskForm(event) {
-        this.setState({
-            taskForm:{ height: event.nativeEvent.layout.height }
-        });
-    }
-
-    // Save Button
-    ButtonSaveTask = () => {
-        return(
-            <View style={styles.buttonSaveContainer}>
-                <ButtonSave size="smaller" style={styles.buttonSave} onPress={this.OnPressButtonSave} />
-            </View>
-        );
-
+        var taskForm = this.state.taskForm;
+        taskForm.height = Math.floor(event.nativeEvent.layout.height);
+        this.setState({taskForm:taskForm});
     }
 
     // Events
@@ -87,28 +82,40 @@ export default class NewTaskScreen extends React.Component {
         if(inputs.length == 9){
             show = false;
         }
+        var task = this.state.task;
         var max = inputs.map(function(attrs){return attrs.key;}).reduce(function (a, b) { return (b > a) ? b : a; }, 0);
-        inputs.push({name:'My Input', type:0, key:max + 1});
+        task.inputs.push({name:'', type:'0', key:max + 1});
         this.setState({
-           task:{inputs:inputs},
+           task:task,
            ButtonAddShow:show //show Button
         });
+        this.validateForm();
+        this.onLayoutChange(event);
     }
 
     onPressButtonSave = event => {
-        console.log('wtf');
-        console.log(this.state.task);
+        console.log(this.state);
         //DbTasks.CreateTask(this.state.task);
     }
 
+    onLabelChangeText = text => {
+        var task = this.state.task;
+        task.name = text;
+        this.setState({task:task});
+        this.validateForm();
+    }
+
     onInputLabelChangeText = (index, text) => {
-        var inputs = this.state.task.inputs;
-        var item = inputs[index - 1];
-        item.name = text;
-        inputs[index - 1] = item;
-        this.setState({
-            task: { inputs: inputs }
-        });
+        var task = this.state.task;
+        task.inputs[index - 1].name = text;
+        this.setState({ task: task });
+        this.validateForm();
+    }
+
+    onPickerValueChange = (index, itemValue, itemIndex) => {
+        var task = this.state.task;
+        task.inputs[index - 1].type = itemValue;
+        this.setState({task: task});
     }
 
     onSubmitEditing = (keyType, index) => {
@@ -119,15 +126,22 @@ export default class NewTaskScreen extends React.Component {
         }
     }
 
-    onPickerValueChange = (index, itemValue, itemIndex) => {
-        var inputs = this.state.task.inputs;
-        var item = inputs[index - 1];
-        item.type = itemValue;
-        inputs[index - 1] = item;
-        this.setState({
-            task: { inputs: inputs }
-        });
+    onRemoveInputField = (index) => {
+        console.log('remove ' + index);
     }
+
+    validateForm = () => {
+        //validate form fields in order to show save button
+        var show = false;
+        if(this.state.task.name.length > 0){
+            show = true;
+            for(x = 0; x < this.state.task.inputs.length; x++){
+                if(this.state.task.inputs[x].name == ''){show = false; break;}
+            }
+        }
+        this.setState({edited:show});
+    }
+
     // Placeholder Task Names
     names = [
         "Pushups", "Exercise", "Jogging", "Cook food", "Read a book", "Watch a movie",
@@ -138,11 +152,22 @@ export default class NewTaskScreen extends React.Component {
         return this.names[this.state.nameIndex];
     }
 
+    // Save Button
+    ButtonSaveTask = () => {
+        var that = this;
+        if(this.state.edited == true){
+            return(
+                <View style={styles.buttonSaveContainer}>
+                    <ButtonSave size="smaller" style={styles.buttonSave} onPress={this.onPressButtonSave} />
+                </View>
+            );
+        }
+    }
+
     //Render Component
     render() {
         var {height, width} = Dimensions.get('window');
         var that = this;
-
         //generate input field list
         var inputFields = [];
         if(this.state.task.inputs.length > 0){
@@ -164,8 +189,10 @@ export default class NewTaskScreen extends React.Component {
                     keytype={keytype} 
                     width={width} 
                     task={this.state.task} 
-                    onSubmitEditing={() => {this.onSubmitEditing.call(that, keytype.toString(), e)}}
+                    onChangeText={(text) => {this.onInputLabelChangeText.call(that, e, text)}}
                     onPickerValueChange={(itemValue, itemIndex) => {this.onPickerValueChange.call(that, e, itemValue, itemIndex)}}
+                    onSubmitEditing={() => {this.onSubmitEditing.call(that, keytype.toString(), e)}}
+                    onRemoveInputField={() => {this.onRemoveInputField.call(that, e)}}
                 />;
             });
 
@@ -187,9 +214,8 @@ export default class NewTaskScreen extends React.Component {
         {
             labelKeyType = 'next';
         }
-
         return (
-            <Body {...this.props} title="New Task" onLayout={this.onLayoutChange} titleBarButtons={this.ButtonSaveTask.call(this)} >
+            <Body {...this.props} title="New Task" onLayout={this.onLayoutChange} titleBarButtons={this.ButtonSaveTask.call(that)} >
                 <ScrollView contentContainerStyle={styles.scrollview} onScroll={this.onScrollView} keyboardShouldPersistTaps="handled">
                     <View style={styles.container} onLayout={(event) => this.measureTaskForm(event)} >
                         <Text style={styles.fieldTitle}>Label</Text>
@@ -199,6 +225,7 @@ export default class NewTaskScreen extends React.Component {
                             placeholder={this.placeholderTaskName()}
                             returnKeyType={labelKeyType} 
                             blurOnSubmit={false}
+                            onChangeText={this.onLabelChangeText}
                             onSubmitEditing={(event) => { 
                                 var ref = this.refs['taskInput1'];
                                 if(ref){
@@ -209,13 +236,13 @@ export default class NewTaskScreen extends React.Component {
                              }}
                         />
                     </View>
-                    <View style={[styles.containerInputs, {minHeight:height - 160 + this.state.taskForm.inputsOffset}]}>
+                    <View style={[styles.containerInputs, {minHeight:height - this.state.taskForm.height, paddingBottom:this.state.taskForm.inputsOffset}]}>
                         <View>
                             <Text style={styles.inputsTitle}>Input Fields</Text>
                             {this.state.ButtonAddShow && 
                                 <ButtonAdd size="small" style={[styles.buttonAddInput, this.state.ButtonAddTop]}
+                                    outline={AppStyles.altBackgroundColor}
                                     onPress={this.onPressAddInput}
-                                    width="25" height="25"
                                 />
                             }
                         </View>
@@ -248,18 +275,18 @@ class TaskInputField extends React.Component{
         }
         return (
             <View style={styles.containerInputField}>
-                <View style={[styles.inputFieldLabel, {width:this.props.width - 175}]}>
+                <View style={[styles.inputFieldLabel, {width:this.props.width - 225}]}>
                     <Textbox 
                         ref={'inputLabel' + this.props.index} 
                         style={styles.inputField} 
-                        placeholder={this.props.input.name} 
+                        placeholder="How Many?" 
                         returnKeyType={labelKeyType} 
                         onChangeText={this.props.onChangeText}
                         blurOnSubmit={false}
                         onSubmitEditing={this.props.onSubmitEditing}
                     />
                 </View>
-                <View style={[styles.inputFieldType, {width:150}]}>
+                <View style={styles.inputFieldType}>
                     <Picker
                         style={styles.pickerStyle}
                         itemStyle={styles.pickerItemStyle}
@@ -273,6 +300,11 @@ class TaskInputField extends React.Component{
                         <Picker.Item label="Yes/No" value="3" />
                         <Picker.Item label="5 Stars" value="4" />
                     </Picker>
+                </View>
+                <View>
+                    <ButtonClose size="xxsmall" color={AppStyles.color} style={styles.buttonRemoveInput}
+                        onPress={this.props.onRemoveInputField}
+                    />
                 </View>
             </View>
         );
@@ -291,19 +323,20 @@ const styles = StyleSheet.create({
     inputsTitle: {fontSize:AppStyles.titleFontSize, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
     containerDescription: {paddingHorizontal:30, flex:1, flexDirection:'column', justifyContent: 'center', alignItems:'center'},
     inputsDescription: { fontSize:16, paddingHorizontal:10, position:'relative', color: AppStyles.color },
-    buttonAddInput:{position:'absolute', right:10, zIndex:1},
+    buttonAddInput:{position:'absolute', right:12, zIndex:1},
 
     //input field
     containerInputField: {flexDirection:'row', paddingHorizontal:30, paddingBottom:20, marginBottom:10, borderBottomColor: AppStyles.altSeparatorColor, borderBottomWidth:1},
     inputField: {fontSize:20},
     inputFieldTitle:{},
     inputFieldType:{},
-    pickerStyle:{},
+    pickerStyle:{width:140},
     pickerItemStyle:{fontSize:20},
+    buttonRemoveInput:{paddingVertical:15, paddingHorizontal:10},
 
     //title bar buttons
-    buttonSaveContainer: {paddingTop:12, paddingLeft:20, backgroundColor:AppStyles.headerDarkColor},
-    buttonSave:{}
+    buttonSaveContainer: {width:75, paddingLeft:10, paddingBottom:12, backgroundColor:AppStyles.headerDarkColor},
+    buttonSave:{padding:12 }
 });
 
 const stylesLandscape = StyleSheet.create({

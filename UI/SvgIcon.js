@@ -14,7 +14,17 @@ export default function SvgIcon(props) {
         case 'smaller':
             width = 32; height = 32;
             break;
+
+        case 'xsmall':
+            width = 25; height = 25;
+            break;
+
+        case 'xxsmall':
+            width = 20; height = 20;
+            break;
     }
+    if(props.offsetWidth){width += props.offsetWidth;}
+    if(props.offsetHeight){height += props.offsetHeight;}
 
     return (
         <Svg viewBox="0 0 64 64" width={width} height={height} preserveAspectRatio="true">
