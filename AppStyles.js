@@ -7,6 +7,7 @@ export default AppStyles = {
     headerDarkColor: '#4D4DAD',
     headerTextColor: '#fff',
     backgroundColor: '#fff',
+    separatorColor: '#eee',
     altBackgroundColor: '#eee',
     altSeparatorColor: '#ccc',
     buttonColor: '#6666cc',

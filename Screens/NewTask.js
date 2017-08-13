@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, Image, Button, StyleSheet, ScrollView, Dimensions, Alert, Picker } from 'react-native';
+import { View, Text, Image, Button, StyleSheet, ScrollView, Dimensions, Alert } from 'react-native';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
+import Picker from 'fields/Picker';
 import ButtonAdd from 'buttons/ButtonAdd';
 import ButtonSave from 'buttons/ButtonSave';
 import ButtonClose from 'buttons/ButtonClose';
@@ -84,7 +85,7 @@ export default class NewTaskScreen extends React.Component {
         }
         var task = this.state.task;
         var max = inputs.map(function(attrs){return attrs.key;}).reduce(function (a, b) { return (b > a) ? b : a; }, 0);
-        task.inputs.push({name:'', type:'0', key:max + 1});
+        task.inputs.push({name:'', type:'0', key:max + 1, isnew:true});
         this.setState({
            task:task,
            ButtonAddShow:show //show Button
@@ -120,14 +121,17 @@ export default class NewTaskScreen extends React.Component {
 
     onSubmitEditing = (keyType, index) => {
         if(keyType == 'next'){
-            this.refs['taskInput' + (index + 1)].refs['inputLabel' + (index + 1)].focus();
+            this.refs['taskInput' + (index + 1)].refs['inputLabel'].focus();
         }else{
-            this.refs['taskInput' + index].refs['inputLabel' + index].blur();
+            this.refs['taskInput' + index].refs['inputLabel'].blur();
         }
     }
 
     onRemoveInputField = (index) => {
         console.log('remove ' + index);
+        var task = this.state.task;
+        task.inputs.splice(index - 1, 1);
+        this.setState({task:task});
     }
 
     validateForm = () => {
@@ -164,6 +168,16 @@ export default class NewTaskScreen extends React.Component {
         }
     }
 
+    onFocusInputField = (index) => {
+        var task = this.state.task;
+        if(task.inputs[i-1].isnew === true){
+            task.inputs[i-1].isnew = false;
+            this.setState({task:task})
+            return true;
+        }
+        return false;
+    }
+
     //Render Component
     render() {
         var {height, width} = Dimensions.get('window');
@@ -189,6 +203,7 @@ export default class NewTaskScreen extends React.Component {
                     keytype={keytype} 
                     width={width} 
                     task={this.state.task} 
+                    focus={() => this.onFocusInputField(e)}
                     onChangeText={(text) => {this.onInputLabelChangeText.call(that, e, text)}}
                     onPickerValueChange={(itemValue, itemIndex) => {this.onPickerValueChange.call(that, e, itemValue, itemIndex)}}
                     onSubmitEditing={() => {this.onSubmitEditing.call(that, keytype.toString(), e)}}
@@ -216,7 +231,7 @@ export default class NewTaskScreen extends React.Component {
         }
         return (
             <Body {...this.props} title="New Task" onLayout={this.onLayoutChange} titleBarButtons={this.ButtonSaveTask.call(that)} >
-                <ScrollView contentContainerStyle={styles.scrollview} onScroll={this.onScrollView} keyboardShouldPersistTaps="handled">
+                <ScrollView onScroll={this.onScrollView} keyboardShouldPersistTaps="handled">
                     <View style={styles.container} onLayout={(event) => this.measureTaskForm(event)} >
                         <Text style={styles.fieldTitle}>Label</Text>
                         <Textbox 
@@ -229,7 +244,7 @@ export default class NewTaskScreen extends React.Component {
                             onSubmitEditing={(event) => { 
                                 var ref = this.refs['taskInput1'];
                                 if(ref){
-                                    ref.refs['inputLabel1'].focus();
+                                    ref.refs['inputLabel'].focus();
                                 }else{
                                     this.refs['tasklabel'].blur();
                                 }
@@ -258,26 +273,26 @@ export default class NewTaskScreen extends React.Component {
 class TaskInputField extends React.Component{
     constructor(props){
         super(props);
-        this.state = {nextInputLabel:null};
+        this.state = {nextInputLabel:null, labelKeyType:'done'};
     }
 
     componentDidMount(){
         this.setState({nextInputLabel:this.refs.inputLabel2});
+        if(this.props.focus === true){
+            this.refs['inputLabel'].focus();
+        }
     }
 
     render(){
-        var that = this;
         var labelKeyType = 'done';
-        var nextInputLabel;
         if(this.props.task.inputs.length > this.props.index){
             labelKeyType = 'next';
-            nextInputLabel = this.refs['inputLabel' + (this.props.index + 1)]; 
         }
         return (
             <View style={styles.containerInputField}>
-                <View style={[styles.inputFieldLabel, {width:this.props.width - 225}]}>
+                <View style={[styles.inputFieldLabel, {width:this.props.width - 210}]}>
                     <Textbox 
-                        ref={'inputLabel' + this.props.index} 
+                        ref={'inputLabel'} 
                         style={styles.inputField} 
                         placeholder="How Many?" 
                         returnKeyType={labelKeyType} 
@@ -288,20 +303,27 @@ class TaskInputField extends React.Component{
                 </View>
                 <View style={styles.inputFieldType}>
                     <Picker
+                        ref={'inputType'}
                         style={styles.pickerStyle}
                         itemStyle={styles.pickerItemStyle}
                         selectedValue={this.props.input.type}
                         onValueChange={this.props.onPickerValueChange}
                         value={this.props.input.type}
-                    >
-                        <Picker.Item label="Number" value="0" />
-                        <Picker.Item label="Text" value="1" />
-                        <Picker.Item label="Date" value="2" />
-                        <Picker.Item label="Yes/No" value="3" />
-                        <Picker.Item label="5 Stars" value="4" />
-                    </Picker>
+                        items={
+                            [
+                                {label:"Number", key:"0"},
+                                {label:"Text", key:"2"},
+                                {label:"Date", key:"3"},
+                                {label:"Time", key:"4"},
+                                {label:"Date & Time", key:"5"},
+                                {label:"Stop Watch", key:"6"},
+                                {label:"Yes/No", key:"7"},
+                                {label:"5 Stars", key:"8"}
+                            ]
+                        }
+                    />
                 </View>
-                <View>
+                <View style={styles.buttonRemoveContainer}>
                     <ButtonClose size="xxsmall" color={AppStyles.color} style={styles.buttonRemoveInput}
                         onPress={this.props.onRemoveInputField}
                     />
@@ -326,12 +348,13 @@ const styles = StyleSheet.create({
     buttonAddInput:{position:'absolute', right:12, zIndex:1},
 
     //input field
-    containerInputField: {flexDirection:'row', paddingHorizontal:30, paddingBottom:20, marginBottom:10, borderBottomColor: AppStyles.altSeparatorColor, borderBottomWidth:1},
+    containerInputField: {width:'100%', flexDirection:'row', paddingHorizontal:30, paddingBottom:20, marginBottom:10, borderBottomColor: AppStyles.altSeparatorColor, borderBottomWidth:1},
     inputField: {fontSize:20},
     inputFieldTitle:{},
     inputFieldType:{},
     pickerStyle:{width:140},
     pickerItemStyle:{fontSize:20},
+    buttonRemoveContainer:{position:'absolute', right:12},
     buttonRemoveInput:{paddingVertical:15, paddingHorizontal:10},
 
     //title bar buttons

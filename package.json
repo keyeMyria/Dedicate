@@ -19,6 +19,7 @@
   "dependencies": {
     "react": "16.0.0-alpha.12",
     "react-native": "^0.46.4",
+    "react-native-fade-view": "^0.3.0",
     "react-native-svg": "5.3.3",
     "react-navigation": "^1.0.0-beta.11",
     "realm": "^1.10.1"
