@@ -13,6 +13,7 @@ import CalendarScreen from './Screens/Calendar';
 import AnalyticsScreen from './Screens/Analytics';
 import SettingsScreen from './Screens/Settings';
 import NewTaskScreen from './Screens/NewTask';
+import TaskScreen from './Screens/NewTask';
 
 // import realm database schema
 import Schema from 'db/Schema';
@@ -26,7 +27,8 @@ const Navigation = DrawerNavigator(
         Calendar: { screen: CalendarScreen, path: 'calendar' },
         Analytics: { screen: AnalyticsScreen, path: 'analytics' },
         Settings: { screen: SettingsScreen, path: 'settings' },
-        NewTask: { screen: NewTaskScreen, path: 'newtask' }
+        NewTask: { screen: NewTaskScreen, path: 'newtask' },
+        Task: { screen: TaskScreen, path: 'task' }
     },
     {
         initialRouteName: 'Overview',

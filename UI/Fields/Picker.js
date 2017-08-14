@@ -20,7 +20,6 @@ export default class Picker extends React.Component {
     }
 
     selectItem(index){
-        console.log('index = ' + index);
         global.Modal.hide();
         this.props.onValueChange(this.state.items[index].key, index);
         this.setState({selectedIndex:index});
@@ -30,13 +29,11 @@ export default class Picker extends React.Component {
         this.setState({modalOpen:true});
         var that = this;
         global.Modal.setContent((modal) => {
-            console.log('/////////////////////');
             var i = 0;
             return (
                 <View style={styles.modalContainer}>
                     {this.state.items.map((input) => {
                         i++;
-                        console.log(i);
                         var e = parseInt(i.toString());
                         return (
                             <TouchableOpacity key={input.key} onPress={() => {this.selectItem.call(that, e-1)}}>

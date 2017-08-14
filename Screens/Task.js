@@ -9,7 +9,7 @@ import ButtonSave from 'buttons/ButtonSave';
 import ButtonClose from 'buttons/ButtonClose';
 import DbTasks from 'db/DbTasks';
 
-export default class NewTaskScreen extends React.Component {
+export default class TaskScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
