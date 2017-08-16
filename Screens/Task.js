@@ -129,21 +129,13 @@ export default class TaskScreen extends React.Component {
     }
 
     onPressButtonSave = event => {
-        //console.log(this.state);
         var db = new DbTasks();
-        console.log('////// BEFORE ////////////////////');
-        console.log(global.realm.objects('Task'));
-        //db.Wipe();
-        //console.log('////// AFTER /////////////////////');
-        //console.log(global.realm.objects('Task'));
-        console.log('////// WITH NEW RECORD ////////////////');
         var task = Object.assign({},this.state.task);
 
         for(var x = 0; x < task.inputs.length; x++){
             delete task.inputs[x].key;
         }
         db.CreateTask(task);
-        console.log(global.realm.objects('Task'));
 
     }
 

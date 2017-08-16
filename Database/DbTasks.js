@@ -40,6 +40,10 @@ export default class DbTasks extends Db{
         }
     }
 
+    HasTasks(){
+        return global.realm.objects('Task').length > 0;
+    }
+
     GetTasksList(options){
         if(!options){
             options = {sorted:'name', descending:false}
@@ -50,5 +54,11 @@ export default class DbTasks extends Db{
             tasks.sorted(options.sorted, options.descending ? options.descending : false)
         }
         return tasks;
+    }
+
+    TotalTasks(filtered){
+        var tasks = global.realm.objects('Task');
+        if(filtered){tasks.filtered(filtered);}
+        return tasks.length;
     }
 }

@@ -28,7 +28,6 @@ export default class Modal extends React.Component {
     onLayoutChange = event => {
         var win = Dimensions.get('window');
         var modalContainer = event.nativeEvent.layout;
-        console.log(modalContainer);
         var styles = this.state.styles;
         styles.darkBackgroundContainer = {height:win.height};
         styles.darkBackground = {height:win.height};
@@ -42,7 +41,6 @@ export default class Modal extends React.Component {
     }
 
     show = () => {
-        //console.log(TextInput);
         Keyboard.dismiss();
         TextInput.State.blurTextInput();
         this.setState({visible:true});

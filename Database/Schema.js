@@ -3,7 +3,7 @@ import Realm from 'realm'
  export default function Schema() {
     global.realm = new Realm({
         schema: [Task, Input, Record, RecordInput],
-        schemaVersion: 1,
+        schemaVersion: 2,
         migration: function(oldRealm, newRealm) {
             newRealm.deleteAll();
         }
@@ -58,9 +58,10 @@ import Realm from 'realm'
  RecordInput.schema = {
     name: 'RecordInput',
     properties: {
-        value: {type: 'float', optional: true},
-        str: {type: 'string', optional: true},
+        number: {type: 'float', optional: true},
+        text: {type: 'string', optional: true},
         date: {type: 'date', optional: true},
+        type: {type: 'int'},
 
         //input information for record input
         input: {type: 'Input'}
