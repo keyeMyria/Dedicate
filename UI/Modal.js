@@ -2,7 +2,6 @@ import React from 'react';
 
 import { AppRegistry, View, StyleSheet, Text, 
     Dimensions, TouchableWithoutFeedback, TextInput, ScrollView, Keyboard  } from 'react-native';
-import FadeView from 'react-native-fade-view';
 import AppStyles from 'dedicate/AppStyles';
 
 export default class Modal extends React.Component {

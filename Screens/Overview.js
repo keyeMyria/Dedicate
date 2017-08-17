@@ -43,11 +43,11 @@ export default class OverviewScreen extends React.Component {
                     <View style={styles.counters}>
                         <View style={styles.counterContainer}>
                             <Text style={styles.counter}>{this.state.totalTasks}</Text>
-                            <Text style={styles.counterLabel}>Task{() => {return this.state.totalTasks != 1 ? 's' : ''}}</Text>
+                            <Text style={styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
                         </View>
                         <View style={styles.counterContainer}>
                             <Text style={styles.counter}>{this.state.totalRecords}</Text>
-                            <Text style={styles.counterLabel}>Events{() => {return this.state.totalTasks != 1 ? 's' : ''}}</Text>
+                            <Text style={styles.counterLabel}>{this.state.totalRecords != 1 ? 'Events' : 'Event'}</Text>
                         </View>
                     </View>
                     

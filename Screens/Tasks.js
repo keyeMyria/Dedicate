@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbTasks from 'db/DbTasks';
@@ -27,9 +27,9 @@ export default class TasksScreen extends React.Component {
         });
         return (
             <Body {...this.props} style={styles.body} title="Tasks" buttonAdd={true}>
-                <View style={styles.taskListContainer}>
+                <ScrollView>
                     {tasklist}
-                </View>
+                </ScrollView>
             </Body>
         );
     }

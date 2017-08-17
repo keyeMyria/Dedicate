@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, Button, StyleSheet, ScrollView, Dimensions, Alert } from 'react-native';
+import { View, Text, Image, Button, StyleSheet, ScrollView, Dimensions, Alert, Keyboard, KeyboardAvoidingView  } from 'react-native';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
@@ -18,28 +18,57 @@ export default class NewTaskScreen extends React.Component {
                 inputs:[], // {name:'', type:0}
             },
             taskForm:{
-                height:160,
+                height:250,
                 inputsOffset:0
             },
             styles:stylesLandscape,
             ButtonAddTop: {},
             ButtonAddShow: {},
+            focusIndex:null,
+            visibleHeight:0,
+            contentOffset:0,
             nameIndex: Math.floor(Math.random() * (this.names.length)),
             edited: false
         }
+    }
 
-
+    // Component Events
+    componentWillMount(){
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this))
+        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide.bind(this))
     }
 
     componentDidMount() { 
         this.onLayoutChange();
     }
 
+    componentWillUnmount () {
+        this.keyboardDidShowListener.remove()
+        this.keyboardDidHideListener.remove()
+        this.onScrollView();
+    }
+
+    // Keyboard Events
+    keyboardDidShow (e) {
+        let newSize = Dimensions.get('window').height - e.endCoordinates.height
+        this.setState({
+            visibleHeight: newSize
+        })
+        this.onScrollView();
+    }
+    
+    keyboardDidHide (e) {
+        this.setState({
+            visibleHeight: Dimensions.get('window').height
+        })
+        this.onScrollView();
+    }  
+
     // Screen Orientation changes
     onLayoutChange = event => {
         var {height, width} = Dimensions.get('window');
         var taskForm = this.state.taskForm;
-        
+    
         if(width > height){
             //landscape
             if(this.state.task.inputs.length > 1){
@@ -62,13 +91,17 @@ export default class NewTaskScreen extends React.Component {
         this.setState({taskForm:taskForm});
     }
 
-    // Events
+    // Child Events
     onScrollView = event => {
-        var offset = event.nativeEvent.contentOffset.y;
-        if(offset > this.state.taskForm.height){
+        var visibleHeight = this.state.visibleHeight;
+        var offset = event ? event.nativeEvent.contentOffset.y : this.state.contentOffset;
+        var viewOffset = Dimensions.get('window').height - visibleHeight;
+        var headerOffset = this.state.taskForm.height + 55;
+        if(offset > 0 && offset > headerOffset){
             //lock button to top of screen
             this.setState({
-                ButtonAddTop:{top: (offset - this.state.taskForm.height) }
+                ButtonAddTop:{top: offset - headerOffset},
+                contentOffset: offset
             });
         }else{
             this.setState({
@@ -125,7 +158,7 @@ export default class NewTaskScreen extends React.Component {
     onRemoveInputField = (index) => {
         var task = this.state.task;
         task.inputs.splice(index - 1, 1);
-        this.setState({task:task});
+        this.setState({task:task, ButtonAddShow:true});
     }
 
     onPressButtonSave = event => {
@@ -136,7 +169,37 @@ export default class NewTaskScreen extends React.Component {
             delete task.inputs[x].key;
         }
         db.CreateTask(task);
+        this.props.navigation.navigate('Tasks')
+    }
 
+    shouldFocusInputField = (index) => {
+        var task = this.state.task;
+        if(task.inputs[index-1].isnew === true){
+            task.inputs[index-1].isnew = false;
+            this.setState({task:task, focusIndex:index});
+            return true;
+        }
+        return false;
+    }
+
+    onFocusInputField(event, index){
+        this.onScrollView();
+        var that = this;
+        if(this.state.focusIndex != index){
+            this.setState({focusIndex:index});
+        }
+
+        //TEMP FIX: temporary fix adds a blank character and instantly removes that character
+        //      to force the broken KeyboardAvoidingView component to refresh.
+        setTimeout(()=>{
+            var ref = that.refs['taskInput' + that.state.focusIndex];
+            ref.saveState({label:' '+ ref.state.label});
+            setTimeout(()=>{
+                var ref = that.refs['taskInput' + that.state.focusIndex];
+                ref.saveState({label:ref.state.label.substr(1, ref.state.label.length - 1)});
+            }, 1)
+        }, 1)
+        
     }
 
     // Form Validation
@@ -175,16 +238,6 @@ export default class NewTaskScreen extends React.Component {
         }
     }
 
-    onFocusInputField = (index) => {
-        var task = this.state.task;
-        if(task.inputs[index-1].isnew === true){
-            task.inputs[index-1].isnew = false;
-            this.setState({task:task})
-            return true;
-        }
-        return false;
-    }
-
     //Render Component
     render() {
         var {height, width} = Dimensions.get('window');
@@ -210,7 +263,8 @@ export default class NewTaskScreen extends React.Component {
                     keytype={keytype} 
                     width={width} 
                     task={this.state.task} 
-                    focus={() => this.onFocusInputField(e)}
+                    focus={() => {return this.shouldFocusInputField.call(that, e)}}
+                    onFocus={(event) => {this.onFocusInputField.call(that, event, e)}}
                     onChangeText={(text) => {this.onInputLabelChangeText.call(that, e, text)}}
                     onPickerValueChange={(itemValue, itemIndex) => {this.onPickerValueChange.call(that, e, itemValue, itemIndex)}}
                     onSubmitEditing={() => {this.onSubmitEditing.call(that, keytype.toString(), e)}}
@@ -224,8 +278,6 @@ export default class NewTaskScreen extends React.Component {
                 <View style={styles.containerDescription}>
                     <Text style={[styles.inputsDescription, this.state.styles.inputsDescription]}>
                         Your can record data about your task by adding one or more input fields above. 
-                        {"\n\n"}
-                        For example, a task labeled "Pushups" would have an input field labeled "How Many" or "Count".
                     </Text>
                 </View>
             );
@@ -236,9 +288,12 @@ export default class NewTaskScreen extends React.Component {
         {
             labelKeyType = 'next';
         }
+        
         return (
-            <Body {...this.props} title="New Task" onLayout={this.onLayoutChange} titleBarButtons={this.ButtonSaveTask.call(that)} >
-                <ScrollView onScroll={this.onScrollView} keyboardShouldPersistTaps="handled">
+            <KeyboardAvoidingView behavior="padding" >
+            <ScrollView ref='scrollinputs' onScroll={this.onScrollView}  keyboardShouldPersistTaps="handled">
+                <Body {...this.props} title="New Task" onLayout={this.onLayoutChange} titleBarButtons={this.ButtonSaveTask.call(that)} >
+                
                     <View style={styles.container} onLayout={(event) => this.measureTaskForm(event)} >
                         <Text style={styles.fieldTitle}>Label</Text>
                         <Textbox 
@@ -270,8 +325,10 @@ export default class NewTaskScreen extends React.Component {
                         </View>
                         {inputFields}
                     </View>
-                </ScrollView>
-            </Body>
+                
+                </Body>
+            </ScrollView>
+            </KeyboardAvoidingView >
         );
     }
 }
@@ -280,7 +337,7 @@ export default class NewTaskScreen extends React.Component {
 class TaskInputField extends React.Component{
     constructor(props){
         super(props);
-        this.state = {nextInputLabel:null, labelKeyType:'done'};
+        this.state = {label:'', labelKeyType:'done'};
     }
 
     componentDidMount(){
@@ -289,7 +346,17 @@ class TaskInputField extends React.Component{
         }
     }
 
+    onChangeText(text){
+        this.setState({label:text});
+        this.props.onChangeText(text);
+    }
+
+    saveState(state){
+        this.setState(state);
+    }
+
     render(){
+        var that = this;
         var labelKeyType = 'done';
         if(this.props.task.inputs.length > this.props.index){
             labelKeyType = 'next';
@@ -300,11 +367,13 @@ class TaskInputField extends React.Component{
                     <Textbox 
                         ref={'inputLabel'} 
                         style={styles.inputField} 
-                        placeholder="How Many?" 
+                        placeholder="How many?" 
                         returnKeyType={labelKeyType} 
-                        onChangeText={this.props.onChangeText}
+                        onChangeText={(text) => this.onChangeText.call(that, text)}
+                        onFocus={this.props.onFocus}
                         blurOnSubmit={false}
                         onSubmitEditing={this.props.onSubmitEditing}
+                        value={this.state.label}
                     />
                 </View>
                 <View style={styles.inputFieldType}>
@@ -348,6 +417,7 @@ class TaskInputField extends React.Component{
 const styles = StyleSheet.create({
     //task form
     container: {padding:30, backgroundColor:AppStyles.backgroundColor},
+    keyboardavoidingview:{},
     fieldTitle: {fontSize:16, fontWeight:'bold'},
 
     // inputs form
