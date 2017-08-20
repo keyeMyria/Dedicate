@@ -45,7 +45,6 @@ export default class TaskScreen extends React.Component {
             var dbTasks = new DbTasks();
             var task = this.state.task;
             var dbtask = dbTasks.GetTask(task.id);
-            task.id = task.id;
             task.name = dbtask.name;
             task.inputs = dbtask.inputs ? dbtask.inputs.map((input) => {
                 return {name:input.name, key:input.id, type:input.type}
@@ -53,6 +52,8 @@ export default class TaskScreen extends React.Component {
             task.category = dbtask.category;
             this.state.task = task;
             this.state.title = 'Edit Task';
+            
+            console.log(dbtask);
         }
 
         var dbCat = new DbCategories;
@@ -183,9 +184,11 @@ export default class TaskScreen extends React.Component {
 
     onCategoryValueChange = (value, index, label) => {
         var task = this.state.task;
+        if(task.category == null){task.category = {};}
         task.category.name = label;
         task.category.id = value;
         this.setState({task:task});
+        this.validateForm();
     }
 
     // Child Events //////////////////////////////////////////////////////////////////////////////////////

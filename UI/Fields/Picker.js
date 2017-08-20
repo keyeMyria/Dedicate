@@ -8,7 +8,7 @@ export default class Picker extends React.Component {
         var selectedIndex = 0;
         for(var x = 0; x < this.props.items.length;x++){
             if(this.props.items[x].selected === true || 
-                (this.props.selectedValue != null && this.props.items[x].value == this.props.selectedValue)
+                (this.props.selectedValue != null && this.props.items[x].key == this.props.selectedValue)
             ){
                 selectedIndex = x; break;
             }

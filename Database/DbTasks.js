@@ -36,7 +36,8 @@ export default class DbTasks extends Db{
                     name: task.name, 
                     icon:task.icon || 0, 
                     color:task.color || 0,
-                    inputs: task.inputs || []
+                    inputs: task.inputs || [],
+                    category: task.category
                 }, updateExisting || false);
             });
         } catch (e) {
