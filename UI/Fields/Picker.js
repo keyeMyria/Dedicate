@@ -7,28 +7,33 @@ export default class Picker extends React.Component {
         super(props);
         var selectedIndex = 0;
         for(var x = 0; x < this.props.items.length;x++){
-            if(this.props.items[x].selected === true){
+            if(this.props.items[x].selected === true || 
+                (this.props.selectedValue != null && this.props.items[x].value == this.props.selectedValue)
+            ){
                 selectedIndex = x; break;
             }
         }
 
         this.state = {
             items:this.props.items,
-            selectedIndex:selectedIndex,
-            modalOpen:false
+            selectedIndex:selectedIndex
         }
+    }
+
+    Update(items){
+        this.setState({items:items});
     }
 
     selectItem(index){
         global.Modal.hide();
-        this.props.onValueChange(this.state.items[index].key, index);
+        this.props.onValueChange(this.state.items[index].key, index, this.state.items[index].label);
         this.setState({selectedIndex:index});
     }
 
     ShowModal = event => {
-        this.setState({modalOpen:true});
+        if(this.state.items.length <= 1){return;}
         var that = this;
-        global.Modal.setContent((modal) => {
+        global.Modal.setContent(this.props.title, () => {
             var i = 0;
             return (
                 <View style={styles.modalContainer}>
@@ -55,12 +60,17 @@ export default class Picker extends React.Component {
                 <TouchableOpacity onPress={this.ShowModal}>
                     <View style={[styles.selectedItem, this.props.styleItem]}>
                         <Text style={[styles.selectedText, this.props.styleText]}>
-                            {this.state.items[this.state.selectedIndex].label}
+                            {this.state.items[this.state.selectedIndex] ? (this.state.items[this.state.selectedIndex].label) : ''}
                         </Text>
                     </View>
-                    <View style={[styles.arrowButton, this.props.styleArrow]}>
-                        <IconPickerArrow/>
-                    </View>
+                    {this.state.items.length >= 1 && 
+                        (
+                            <View style={[styles.arrowButton, this.props.styleArrow]}>
+                                <IconPickerArrow/>
+                            </View>
+                        )
+                    }
+                    
                 </TouchableOpacity>
             </View>
         );

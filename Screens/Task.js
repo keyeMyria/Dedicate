@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, Button, StyleSheet, ScrollView, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert, 
+    Keyboard, KeyboardAvoidingView  } from 'react-native';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
@@ -7,73 +8,197 @@ import Picker from 'fields/Picker';
 import ButtonAdd from 'buttons/ButtonAdd';
 import ButtonSave from 'buttons/ButtonSave';
 import ButtonClose from 'buttons/ButtonClose';
+import ButtonPlus from 'buttons/ButtonPlus';
+import Button from 'buttons/Button';
 import DbTasks from 'db/DbTasks';
+import DbCategories from 'db/DbCategories';
 
 export default class TaskScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             task:{
+                id: props.navigation.state.params ? props.navigation.state.params.taskId : null,
                 name:"",
-                inputs:[], // {name:'', type:0}
+                inputs:[], // {name:'', type:0},
+                category:{id:0, name:''}
             },
+            categories:[],
             taskForm:{
-                height:160,
+                height:250,
                 inputsOffset:0
             },
             styles:stylesLandscape,
-            ButtonAddTop: {},
-            ButtonAddShow: {},
+            title:'New Task',
+            ButtonAddShow: true,
+            ButtonInTitleBar: false,
+            focusIndex:null,
+            visibleHeight:0,
+            contentOffset:0,
             nameIndex: Math.floor(Math.random() * (this.names.length)),
-            edited: false
+            categoryIndex: Math.floor(Math.random() * (this.categories.length)),
+            edited: false,
+            newcat: {name:''}
+        }
+        if(this.state.task.id != null){
+            //load task details
+            var dbTasks = new DbTasks();
+            var task = this.state.task;
+            var dbtask = dbTasks.GetTask(task.id);
+            task.id = task.id;
+            task.name = dbtask.name;
+            task.inputs = dbtask.inputs ? dbtask.inputs.map((input) => {
+                return {name:input.name, key:input.id, type:input.type}
+            }) : [];
+            task.category = dbtask.category;
+            this.state.task = task;
+            this.state.title = 'Edit Task';
         }
 
+        var dbCat = new DbCategories;
+        this.state.categories = dbCat.GetCategoriesList();
+    }
 
+    // Component Events  //////////////////////////////////////////////////////////////////////////////////////
+    componentWillMount(){
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this))
+        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide.bind(this))
     }
 
     componentDidMount() { 
         this.onLayoutChange();
+        //this.refs['tasklabel'].focus();
     }
 
-    // Screen Orientation changes
+    componentWillUnmount () {
+        this.keyboardDidShowListener.remove()
+        this.keyboardDidHideListener.remove()
+        this.onScrollView();
+    }
+
+    // Keyboard Events  //////////////////////////////////////////////////////////////////////////////////////
+    keyboardDidShow (e) {
+        let newSize = Dimensions.get('window').height - e.endCoordinates.height
+        this.setState({
+            visibleHeight: newSize
+        })
+        this.onScrollView();
+    }
+    
+    keyboardDidHide (e) {
+        this.setState({
+            visibleHeight: Dimensions.get('window').height
+        })
+        this.onScrollView();
+    }  
+
+    // Screen Orientation changes  //////////////////////////////////////////////////////////////////////////////////////
     onLayoutChange = event => {
         var {height, width} = Dimensions.get('window');
         var taskForm = this.state.taskForm;
-        
+    
         if(width > height){
             //landscape
             if(this.state.task.inputs.length > 1){
-                taskForm.inputsOffset = 50;
+                taskForm.inputsOffset = 100;
             }
             this.setState({styles: stylesLandscape, taskForm:taskForm});
         }else{
             //portrait
             if(this.state.task.inputs.length > 3){
-                taskForm.inputsOffset = 50;
+                taskForm.inputsOffset = 100;
             }
             this.setState({styles: stylesPortrait, taskForm:taskForm});
         }
     }
 
-    // Element Measurements
+    // Element Measurements  //////////////////////////////////////////////////////////////////////////////////////
     measureTaskForm(event) {
         var taskForm = this.state.taskForm;
         taskForm.height = Math.floor(event.nativeEvent.layout.height);
         this.setState({taskForm:taskForm});
     }
 
-    // Events
+    // Categories ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    categories = ['Personal Tasks', 'Side Projects', 'Exercise Routines', 'Dieting', 'Shopping', 'Research', 
+    'Web Design', 'College', 'Cooking Recipes', 'Video Games', 'Vacation', 'Before Bed', 'Good Morning', 
+    'Finances', 'Vehicle Maintenance', 'Medicine', 'Cleaning', 'Conventions', 'Concerts', 'Weekend Projects'];
+
+    getCategoriesForPicker(){
+        return this.state.categories.length > 0 ? 
+            ([{id:0, name:'None'}, ...this.state.categories]).map((cat) => {
+                var newcat = cat;
+                newcat.key = newcat.id;
+                newcat.label = newcat.name;
+                return newcat;
+            }) :
+            [{key:0, label:'None'}];
+    }
+    onPressAddCategory = event => {
+        var that = this;
+        this.setState({categoryIndex: Math.floor(Math.random() * (this.categories.length))});
+        global.Modal.setContent('Add A New Category',() => {
+            return (
+                <View style={[styles.modalContainer, {minWidth:300}]}>
+                    <Text style={styles.fieldTitle}>Label</Text>
+                    <Textbox 
+                        ref="tasklabel"
+                        value={that.state.newcat.name}
+                        style={styles.inputField} 
+                        placeholder={that.placeholderCategoryName()}
+                        returnKeyType={'done'}
+                        onChangeText={that.onNewCategoryTitleChangeText}
+                    />
+                    <View style={styles.createCategoryButton}>
+                        <Button text="Create Category" onPress={() => that.onPressCreateCategory()}/>
+                    </View>
+                </View>
+            );
+        });
+        global.Modal.show();
+    }
+
+    onNewCategoryTitleChangeText = text => {
+        var newcat = this.state.newcat;
+        newcat.name = text;
+        this.setState({newcat:newcat});
+    }
+
+    placeholderCategoryName(){
+        return this.categories[this.state.categoryIndex];
+    }
+
+    onPressCreateCategory(){
+        if(this.state.newcat.name == ''){
+            Alert.alert('Create Category Error', 'You must provide a label for your new category');
+            return;
+        }
+        var dbCat = new DbCategories;
+        dbCat.CreateCategory(this.state.newcat);
+        global.Modal.hide();
+        this.setState({newcat:{name:''}});
+        this.refs['categoryPicker'].Update(this.getCategoriesForPicker());
+    }
+
+    onCategoryValueChange = (value, index, label) => {
+        var task = this.state.task;
+        task.category.name = label;
+        task.category.id = value;
+        this.setState({task:task});
+    }
+
+    // Child Events //////////////////////////////////////////////////////////////////////////////////////
     onScrollView = event => {
-        var offset = event.nativeEvent.contentOffset.y;
-        if(offset > this.state.taskForm.height){
+        var visibleHeight = this.state.visibleHeight;
+        var offset = event ? event.nativeEvent.contentOffset.y : this.state.contentOffset;
+        var viewOffset = Dimensions.get('window').height - visibleHeight;
+        var headerOffset = this.state.taskForm.height + 15;
+        if(offset > 0 && offset > headerOffset){
             //lock button to top of screen
-            this.setState({
-                ButtonAddTop:{top: (offset - this.state.taskForm.height) }
-            });
+            this.setState({ButtonInTitleBar:true, contentOffset:offset});
         }else{
-            this.setState({
-                ButtonAddTop:{top:0}
-            });
+            this.setState({ButtonInTitleBar:false, contentOffset:offset});
         }
     }
 
@@ -125,7 +250,7 @@ export default class TaskScreen extends React.Component {
     onRemoveInputField = (index) => {
         var task = this.state.task;
         task.inputs.splice(index - 1, 1);
-        this.setState({task:task});
+        this.setState({task:task, ButtonAddShow:true});
     }
 
     onPressButtonSave = event => {
@@ -135,11 +260,58 @@ export default class TaskScreen extends React.Component {
         for(var x = 0; x < task.inputs.length; x++){
             delete task.inputs[x].key;
         }
-        db.CreateTask(task);
-
+        db.CreateTask(task, true);
+        this.props.navigation.navigate('Tasks')
     }
 
-    // Form Validation
+    onDeleteTask = event => {
+        var that = this;
+        Alert.alert(
+        'Delete Task?',
+        'Do you really want to delete this task? All data recorded about this task will also be perminently deleted as well.',
+        [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Delete Task', onPress: () => {
+                var db = new DbTasks();
+                db.DeleteTask(this.state.task.id);
+                that.props.navigation.navigate('Tasks')
+            }}
+        ],
+        { cancelable: true }
+        )
+    }
+
+    shouldFocusInputField = (index) => {
+        var task = this.state.task;
+        if(task.inputs[index-1].isnew === true){
+            task.inputs[index-1].isnew = false;
+            this.setState({task:task, focusIndex:index});
+            return true;
+        }
+        return false;
+    }
+
+    onFocusInputField(event, index){
+        this.onScrollView();
+        var that = this;
+        if(this.state.focusIndex != index){
+            this.setState({focusIndex:index});
+        }
+
+        //TEMP FIX: temporary fix adds a blank character and instantly removes that character
+        //      to force the broken KeyboardAvoidingView component to refresh.
+        setTimeout(()=>{
+            var ref = that.refs['taskInput' + that.state.focusIndex];
+            //var event = new Event('input', { bubbles: true });
+            //ref.dispatchEvent(event);
+        }, 100);
+    }
+
+    onFocusTaskLabel(event){
+        this.onScrollView();
+    }
+
+    // Form Validation ////////////////////////////////////////////////////////////////////////////////////////
 
     validateForm = () => {
         //validate form fields in order to show save button
@@ -163,36 +335,33 @@ export default class TaskScreen extends React.Component {
         return this.names[this.state.nameIndex];
     }
 
-    // Save Button
-    ButtonSaveTask = () => {
+    // TitleBar Button ////////////////////////////////////////////////////////////////////////////////////////
+    TitleBarButtons = () => {
         var that = this;
-        if(this.state.edited == true){
-            return(
-                <View style={styles.buttonSaveContainer}>
-                    <ButtonSave size="smaller" style={styles.buttonSave} onPress={this.onPressButtonSave} />
-                </View>
-            );
-        }
+        return (
+            <View style={styles.titleBarButtons}>
+                {this.state.ButtonInTitleBar && (
+                    <View key="buttonAdd" style={styles.titleBarButtonAddInput}>
+                        <ButtonAdd onPress={this.onPressAddInput}
+                        />
+                    </View>
+                )}
+                {this.state.edited == true && (
+                    <View key="buttonSave" style={styles.buttonSaveContainer}>
+                        <ButtonSave size="smaller" style={styles.buttonSave} onPress={this.onPressButtonSave} />
+                    </View>
+                )}
+            </View>);
     }
 
-    onFocusInputField = (index) => {
-        var task = this.state.task;
-        if(task.inputs[index-1].isnew === true){
-            task.inputs[index-1].isnew = false;
-            this.setState({task:task})
-            return true;
-        }
-        return false;
-    }
-
-    //Render Component
+    //Render Component ////////////////////////////////////////////////////////////////////////////////////////
     render() {
         var {height, width} = Dimensions.get('window');
         var that = this;
         //generate input field list
         var inputFields = [];
         if(this.state.task.inputs.length > 0){
-            // show list of Input Fields /////////////////////////////////////////////
+            // show list of Input Fields ///////////////////////////
             var i = 0;
             inputFields = this.state.task.inputs.map((input) => {
                 i++;
@@ -210,7 +379,8 @@ export default class TaskScreen extends React.Component {
                     keytype={keytype} 
                     width={width} 
                     task={this.state.task} 
-                    focus={() => this.onFocusInputField(e)}
+                    focus={() => {return this.shouldFocusInputField.call(that, e)}}
+                    onFocus={(event) => {this.onFocusInputField.call(that, event, e)}}
                     onChangeText={(text) => {this.onInputLabelChangeText.call(that, e, text)}}
                     onPickerValueChange={(itemValue, itemIndex) => {this.onPickerValueChange.call(that, e, itemValue, itemIndex)}}
                     onSubmitEditing={() => {this.onSubmitEditing.call(that, keytype.toString(), e)}}
@@ -219,33 +389,38 @@ export default class TaskScreen extends React.Component {
             });
 
         }else{
-            // show description about Input Fields ////////////////////////////////////
+            // show description about Input Fields //////////////////
             inputFields = (
                 <View style={styles.containerDescription}>
                     <Text style={[styles.inputsDescription, this.state.styles.inputsDescription]}>
                         Your can record data about your task by adding one or more input fields above. 
-                        {"\n\n"}
-                        For example, a task labeled "Pushups" would have an input field labeled "How Many" or "Count".
                     </Text>
                 </View>
             );
         }
 
+        // Render Body ////////////////////////////////////////////////////////////////////////////////////////
+        
+        var i = 0;
         var labelKeyType = 'done';
         if(this.state.task.inputs.length >= 1)
         {
             labelKeyType = 'next';
         }
         return (
-            <Body {...this.props} title="New Task" onLayout={this.onLayoutChange} titleBarButtons={this.ButtonSaveTask.call(that)} >
-                <ScrollView onScroll={this.onScrollView} keyboardShouldPersistTaps="handled">
+                <Body {...this.props} title={this.state.title} onLayout={this.onLayoutChange} 
+                    titleBarButtons={this.TitleBarButtons.call(that)} onScroll={this.onScrollView}
+                >
+                    <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={-500}>
                     <View style={styles.container} onLayout={(event) => this.measureTaskForm(event)} >
                         <Text style={styles.fieldTitle}>Label</Text>
                         <Textbox 
                             ref="tasklabel"
+                            value={this.state.task.name}
                             style={styles.inputField} 
                             placeholder={this.placeholderTaskName()}
                             returnKeyType={labelKeyType} 
+                            onFocus={(e)=>{return this.onFocusTaskLabel.call(that, e)}}
                             blurOnSubmit={false}
                             onChangeText={this.onLabelChangeText}
                             onSubmitEditing={(event) => { 
@@ -257,30 +432,57 @@ export default class TaskScreen extends React.Component {
                                 }
                              }}
                         />
+                        <View style={styles.categoryContainer}>
+                            <View style={styles.categoryColumnOne}>
+                                <Text style={[styles.fieldTitle, styles.fieldCategory]}>Category</Text>
+                            </View>
+                            <View style={styles.categoryColumnTwo}>
+                                <ButtonPlus style={styles.buttonAddCategory} color={AppStyles.color} size="xsmall"
+                                    onPress={this.onPressAddCategory}
+                                />
+                            </View>
+                            <View style={styles.categoryPicker}>
+                                <Picker
+                                    ref='categoryPicker'
+                                    style={styles.pickerStyle}
+                                    itemStyle={styles.pickerItemStyle}
+                                    selectedValue={this.state.task.category ? this.state.task.category.id : 0}
+                                    onValueChange={this.onCategoryValueChange}
+                                    items={this.getCategoriesForPicker()}
+                                    title="Select A Category"
+                                />
+                            </View>
+                        </View>
                     </View>
                     <View style={[styles.containerInputs, {minHeight:height - this.state.taskForm.height, paddingBottom:this.state.taskForm.inputsOffset}]}>
                         <View>
                             <Text style={styles.inputsTitle}>Input Fields</Text>
-                            {this.state.ButtonAddShow && 
-                                <ButtonAdd size="small" style={[styles.buttonAddInput, this.state.ButtonAddTop]}
+                            {this.state.ButtonAddShow && this.state.ButtonInTitleBar == false &&
+                                <ButtonAdd size="small" style={[styles.buttonAddInput]}
                                     outline={AppStyles.altBackgroundColor}
                                     onPress={this.onPressAddInput}
                                 />
                             }
                         </View>
                         {inputFields}
+
+                        {this.state.task.id != null && (
+                            <View style={styles.buttonDeleteContainer}>
+                                <Button text="Delete Task" onPress={this.onDeleteTask}/>
+                            </View>
+                        )}
                     </View>
-                </ScrollView>
-            </Body>
+                    </KeyboardAvoidingView >
+                </Body>
         );
     }
 }
 
-// Input Field
+// Input Field /////////////////////////////////////////////////////////////////////////////////////////////////
 class TaskInputField extends React.Component{
     constructor(props){
         super(props);
-        this.state = {nextInputLabel:null, labelKeyType:'done'};
+        this.state = {label:props.input.name, labelKeyType:'done'};
     }
 
     componentDidMount(){
@@ -289,7 +491,17 @@ class TaskInputField extends React.Component{
         }
     }
 
+    onChangeText(text){
+        this.setState({label:text});
+        this.props.onChangeText(text);
+    }
+
+    saveState(state){
+        this.setState(state);
+    }
+
     render(){
+        var that = this;
         var labelKeyType = 'done';
         if(this.props.task.inputs.length > this.props.index){
             labelKeyType = 'next';
@@ -300,11 +512,13 @@ class TaskInputField extends React.Component{
                     <Textbox 
                         ref={'inputLabel'} 
                         style={styles.inputField} 
-                        placeholder="How Many?" 
+                        placeholder="How many?" 
                         returnKeyType={labelKeyType} 
-                        onChangeText={this.props.onChangeText}
+                        onChangeText={(text) => this.onChangeText.call(that, text)}
+                        onFocus={this.props.onFocus}
                         blurOnSubmit={false}
                         onSubmitEditing={this.props.onSubmitEditing}
+                        value={this.state.label}
                     />
                 </View>
                 <View style={styles.inputFieldType}>
@@ -331,6 +545,7 @@ class TaskInputField extends React.Component{
                                 {label:"Video", key:11}
                             ]
                         }
+                        title="Select A Data Type"
                     />
                 </View>
                 <View style={styles.buttonRemoveContainer}>
@@ -344,14 +559,25 @@ class TaskInputField extends React.Component{
 }
 
 
+// StyleSheet ////////////////////////////////////////////////////////////////////////////////////////////////
 
 const styles = StyleSheet.create({
     //task form
     container: {padding:30, backgroundColor:AppStyles.backgroundColor},
+    keyboardavoidingview:{},
     fieldTitle: {fontSize:16, fontWeight:'bold'},
 
+    //category field
+    categoryContainer:{width:'100%', paddingTop:20},
+    categoryColumnOne:{paddingTop:5, height:25},
+    categoryColumnTwo:{position:'absolute', right:-10, top:24},
+    categoryPicker:{paddingTop:5},
+
+    // create category modal
+    createCategoryButton:{paddingTop:20, alignSelf:'center'},
+
     // inputs form
-    containerInputs: {minHeight:100, paddingVertical:15, backgroundColor:AppStyles.altBackgroundColor},
+    containerInputs: {minHeight:100, paddingTop:15, paddingBottom:70, backgroundColor:AppStyles.altBackgroundColor},
     inputsTitle: {fontSize:AppStyles.titleFontSize, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
     containerDescription: {paddingHorizontal:30, flex:1, flexDirection:'column', justifyContent: 'center', alignItems:'center'},
     inputsDescription: { fontSize:16, paddingHorizontal:10, position:'relative', color: AppStyles.color },
@@ -368,8 +594,16 @@ const styles = StyleSheet.create({
     buttonRemoveInput:{paddingVertical:15, paddingHorizontal:10},
 
     //title bar buttons
-    buttonSaveContainer: {width:75, paddingLeft:10, paddingBottom:12, backgroundColor:AppStyles.headerDarkColor},
-    buttonSave:{padding:12 }
+    titleBarButtons:{flexDirection:'row'},
+    titleBarButtonAddInput:{paddingTop:3, zIndex:1002},
+    buttonSaveContainer: {width:75, zIndex:1001, paddingLeft:10, paddingBottom:12, backgroundColor:AppStyles.headerDarkColor},
+    buttonSave:{padding:12 },
+
+    //delete button
+    buttonDeleteContainer:{paddingTop:30, paddingBottom:15, alignItems:'center'},
+
+    //new category modal window
+    modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30}
 });
 
 const stylesLandscape = StyleSheet.create({

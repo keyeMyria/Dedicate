@@ -49,8 +49,8 @@ export default class Modal extends React.Component {
         this.setState({visible:false})
     }
 
-    setContent = (content) => {
-        this.setState({content:content});
+    setContent = (title, content) => {
+        this.setState({title:title, content:content});
     }
 
     onPressDarkBackground = () => {
@@ -61,12 +61,19 @@ export default class Modal extends React.Component {
         if(this.state.visible === true){
             return (
                 <View style={styles.container}>
-                    <ScrollView 
-                        style={[styles.modalContainer, this.state.styles.modalContainer]}
-                        onLayout={this.onLayoutChange}
-                    >
-                        {this.state.content(this)}
-                    </ScrollView>
+                    <View style={[styles.modalContainer, this.state.styles.modalContainer]}>
+                        <View style={styles.titleContainer}>
+                            <Text style={styles.title}>{this.state.title}</Text>
+                        </View>
+                        <ScrollView 
+                            onLayout={this.onLayoutChange}
+                        >
+                        
+                    
+
+                            {this.state.content(this)}
+                        </ScrollView>
+                    </View>
                     <View style={[styles.darkBackgroundContainer, this.state.styles.darkBackgroundContainer]}>
                         <TouchableWithoutFeedback onPress={this.onPressDarkBackground}>
                             <View 
@@ -84,6 +91,8 @@ export default class Modal extends React.Component {
 
 const styles = StyleSheet.create({
     container:{position:'absolute', top:0, right:0, bottom:0, left:0},
+    titleContainer:{paddingTop:15, paddingHorizontal:15},
+    title:{fontSize:20},
     darkBackgroundContainer:{position:'absolute', top:0, right:0, bottom:0, left:0},
     darkBackground:{backgroundColor:'rgba(0,0,0,0.7)', position:'absolute', top:0, right:0, bottom:0, left:0, zIndex:5000},
     modalContainer:{position:'absolute', zIndex:5001, backgroundColor:AppStyles.backgroundColor}

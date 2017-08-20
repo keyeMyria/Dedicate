@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, 
+    StyleSheet, Dimensions, TouchableHighlight } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DrawerIcon from 'ui/DrawerIcon';
+import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
 
@@ -41,14 +43,18 @@ export default class OverviewScreen extends React.Component {
             return (
                 <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true}>
                     <View style={styles.counters}>
-                        <View style={styles.counterContainer}>
-                            <Text style={styles.counter}>{this.state.totalTasks}</Text>
-                            <Text style={styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
-                        </View>
+                        <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
+                            <View style={styles.counterContainer}>
+                                <Text style={styles.counter}>{this.state.totalTasks}</Text>
+                                <Text style={styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
+                            </View>
+                        </TouchableBox>
+                        <TouchableBox onPress={() => this.props.navigation.navigate('Records')}>
                         <View style={styles.counterContainer}>
                             <Text style={styles.counter}>{this.state.totalRecords}</Text>
                             <Text style={styles.counterLabel}>{this.state.totalRecords != 1 ? 'Events' : 'Event'}</Text>
                         </View>
+                        </TouchableBox>
                     </View>
                     
                 </Body>
@@ -90,7 +96,7 @@ const styles = StyleSheet.create({
     counters:{flexDirection:'row', padding: 30, width:'100%' },
     counterContainer:{alignSelf:'flex-start', paddingHorizontal:20},
     counterLabel:{fontSize:17, paddingBottom:20},
-    counter:{fontSize:40}
+    counter:{fontSize:40, color:AppStyles.numberColor}
 });
 
 const stylesLandscape = StyleSheet.create({

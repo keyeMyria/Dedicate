@@ -2,10 +2,10 @@ import Realm from 'realm'
 
  export default function Schema() {
     global.realm = new Realm({
-        schema: [Task, Input, Record, RecordInput],
-        schemaVersion: 2,
+        schema: [Task, Input, Category, Record, RecordInput],
+        schemaVersion: 3,
         migration: function(oldRealm, newRealm) {
-            newRealm.deleteAll();
+            //newRealm.deleteAll();
         }
     });
  }
@@ -23,7 +23,8 @@ import Realm from 'realm'
         name: 'string',
         icon: {type: 'int', default: 0},
         color: {type: 'int', default: 0},
-        inputs: {type: 'list', objectType: 'Input'}
+        inputs: {type: 'list', objectType: 'Input'},
+        category: {type: 'Category'}
     }
  };
 
@@ -35,6 +36,16 @@ import Realm from 'realm'
         id: 'int',
         name: 'string',
         type: {type: 'int', default: 0} //0 = number, 1 = string, 2 = datetime
+     }
+ }
+
+ class Category {};
+ Category.schema = {
+    name: 'Category',
+    primaryKey: 'id',
+    properties: {
+        id: 'int',
+        name: 'string'
      }
  }
 

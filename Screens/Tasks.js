@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableHighlight } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbTasks from 'db/DbTasks';
@@ -20,13 +20,15 @@ export default class TasksScreen extends React.Component {
     render() {
         var tasklist = this.state.tasks.map((task) => {
             return (
-                <View key={task.id} style={styles.taskItemContainer}>
+                <TouchableHighlight key={task.id} onPress={() => {this.props.navigation.navigate('Task', {taskId:task.id})}}>
+                <View style={styles.taskItemContainer}>
                     <Text style={styles.taskName}>{task.name}</Text>
                 </View>
+                </TouchableHighlight>
             );
         });
         return (
-            <Body {...this.props} style={styles.body} title="Tasks" buttonAdd={true}>
+            <Body {...this.props} style={styles.body} title="Tasks" buttonAdd={true} buttonRecord={true}>
                 <ScrollView>
                     {tasklist}
                 </ScrollView>

@@ -34,7 +34,6 @@ export default class DbTaskAnalytics extends Db{
                 }
             }
         );
-        console.log(chart);
         return chart;
     }
 }

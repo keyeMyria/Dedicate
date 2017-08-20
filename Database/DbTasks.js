@@ -2,13 +2,18 @@ import Realm from 'realm';
 import Db from 'db/Db';
 
 export default class DbTasks extends Db{
-    CreateTask(task){
+    CreateTask(task, updateExisting){
         try {
             //generate id for Task
             var id = 1;
-            if(global.realm.objects('Task').length > 0){
-                id = (global.realm.objects('Task').sorted('id', true).slice(0,1)[0].id) + 1;
+            if(task.id){
+                id = task.id;
+            }else{
+                if(global.realm.objects('Task').length > 0){
+                    id = (global.realm.objects('Task').sorted('id', true).slice(0,1)[0].id) + 1;
+                }
             }
+            
             
             //generate ids for Inputs
             if(task.inputs.length > 0){
@@ -32,7 +37,7 @@ export default class DbTasks extends Db{
                     icon:task.icon || 0, 
                     color:task.color || 0,
                     inputs: task.inputs || []
-                });
+                }, updateExisting || false);
             });
         } catch (e) {
             console.log("Error on creation");
@@ -60,5 +65,19 @@ export default class DbTasks extends Db{
         var tasks = global.realm.objects('Task');
         if(filtered){tasks.filtered(filtered);}
         return tasks.length;
+    }
+
+    GetTask(taskId){
+        var task = global.realm.objects('Task').filtered('id=' + taskId);
+        return task ? task[0] : null;
+    }
+
+    DeleteTask(taskId){
+        global.realm.write(() => {
+            //delete task recordings
+            global.realm.delete(global.realm.objects('Record').filtered('task.id=' + taskId));
+            //finally, delete task
+            global.realm.delete(global.realm.objects('Task').filtered('id=' + taskId));
+        });
     }
 }

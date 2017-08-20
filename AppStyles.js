@@ -2,7 +2,7 @@ export default AppStyles = {
     // colors ///////////////////////////////
     color: '#6666cc',
     textColor: '#444',
-    logoColor: '#6666cc',
+    numberColor: '#333',
     headerColor: '#6666cc',
     headerDarkColor: '#4D4DAD',
     headerTextColor: '#fff',
@@ -12,7 +12,10 @@ export default AppStyles = {
     altSeparatorColor: '#ccc',
     buttonColor: '#6666cc',
     buttonTextColor: '#fff',
+    buttonPressedColor: '#5555bb',
+    buttonPressedTextColor: '#fff',
 
     // font styling //////////////////////////
-    titleFontSize: 24
+    titleFontSize: 24,
+    buttonFontSize:17
 };
