@@ -49,7 +49,7 @@ export default class TaskScreen extends React.Component {
             task.inputs = dbtask.inputs ? dbtask.inputs.map((input) => {
                 return {name:input.name, key:input.id, type:input.type}
             }) : [];
-            task.category = dbtask.category;
+            task.category = {id:dbtask.category.id, name:dbtask.category.name};
             this.state.task = task;
             this.state.title = 'Edit Task';
             
@@ -57,7 +57,9 @@ export default class TaskScreen extends React.Component {
         }
 
         var dbCat = new DbCategories;
-        this.state.categories = dbCat.GetCategoriesList();
+        this.state.categories = dbCat.GetCategoriesList().map((cat) => {
+          return {id:cat.id, name:cat.name}  
+        });
     }
 
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////

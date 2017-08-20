@@ -4,9 +4,10 @@ import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
+import DbCategories from 'db/DbCategories';
 import DbRecords from 'db/DbRecords';
 
-export default class OverviewScreen extends React.Component {
+export default class RecordScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -15,12 +16,17 @@ export default class OverviewScreen extends React.Component {
                 name:'', 
                 inputs:[]
             },
-            tasks:[]
+            tasks:[],
+            categories:[]
         };
 
         //load a list of tasks
         var dbTasks = new DbTasks();
         this.state.tasks = dbTasks.GetTasksList();
+
+        //load a list of categories
+        var dbCategories = new DbCategories();
+        this.state.categories = dbCategories.GetCategoriesList();
     }
 
     componentDidMount() { 
@@ -35,6 +41,10 @@ export default class OverviewScreen extends React.Component {
         var {height, width} = Dimensions.get('window');
     }
 
+    onSelectCategory = (event, index) => {
+
+    }
+
     onSelectTask = (event, index) => {
         var dbTasks = new DbTasks();
         var task = this.state.task;
@@ -42,8 +52,9 @@ export default class OverviewScreen extends React.Component {
         setState({task:{
             id:task.id,
             name:dbtask.name,
+            category:dbtask.category,
             inputs:dbtask.inputs ? dbtask.inputs.map((input) => {
-                return {name:input.name, key:input.id, type:input.type}
+                return {name:input.name, key:input.id, id:input.id, type:input.type}
             }) : []
         }});
     }
@@ -53,8 +64,18 @@ export default class OverviewScreen extends React.Component {
             // Show List of Tasks to Choose From
             return (
                 <Body {...this.props} title="Record Event" onLayout={this.onLayoutChange}>
-                    <View style={styles.container}>
+                    <View>
                         <Text style={styles.tasksTitle}>Select a task to record your event with.</Text>
+                        {this.state.categories.map((cat) => {
+                            return (
+                                <TouchableOpacity key={cat.id} onPress={this.onSelectCategory}>
+                                    <View style={styles.catItem}>
+                                        <Text style={styles.catText}>{cat.name}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+
                         {this.state.tasks.map((task) => {
                             return (<View key={task.id} style={styles.taskItem}>
                                 <Text style={styles.taskText}>{task.name}</Text>
@@ -81,9 +102,16 @@ export default class OverviewScreen extends React.Component {
 
 const styles = StyleSheet.create({
     container:{padding:30},
-    tasksTitle:{fontSize:17, color:AppStyles.color, paddingBottom:20},
+    tasksTitle:{fontSize:17, color:AppStyles.color, paddingBottom:20, paddingHorizontal:30, paddingTop:30},
     labelContainer:{paddingBottom:30},
     labelText:{fontSize:24},
+    catItem:{
+        paddingVertical:15, 
+        paddingHorizontal:30, 
+        borderBottomWidth:1, 
+        borderBottomColor:AppStyles.color + '55'
+    },
+    catText:{fontSize:22, color:AppStyles.color},
     taskItem:{
         paddingVertical:15, 
         paddingHorizontal:30, 
