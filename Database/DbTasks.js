@@ -31,7 +31,7 @@ export default class DbTasks extends Db{
 
             //save task (with inputs) into the database
             global.realm.write(() => {
-                global.realm.create('Task', {
+                task = global.realm.create('Task', {
                     id:id, 
                     name: task.name, 
                     icon:task.icon || 0, 
@@ -44,6 +44,7 @@ export default class DbTasks extends Db{
             console.log("Error on creation");
             console.log(e);
         }
+        return task;
     }
 
     HasTasks(){
@@ -52,19 +53,29 @@ export default class DbTasks extends Db{
 
     GetTasksList(options){
         if(!options){
-            options = {sorted:'name', descending:false}
+            options = {sorted:'name', descending:false, filtered:null}
         }
         
-        var tasks = global.realm.objects('Task').sorted('id', true)
+        var tasks = global.realm.objects('Task')
         if(options.sorted){
-            tasks.sorted(options.sorted, options.descending ? options.descending : false)
+            tasks = tasks.sorted(options.sorted, options.descending ? options.descending : false)
+        }else{
+            tasks = tasks.sorted('id', true);
+        }
+        if(options.filtered != null){
+            if(typeof options.filtered == 'string'){
+                tasks = tasks.filtered(options.filtered);
+            }else{
+                tasks = tasks.filtered(...options.filtered);
+            }
+            
         }
         return tasks;
     }
 
     TotalTasks(filtered){
         var tasks = global.realm.objects('Task');
-        if(filtered){tasks.filtered(filtered);}
+        if(filtered){tasks = tasks.filtered(...filtered);}
         return tasks.length;
     }
 

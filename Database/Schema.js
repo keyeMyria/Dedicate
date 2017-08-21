@@ -3,7 +3,7 @@ import Realm from 'realm'
  export default function Schema() {
     global.realm = new Realm({
         schema: [Task, Input, Category, Record, RecordInput],
-        schemaVersion: 3,
+        schemaVersion: 4,
         migration: function(oldRealm, newRealm) {
             //newRealm.deleteAll();
         }
@@ -45,7 +45,8 @@ import Realm from 'realm'
     primaryKey: 'id',
     properties: {
         id: 'int',
-        name: 'string'
+        name: 'string',
+        tasks: {type:'int', default:0}
      }
  }
 

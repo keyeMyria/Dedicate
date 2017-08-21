@@ -42,19 +42,28 @@ export default class DbCategories extends Db{
 
     GetCategoriesList(options){
         if(!options){
-            options = {sorted:'name', descending:false}
+            options = {sorted:'name', descending:false, filtered:null}
         }
         
         var categories = global.realm.objects('Category').sorted('id', true)
         if(options.sorted){
             categories.sorted(options.sorted, options.descending ? options.descending : false)
         }
+        if(options.filtered != null){
+            console.log(typeof options.filtered);
+            if(typeof options.filtered == 'string'){
+                categories = categories.filtered(options.filtered);
+            }else{
+                categories = categories.filtered(...options.filtered);
+            }
+            
+        }
         return categories;
     }
 
     TotalCategories(filtered){
         var categories = global.realm.objects('Category');
-        if(filtered){categories.filtered(filtered);}
+        if(filtered){categories.filtered(...filtered);}
         return categories.length;
     }
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, 
     StyleSheet, Dimensions, TouchableHighlight } from 'react-native';
+import { StackNavigator } from 'react-navigation';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DrawerIcon from 'ui/DrawerIcon';
@@ -11,10 +12,13 @@ import DbRecords from 'db/DbRecords';
 export default class OverviewScreen extends React.Component {
     constructor(props) {
         super(props);
+
+        var dbTasks = new DbTasks();
+        var dbRecords = new DbRecords();
+
         this.state = {
             styles: stylesLandscape,
-            totalTasks:this.dbTasks.TotalTasks(),
-            totalRecords:this.dbRecords.TotalRecords()
+            ...this.dbState()
         };
         
     }
@@ -23,8 +27,23 @@ export default class OverviewScreen extends React.Component {
         this.onLayoutChange();
     }
 
-    dbTasks = new DbTasks();
-    dbRecords = new DbRecords();
+    componentWillReceiveProps() {
+        var dbTasks = new DbTasks();
+        var dbRecords = new DbRecords();
+        
+        this.setState(this.dbState());
+    };
+
+    dbState(){ //updates state from database
+        var dbTasks = new DbTasks();
+        var dbRecords = new DbRecords();
+
+        return {
+            totalTasks:dbTasks.TotalTasks(),
+            totalRecords:dbRecords.TotalRecords(),
+            hasTask:dbTasks.HasTasks()
+        };
+    }
 
     // Screen Orientation changes
     onLayoutChange = event => {
@@ -39,7 +58,7 @@ export default class OverviewScreen extends React.Component {
     }
 
     render() {
-        if(this.dbTasks.HasTasks() === true){
+        if(this.state.hasTask === true){
             return (
                 <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true}>
                     <View style={styles.counters}>

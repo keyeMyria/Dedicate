@@ -21,8 +21,9 @@ export default class TaskScreen extends React.Component {
                 id: props.navigation.state.params ? props.navigation.state.params.taskId : null,
                 name:"",
                 inputs:[], // {name:'', type:0},
-                category:{id:0, name:''}
+                category:{id:-1, name:''}
             },
+            existingTask:{},
             categories:[],
             taskForm:{
                 height:250,
@@ -49,17 +50,18 @@ export default class TaskScreen extends React.Component {
             task.inputs = dbtask.inputs ? dbtask.inputs.map((input) => {
                 return {name:input.name, key:input.id, type:input.type}
             }) : [];
-            task.category = {id:dbtask.category.id, name:dbtask.category.name};
-            this.state.task = task;
-            this.state.title = 'Edit Task';
+            if(dbtask.category){
+                task.category = {id:dbtask.category.id, name:dbtask.category.name};
+            }else{
+                task.category = {id:-1, name:''}
+            }
             
-            console.log(dbtask);
+            this.state.task = task;
+            this.state.existingTask = JSON.parse(JSON.stringify(task));
+            this.state.title = 'Edit Task';
         }
 
-        var dbCat = new DbCategories;
-        this.state.categories = dbCat.GetCategoriesList().map((cat) => {
-          return {id:cat.id, name:cat.name}  
-        });
+        this.state.categories = this.getDbCategories();
     }
 
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////
@@ -94,6 +96,23 @@ export default class TaskScreen extends React.Component {
         })
         this.onScrollView();
     }  
+
+    // Database Calls ////////////////////////////////////////////////////////////////////////////////////////
+    getDbCategories(){
+        var dbCat = new DbCategories;
+        return dbCat.GetCategoriesList().filter((cat) => {
+            if(!cat || (cat && cat.name=='')  || (cat && cat.id && cat.id==0)){
+                global.realm.write(()=>{
+                    global.realm.delete(cat);
+                });
+                return false;
+            }
+            return true;
+            }
+        ).map((cat) => {
+            return {id:cat.id, name:cat.name}  
+        });
+    }
 
     // Screen Orientation changes  //////////////////////////////////////////////////////////////////////////////////////
     onLayoutChange = event => {
@@ -130,13 +149,13 @@ export default class TaskScreen extends React.Component {
 
     getCategoriesForPicker(){
         return this.state.categories.length > 0 ? 
-            ([{id:0, name:'None'}, ...this.state.categories]).map((cat) => {
+            ([{id:-1, name:'None'}, ...this.state.categories]).map((cat) => {
                 var newcat = cat;
                 newcat.key = newcat.id;
                 newcat.label = newcat.name;
                 return newcat;
             }) :
-            [{key:0, label:'None'}];
+            [{key:-1, label:'None'}];
     }
     onPressAddCategory = event => {
         var that = this;
@@ -178,10 +197,18 @@ export default class TaskScreen extends React.Component {
             return;
         }
         var dbCat = new DbCategories;
-        dbCat.CreateCategory(this.state.newcat);
+        var task = this.state.task;
+        
+        var id = dbCat.CreateCategory(this.state.newcat);
+        task.category.id = id;
+        task.category.name = this.state.newcat.name;
+        var catRef = this.refs['categoryPicker'];
+        var cats = this.getDbCategories();
+        this.setState({newcat:{name:''}, task:task, categories:cats});
+
+        catRef.Update(cats, 0);
+        this.validateForm();
         global.Modal.hide();
-        this.setState({newcat:{name:''}});
-        this.refs['categoryPicker'].Update(this.getCategoriesForPicker());
     }
 
     onCategoryValueChange = (value, index, label) => {
@@ -259,13 +286,32 @@ export default class TaskScreen extends React.Component {
     }
 
     onPressButtonSave = event => {
-        var db = new DbTasks();
+        var dbTasks = new DbTasks();
+        var dbCats = new DbCategories();
         var task = Object.assign({},this.state.task);
 
         for(var x = 0; x < task.inputs.length; x++){
             delete task.inputs[x].key;
         }
-        db.CreateTask(task, true);
+
+        //update existing category
+        var exCat = this.state.existingTask.category;
+        if(exCat != null && exCat.id > 0){
+            global.realm.write(()=>{
+                var cat = dbCats.GetCategory(exCat.id)
+                var total = dbTasks.TotalTasks(['category.id=$0',exCat.id]) - 1;
+                if(total < 0){total = 0;}
+                cat.tasks = total
+            });
+        }
+        
+        
+        task = dbTasks.CreateTask(task, true);
+        if(this.state.task.category.id > 0){
+            global.realm.write(()=>{
+                task.category.tasks = dbTasks.TotalTasks(['category.id=$0',this.state.task.category.id])
+            });
+        }
         this.props.navigation.navigate('Tasks')
     }
 
@@ -451,7 +497,7 @@ export default class TaskScreen extends React.Component {
                                     ref='categoryPicker'
                                     style={styles.pickerStyle}
                                     itemStyle={styles.pickerItemStyle}
-                                    selectedValue={this.state.task.category ? this.state.task.category.id : 0}
+                                    selectedValue={this.state.task.category ? this.state.task.category.id : -1}
                                     onValueChange={this.onCategoryValueChange}
                                     items={this.getCategoriesForPicker()}
                                     title="Select A Category"
@@ -544,7 +590,7 @@ class TaskInputField extends React.Component{
                                 {label:"Stop Watch", key:5},
                                 {label:"Yes/No", key:6},
                                 {label:"5 Stars", key:7},
-                                {label:"Address", key:8},
+                                {label:"Location", key:8},
                                 {label:"URL Link", key:9},
                                 {label:"Photo", key:10},
                                 {label:"Video", key:11}
@@ -584,7 +630,7 @@ const styles = StyleSheet.create({
     // inputs form
     containerInputs: {minHeight:100, paddingTop:15, paddingBottom:70, backgroundColor:AppStyles.altBackgroundColor},
     inputsTitle: {fontSize:AppStyles.titleFontSize, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
-    containerDescription: {paddingHorizontal:30, flex:1, flexDirection:'column', justifyContent: 'center', alignItems:'center'},
+    containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
     inputsDescription: { fontSize:16, paddingHorizontal:10, position:'relative', color: AppStyles.color },
     buttonAddInput:{position:'absolute', right:12, zIndex:1},
 

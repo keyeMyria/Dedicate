@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableHighlight } from 'react-native';
+import { StackNavigator } from 'react-navigation';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbTasks from 'db/DbTasks';
@@ -21,9 +22,9 @@ export default class TasksScreen extends React.Component {
         var tasklist = this.state.tasks.map((task) => {
             return (
                 <TouchableHighlight key={task.id} onPress={() => {this.props.navigation.navigate('Task', {taskId:task.id})}}>
-                <View style={styles.taskItemContainer}>
-                    <Text style={styles.taskName}>{task.name}</Text>
-                </View>
+                    <View style={styles.taskItemContainer}>
+                        <Text style={styles.taskName}>{task.name}</Text>
+                    </View>
                 </TouchableHighlight>
             );
         });
