@@ -213,7 +213,7 @@ export default class TaskScreen extends React.Component {
 
     onCategoryValueChange = (value, index, label) => {
         var task = this.state.task;
-        if(task.category == null){task.category = {};}
+        if(task.category == null){ task.category = {}; }
         task.category.name = label;
         task.category.id = value;
         this.setState({task:task});
@@ -304,7 +304,6 @@ export default class TaskScreen extends React.Component {
                 cat.tasks = total
             });
         }
-        
         
         task = dbTasks.CreateTask(task, true);
         if(this.state.task.category.id > 0){

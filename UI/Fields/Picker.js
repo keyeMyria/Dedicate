@@ -21,9 +21,6 @@ export default class Picker extends React.Component {
     }
 
     Update(items, selectedIndex){
-        
-        console.log('//////////////////////////');
-        console.log(items);
         this.setState({items:items, selectedIndex:selectedIndex});
     }
 

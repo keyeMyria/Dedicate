@@ -48,7 +48,7 @@ export default class DbTasks extends Db{
     }
 
     HasTasks(){
-        return global.realm.objects('Task').length > 0;
+        console.log(global.realm.objects('Task').length); return global.realm.objects('Task').length > 0;
     }
 
     GetTasksList(options){

@@ -80,8 +80,10 @@ export default class OverviewScreen extends React.Component {
             );
         }else{
             return (
-                <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true}>
-                    <View style={[styles.container, styles.body]}>
+                <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true}
+                    footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
+                >
+                    <View style={[styles.container]}>
                         <Image source={require('images/logo.png')} style={[styles.logo, this.state.styles.logo]} resizeMode='contain' />
                         <View style={styles.text}>
                             <Text style={[styles.p, styles.purple, styles.h4]}>
@@ -93,9 +95,6 @@ export default class OverviewScreen extends React.Component {
                             </Text>
                         </View>
                     </View>
-                    <Text style={[styles.p, this.state.styles.tooltip]}>
-                        To begin, create a task that you'd like to dedicate yourself to.
-                    </Text>
                 </Body>
             );
         }
@@ -104,8 +103,8 @@ export default class OverviewScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    body:{position:'absolute', top:0, bottom:0, left:0, right:0},
     container: {padding: 30 },
+    body:{position:'absolute', top:0, bottom:0, left:0, right:0},
     logo: { marginVertical:10, width: 200, alignSelf: 'center', tintColor:AppStyles.logoColor },
     text: {alignSelf:'center'},
     h4: {fontSize:20},
