@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Textbox from 'fields/Textbox';
-import IconPickerArrow from 'icons/IconPickerArrow';
 import MapView from 'react-native-maps';
 import MapTheme from 'ui/Maps/Themes/Default.js';
 

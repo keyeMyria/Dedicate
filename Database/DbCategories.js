@@ -50,7 +50,6 @@ export default class DbCategories extends Db{
             categories.sorted(options.sorted, options.descending ? options.descending : false)
         }
         if(options.filtered != null){
-            console.log(typeof options.filtered);
             if(typeof options.filtered == 'string'){
                 categories = categories.filtered(options.filtered);
             }else{

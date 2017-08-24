@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import DatePicker from 'react-native-datepicker'
 import { StackNavigator } from 'react-navigation';
 import AppLang from 'dedicate/AppLang';
 import AppStyles from 'dedicate/AppStyles';
@@ -9,6 +8,7 @@ import TouchableBox from 'ui/Touchable/Box';
 import Textbox from 'fields/Textbox';
 import Picker from 'fields/Picker';
 import LocationPicker from 'fields/LocationPicker';
+import DateTimePicker from 'fields/DateTimePicker'
 import ButtonAdd from 'buttons/ButtonAdd';
 import ButtonSave from 'buttons/ButtonSave';
 import ButtonClose from 'buttons/ButtonClose';
@@ -34,8 +34,7 @@ class DefaultScreen extends React.Component {
                 id:0,
                 tasks:[]
             },
-            record:[],
-            edited:true
+            edited:true,
         };
         
 
@@ -55,9 +54,17 @@ class DefaultScreen extends React.Component {
         this.onLayoutChange();
     }
 
+    componentWillUpdate() {
+        
+    }
+
     // Screen Orientation changes
     onLayoutChange = event => {
-        var {height, width} = Dimensions.get('window');
+        //var {height, width} = Dimensions.get('window');
+        //var reload = this.props.navigation.state.params ? this.props.navigation.state.params.reload : false;
+        //if(reload == true){
+        //    this.props.navigation.navigate('Default', {taskId:0});
+        //}
     }
 
     onSelectCategory = (event, id) => {
@@ -138,7 +145,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         super(props);
 
         this.state = {
-            task: props.navigation.state.params ? props.navigation.state.params.task : {}
+            task: props.navigation.state.params ? props.navigation.state.params.task : {},
+            record:{date: new Date()}
         }
     }
 
@@ -179,6 +187,12 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         this.setState(record);
     }
 
+    onRecordedDateChange = (time, date) => {
+        var record = this.state.record;
+        record.date = date;
+        this.setState({record:record})
+    }
+
     // TitleBar Button ////////////////////////////////////////////////////////////////////////////////////////
     TitleBarButtons = () => {
         var that = this;
@@ -198,194 +212,205 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         return (
             <Body {...this.props} style={styles.body} title="Record Event" onLayout={this.onLayoutChange} 
             titleBarButtons={this.TitleBarButtons.call(that)}>
-                <View style={styles.container}>
+                <View style={styles.taskInfo}>
                     <View style={styles.labelContainer}>
                         <Text style={styles.labelText}>{this.state.task.name}</Text>
                     </View>
                     <View style={styles.recordTimeContainer}>
                         <Text style={styles.fieldTitle}>Recorded Date & Time</Text>
-                        <DatePicker
-                            style={styles.recordTimeField}
-                            date={new Date()}
-                            mode="datetime"
-                            placeholder="Date & Time"
-                            format={that.appLang.dateFormat + ' ' + that.appLang.timeFormat}
-                            confirmBtnText="Select Time"
-                            cancelBtnText="Cancel"
-                            customStyles={{
-                                dateIcon: { position: 'absolute', left: 0, top: 4, marginLeft: 0 },
-                                dateInput: { marginLeft: 36 }
-                            }}
-                            onDateChange={(date) => {that.onDateChange.call(that, ref, input.id, date)}}
-                        />
+                        <DateTimePicker
+                                styleTextbox={{minWidth:200}}
+                                date={this.state.record.date}
+                                type="datetime"
+                                placeholder="Date & Time"
+                                format={this.appLang.timeFormat}
+                                buttonConfirmText="Select Date & Time"
+                                buttonCancelText="Cancel"
+                                onDateChange={(date) => {this.onRecordedDateChange.call(that, date)}}
+                            />
                     </View>
-                    <View style={styles.inputsContainer}>
-                        {this.state.task.inputs.map((input) => {
-                            var keyType = 'done';
-                            if(i < this.state.task.inputs.length - 1){
-                                keyType = 'next';
-                            }
-                            i++;
-                            var e = parseInt(i.toString());
-                            var ref = 'input' + e;
-                            switch(input.type){
-                                case 0: //Number
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            <Textbox 
-                                                ref={ref}
-                                                style={styles.inputField}
-                                                placeholder={'10'}
-                                                keyboardType="numeric"
-                                                returnKeyType={keyType} 
-                                                blurOnSubmit={false}
-                                                onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                                onKeyPress={() => {that.onKeyPress.call(that, e)}}
-                                            />
-                                        </View>
-                                    )
-                                    break;
-                                case 1: //Text
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            <Textbox 
-                                                style={styles.inputField}
-                                                placeholder={'Text'}
-                                                returnKeyType={keyType} 
-                                                blurOnSubmit={false}
-                                                onSubmitEditing={() => {that.onSubmitEditing.call(that, ref, keytype.toString(), e)}}
-                                                onKeyPress={() => {that.onKeyPress.call(that, e)}}
-                                            />
-                                        </View>
-                                    )
-                                    break;
-                                case 2: //Date
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            <DatePicker
-                                                style={{width: 200}}
-                                                date={that.state.record.date || new Date()}
-                                                mode="date"
-                                                placeholder="Date"
-                                                format={that.appLang.dateFormat}
-                                                minDate="0-01-01"
-                                                confirmBtnText="Select Date"
-                                                cancelBtnText="Cancel"
-                                                customStyles={{
-                                                    dateIcon: { position: 'absolute', left: 0, top: 4, marginLeft: 0 },
-                                                    dateInput: { marginLeft: 36 }
-                                                }}
-                                                onDateChange={(date) => {that.onDateChange.call(that, ref, input.id, date)}}
-                                            />
-                                        </View>
-                                    )
-                                    break;
-                                case 3: //Time
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            <DatePicker
-                                                style={{width: 200}}
-                                                date={that.state.record.date || new Date()}
-                                                mode="time"
-                                                placeholder="Time"
-                                                format={that.appLang.timeFormat}
-                                                confirmBtnText="Select Time"
-                                                cancelBtnText="Cancel"
-                                                customStyles={{
-                                                    dateIcon: { position: 'absolute', left: 0, top: 4, marginLeft: 0 },
-                                                    dateInput: { marginLeft: 36 }
-                                                }}
-                                                onDateChange={(date) => {that.onDateChange.call(that, ref, input.id, date)}}
-                                            />
-                                        </View>
-                                    )
-                                    break;
-                                case 4: //Date & Time
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-
-                                        </View>
-                                    )
-                                    break;
-                                case 5: //Stop Watch
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            
-                                        </View>
-                                    )
-                                    break;
-                                case 6: //Yes/No
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            
-                                        </View>
-                                    )
-                                    break;
-                                case 7: //5 Stars
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            
-                                        </View>
-                                    )
-                                    break;
-                                case 8: //Location
-                                    return (
-                                        <View key={input.id} style={styles.inputFieldContainer}>
-                                            <Text style={[styles.fieldTitle, styles.padding]}>{input.name}</Text>
-                                            <LocationPicker 
-                                                ref={ref}
-                                                textInputStyle={[styles.inputField, styles.padding]}
-                                                placeholder={'location'}
-                                                returnKeyType={keyType} 
-                                                blurOnSubmit={false}
-                                                onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            />
-                                        </View>
-                                    )
-                                    break;
-                                case 9: //URL Link
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            <Textbox 
-                                                ref={ref}
-                                                style={styles.inputField}
-                                                placeholder={'URL link'}
-                                                returnKeyType={keyType} 
-                                                blurOnSubmit={false}
-                                                onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            />
-                                        </View>
-                                    )
-                                    break;
-                                case 10: //Photo
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            
-                                        </View>
-                                    )
-                                    break;
-                                case 11: //Video
-                                    return (
-                                        <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                            <Text style={styles.fieldTitle}>{input.name}</Text>
-                                            
-                                        </View>
-                                    )
-                                    break;
-                            }
-                            return (<View key={input.id}></View>)
-                        })}
-                    </View>
+                </View>
+                <View style={styles.inputsContainer}>
+                    {this.state.task.inputs.map((input) => {
+                        var keyType = 'done';
+                        if(i < this.state.task.inputs.length - 1){
+                            keyType = 'next';
+                        }
+                        i++;
+                        var e = parseInt(i.toString());
+                        var ref = 'input' + e;
+                        switch(input.type){
+                            case 0: //Number
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <Textbox 
+                                            ref={ref}
+                                            style={styles.inputField}
+                                            placeholder={'10'}
+                                            keyboardType="numeric"
+                                            returnKeyType={keyType} 
+                                            blurOnSubmit={false}
+                                            onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
+                                            onKeyPress={() => {that.onKeyPress.call(that, e)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 1: //Text
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <Textbox 
+                                            style={styles.inputField}
+                                            placeholder={'Text'}
+                                            returnKeyType={keyType} 
+                                            blurOnSubmit={false}
+                                            onSubmitEditing={() => {that.onSubmitEditing.call(that, ref, keyType.toString(), e)}}
+                                            onKeyPress={() => {that.onKeyPress.call(that, e)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 2: //Date
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <DateTimePicker
+                                            style={{width: 200}}
+                                            date={that.state.record.date || new Date()}
+                                            type="date"
+                                            placeholder="Date"
+                                            format={that.appLang.dateFormat}
+                                            minDate="0-01-01"
+                                            buttonConfirmText="Select Date"
+                                            buttonCancelText="Cancel"
+                                            onDateChange={(date) => {that.onDateChange.call(that, ref, input.id, date)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 3: //Time
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <DateTimePicker
+                                            style={{width: 200}}
+                                            date={that.state.record.date || new Date()}
+                                            type="time"
+                                            placeholder="Time"
+                                            format={that.appLang.timeFormat}
+                                            buttonConfirmText="Select Time"
+                                            buttonCancelText="Cancel"
+                                            onDateChange={(date) => {that.onDateChange.call(that, ref, input.id, date)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 4: //Date & Time
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <DateTimePicker
+                                            style={{width: 200}}
+                                            date={that.state.record.date || new Date()}
+                                            type="datetime"
+                                            placeholder="Date & Time"
+                                            format={that.appLang.timeFormat}
+                                            buttonConfirmText="Select Time"
+                                            buttonCancelText="Cancel"
+                                            onDateChange={(date) => {that.onDateChange.call(that, ref, input.id, date)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 5: //Stop Watch
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <Textbox 
+                                            ref={ref}
+                                            style={styles.inputField}
+                                            placeholder={'30'}
+                                            keyboardType="numeric"
+                                            returnKeyType={keyType} 
+                                            blurOnSubmit={false}
+                                            onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
+                                            onKeyPress={() => {that.onKeyPress.call(that, e)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 6: //Yes/No
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <Picker
+                                            items={[
+                                                {key:0, label:'No'},
+                                                {key:1, label:'Yes'}
+                                            ]}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 7: //5 Stars
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        
+                                    </View>
+                                )
+                                break;
+                            case 8: //Location
+                                return (
+                                    <View key={input.id} style={styles.inputFieldContainer}>
+                                        <Text style={[styles.fieldTitle, styles.padding]}>{input.name}</Text>
+                                        <LocationPicker 
+                                            ref={ref}
+                                            textInputStyle={[styles.inputField, styles.padding]}
+                                            placeholder={'location'}
+                                            returnKeyType={keyType} 
+                                            blurOnSubmit={false}
+                                            onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 9: //URL Link
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <Textbox 
+                                            ref={ref}
+                                            style={styles.inputField}
+                                            placeholder={'URL link'}
+                                            returnKeyType={keyType} 
+                                            blurOnSubmit={false}
+                                            onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
+                                        />
+                                    </View>
+                                )
+                                break;
+                            case 10: //Photo
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        
+                                    </View>
+                                )
+                                break;
+                            case 11: //Video
+                                return (
+                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
+                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        
+                                    </View>
+                                )
+                                break;
+                        }
+                        return (<View key={input.id}></View>)
+                    })}
                 </View>
             </Body>
         );
@@ -393,9 +418,9 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
 }
 
 const styles = StyleSheet.create({
-    body:{backgroundColor:AppStyles.backgroundColor},
+    body:{backgroundColor:AppStyles.altBackgroundColor},
     container:{paddingVertical:30, paddingBottom:70},
-    listContainer:{paddingBottom:75},
+    listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
     tasksTitle:{fontSize:17, color:AppStyles.color, paddingBottom:20, paddingHorizontal:30, paddingTop:30},
     labelContainer:{paddingBottom:30, paddingHorizontal:30},
     labelText:{fontSize:24},
@@ -420,7 +445,9 @@ const styles = StyleSheet.create({
     taskText:{fontSize:20},
     subTaskGutter:{backgroundColor:AppStyles.color, height:60, width:45},
 
-    //task form fields
+    //task input fields
+    taskInfo:{backgroundColor:AppStyles.backgroundColor, paddingTop:20},
+    inputsContainer:{backgroundColor:AppStyles.altBackgroundColor, paddingTop:20, paddingBottom:70},
     inputFieldContainer:{paddingBottom:15},
     padding:{marginHorizontal:30},
     fieldTitle: {fontSize:16, fontWeight:'bold'},
