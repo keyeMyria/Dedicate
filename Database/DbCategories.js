@@ -34,6 +34,7 @@ export default class DbCategories extends Db{
             console.log("Error on creating category");
             console.log(e);
         }
+        return id;
     }
 
     HasCategories(){

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Keyboard } from 'react-native';
 import DatePicker from 'react-native-datepicker'
 import Textbox from 'fields/Textbox';
 
@@ -23,9 +23,11 @@ export default class DateTimePicker extends React.Component {
     getDateString = (d) => {
         var hour = d.getHours() % 12;
         hour = hour < 1 ? 12 : hour;
-        return (this.props.type.indexOf('date') >= 0 ? (d.getMonth() + '/' + d.getDay() + '/' + d.getFullYear()) + ' ' : '') +
+        return (this.props.type.indexOf('date') >= 0 ? ((d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear()) + ' ' : '') +
                 (this.props.type.indexOf('date') >= 0 && this.props.type.indexOf('time') >= 0 ? '@ ' : '') +
-        (this.props.type.indexOf('time') >= 0 ? (hour + ':' + ('0' + d.getMinutes()).slice(-2) + ' ' + (d.getHours() >= 12 ? 'pm' : 'am')) : '');
+        (this.props.type.indexOf('time') >= 0 ? 
+            (hour + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2)
+            + ' ' + (d.getHours() >= 12 ? 'pm' : 'am')) : '');
     }
 
     onDateChange = (...args) => { //args = time, date
@@ -37,8 +39,8 @@ export default class DateTimePicker extends React.Component {
     }
 
     onTextboxFocus = (event) => {
+        Keyboard.dismiss();
         this.refs['datepicker'].onPressDate();
-        this.refs['textbox'].blur();
     }
 
 

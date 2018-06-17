@@ -72,6 +72,10 @@ import com.android.build.OutputFile
  * ]
  */
 
+project.ext.react = [
+    entryFile: "index.js"
+]
+
 apply from: "../../node_modules/react-native/react.gradle"
 
 /**
@@ -133,7 +137,7 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-maps')
+    //compile project(':react-native-maps')
     compile project(':react-native-svg')
     compile project(':realm')
     compile fileTree(dir: "libs", include: ["*.jar"])

@@ -3,7 +3,7 @@ import { AppRegistry, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Svg, Circle, G, Path} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
 
-export default class ButtonAdd extends React.Component {
+export default class ButtonRecord extends React.Component {
     constructor(props){
         super(props);
     }
@@ -41,4 +41,4 @@ export default class ButtonAdd extends React.Component {
     }
 }
 
-AppRegistry.registerComponent("ButtonAdd", () => ButtonAdd);
+AppRegistry.registerComponent("ButtonRecord", () => ButtonRecord);

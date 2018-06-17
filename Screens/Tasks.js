@@ -10,9 +10,12 @@ export default class TasksScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            analytics: this.dbTaskAnalytics.GetTaskChart(),
             tasks: this.dbTasks.GetTasksList()
         };
+        for(var x = 0; x < this.state.tasks.length; x++){
+            var task = this.state.tasks[x];
+            task.analytics = this.dbTaskAnalytics.GetTaskChart({taskId:task.id});
+        }
     }
 
     dbTasks = new DbTasks();

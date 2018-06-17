@@ -14,6 +14,10 @@ export default AppStyles = {
     buttonTextColor: '#fff',
     buttonPressedColor: '#5555bb',
     buttonPressedTextColor: '#fff',
+    buttonOutlineColor: '#6666cc',
+    buttonOutlineTextColor: '#6666cc',
+    buttonOutlinePressedColor: '#5555bb',
+    buttonOutlinePressedTextColor: '#5555bb',
 
     // font styling //////////////////////////
     titleFontSize: 24,

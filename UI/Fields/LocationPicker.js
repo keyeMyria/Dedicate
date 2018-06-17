@@ -4,6 +4,9 @@ import Textbox from 'fields/Textbox';
 import MapView from 'react-native-maps';
 import MapTheme from 'ui/Maps/Themes/Default.js';
 
+// NOTE: Find Google Android Maps Developer API Key within /android/app/src/main/AndroidManifest.xml :
+//       com.google.android.geo.API_KEY
+
 export default class LocationPicker extends React.Component {
     constructor(props){
         super(props);
@@ -17,8 +20,6 @@ export default class LocationPicker extends React.Component {
             }
         }
     }
-
-
 
     render(){
         return (
@@ -46,7 +47,7 @@ export default class LocationPicker extends React.Component {
 
 const styles = StyleSheet.create({
     mapContainer:{width:'100%', height:200, justifyContent: 'flex-end', alignItems: 'center'},
-    mapView:{...StyleSheet.absoluteFillObject }
+    mapView:{position:'absolute', top:0, right:0, bottom:0, left:0 }
 
 
 });

@@ -32,7 +32,8 @@ export default class Body extends React.Component {
                 <View style={[styles.footerStyle, this.props.footerStyle || {}]}>
                     {this.props.buttonRecord == true && this.state.hasTasks ?
                         <ButtonRecord {...this.props} style={styles.buttonRecord} buttonType="rec"
-                            onPress={() => this.props.navigation.navigate('Record',{taskId:0, reload:true})}
+                            onPress={() => {
+                            that.props.navigation.navigate('Record', {reload:true});}}
                         />
                         : <View></View>
                     }
@@ -44,7 +45,8 @@ export default class Body extends React.Component {
                         )
                     }
                     {this.props.buttonAdd == true ?
-                        <ButtonAdd {...this.props} style={styles.buttonAdd} onPress={() => this.props.navigation.navigate('Task', {taskId:null})}/>
+                        <ButtonAdd {...this.props} style={styles.buttonAdd} onPress={() => {
+                            this.props.navigation.navigate('Task', {taskId:null});}}/>
                         : <View></View>
                     }
                 </View>

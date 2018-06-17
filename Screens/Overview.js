@@ -8,6 +8,8 @@ import DrawerIcon from 'ui/DrawerIcon';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
+import DbTaskAnalytics from 'db/Analytics/DbTaskAnalytics';
+import LineChart from 'charts/LineChart';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -15,12 +17,13 @@ export default class OverviewScreen extends React.Component {
 
         var dbTasks = new DbTasks();
         var dbRecords = new DbRecords();
+        var dbTaskAnalytics = new DbTaskAnalytics();
 
         this.state = {
             styles: stylesLandscape,
-            ...this.dbState()
+            ...this.dbState(),
+            analytics:dbTaskAnalytics.GetChart({datestart:(new Date(+new Date - 12096e5)), dateend:new Date()})
         };
-        
     }
 
     componentDidMount() { 

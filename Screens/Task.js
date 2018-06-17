@@ -269,6 +269,7 @@ export default class TaskScreen extends React.Component {
         var task = this.state.task;
         task.inputs[index - 1].type = itemValue;
         this.setState({task: task});
+        this.validateForm();
     }
 
     onSubmitEditing = (keyType, index) => {
@@ -277,12 +278,14 @@ export default class TaskScreen extends React.Component {
         }else{
             this.refs['taskInput' + index].refs['inputLabel'].blur();
         }
+        this.validateForm();
     }
 
     onRemoveInputField = (index) => {
         var task = this.state.task;
         task.inputs.splice(index - 1, 1);
         this.setState({task:task, ButtonAddShow:true});
+        this.validateForm();
     }
 
     onPressButtonSave = event => {
@@ -347,14 +350,6 @@ export default class TaskScreen extends React.Component {
         if(this.state.focusIndex != index){
             this.setState({focusIndex:index});
         }
-
-        //TEMP FIX: temporary fix adds a blank character and instantly removes that character
-        //      to force the broken KeyboardAvoidingView component to refresh.
-        setTimeout(()=>{
-            var ref = that.refs['taskInput' + that.state.focusIndex];
-            //var event = new Event('input', { bubbles: true });
-            //ref.dispatchEvent(event);
-        }, 100);
     }
 
     onFocusTaskLabel(event){

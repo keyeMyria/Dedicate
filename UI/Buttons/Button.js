@@ -43,7 +43,8 @@ const styles = StyleSheet.create({
     button:{
         backgroundColor:AppStyles.buttonColor,
         paddingHorizontal:25,
-        paddingVertical:7,
+        paddingTop:6,
+        paddingBottom:7,
         alignItems:'center',
         borderRadius:7
     },

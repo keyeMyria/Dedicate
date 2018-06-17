@@ -11,16 +11,13 @@ export default class DbRecords extends Db{
                 id = (global.realm.objects('Record').sorted('id', true).slice(0,1)[0].id) + 1;
             }
 
-            //get Task from task Id
-            var task = global.realm.objects('Task').filtered('id=' + record.taskId);
-
             //save record (with inputs) into the database
             global.realm.write(() => {
                 global.realm.create('Record', {
                     id:id, 
                     datecreated: datecreated,
                     inputs: record.inputs || [],
-                    task: task
+                    task: record.task || null
                 });
             });
         } catch (e) {

@@ -3,9 +3,9 @@ import Realm from 'realm'
  export default function Schema() {
     global.realm = new Realm({
         schema: [Task, Input, Category, Record, RecordInput],
-        schemaVersion: 4,
+        schemaVersion: 5,
         migration: function(oldRealm, newRealm) {
-            //newRealm.deleteAll();
+            newRealm.deleteAll();
         }
     });
  }
@@ -35,7 +35,19 @@ import Realm from 'realm'
     properties: {
         id: 'int',
         name: 'string',
-        type: {type: 'int', default: 0} //0 = number, 1 = string, 2 = datetime
+        type: {type: 'int', default: 1}
+        //0 = Number
+        //1 = Text
+        //2 = Date
+        //3 = Time
+        //4 = Date & Time
+        //5 = Stop Watch
+        //6 = Yes/No
+        //7 = 5 Stars
+        //8 = Location
+        //9 = URL Link
+        //10 = Photo
+        //11 = Video
      }
  }
 
@@ -56,7 +68,11 @@ import Realm from 'realm'
     primaryKey: 'id',
     properties: {
         id: 'int',
-        datecreated: {type: 'date', indexed: true},
+        taskId: {type: 'int', indexed: true},
+
+        //recorded date & time range
+        datestart: {type: 'date', indexed: true},
+        dateend: {type: 'date'},
         
         //list of inputs & their values
         inputs: {type: 'list', objectType: 'RecordInput'},
@@ -76,6 +92,8 @@ import Realm from 'realm'
         type: {type: 'int'},
 
         //input information for record input
+        taskId: {type: 'int', indexed:true},
+        inputtId: {type: 'int', indexed:true},
         input: {type: 'Input'}
      }
  }

@@ -7,12 +7,12 @@ import TaskScreen from 'screens/Task';
 import RecordScreen from 'screens/Record';
 
 const Screens = {
-    Tasks: { screen: TasksScreen, path: 'tasks' },
-    Calendar: { screen: CalendarScreen, path: 'calendar' },
-    Analytics: { screen: AnalyticsScreen, path: 'analytics' },
-    Settings: { screen: SettingsScreen, path: 'settings' },
-    Task: { screen: TaskScreen, path: 'task' },
-    Record: { screen: RecordScreen, path: 'record' }
+    Tasks: { screen: TasksScreen},
+    Calendar: { screen: CalendarScreen },
+    Analytics: { screen: AnalyticsScreen },
+    Settings: { screen: SettingsScreen },
+    Task: { screen: TaskScreen },
+    Record: { screen: RecordScreen }
 }
 
 export default Screens;
