@@ -1,6 +1,5 @@
-import React, { Component } from "react";
+import React from "react";
 import { View, Text, Image, StyleSheet, TouchableHighlight } from "react-native";
-import { DrawerItems } from 'react-navigation';
 import IconOverview from 'icons/IconOverview';
 
 export default class DrawerContent extends React.Component{
@@ -26,7 +25,6 @@ export default class DrawerContent extends React.Component{
 
 const DrawerItem = props => {
   const Icon = props.icon;
-  var path = props.path ? props.path : props.text;
   var selectedStyle = {};
   if(props.activeItemKey == props.text){ selectedStyle = styles.drawerItemSelected; }
   return (

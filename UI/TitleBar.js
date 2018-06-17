@@ -5,6 +5,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
+import { DrawerActions } from 'react-navigation';
 
 export default class TitleBar extends React.Component {
     constructor(props){
@@ -16,7 +17,7 @@ export default class TitleBar extends React.Component {
         return (
             <View style={styles.container}>
                 <View style={styles.container_menu}>
-                    <TouchableOpacity onPress={() => this.props.navigation.navigate('DrawerOpen')}>
+                    <TouchableOpacity onPress={() => this.props.navigation.dispatch(DrawerActions.openDrawer())}>
                         <Image style={styles.menu} source={require('icons/Menu.png')} />
                     </TouchableOpacity>
                 </View>

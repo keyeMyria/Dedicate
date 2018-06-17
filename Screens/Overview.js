@@ -1,22 +1,17 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, 
-    StyleSheet, Dimensions, TouchableHighlight } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { View, Text, Image, 
+    StyleSheet, Dimensions } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
-import DrawerIcon from 'ui/DrawerIcon';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
 import DbTaskAnalytics from 'db/Analytics/DbTaskAnalytics';
-import LineChart from 'charts/LineChart';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
         super(props);
-
-        var dbTasks = new DbTasks();
-        var dbRecords = new DbRecords();
+        
         var dbTaskAnalytics = new DbTaskAnalytics();
 
         this.state = {
@@ -31,9 +26,6 @@ export default class OverviewScreen extends React.Component {
     }
 
     componentWillReceiveProps() {
-        var dbTasks = new DbTasks();
-        var dbRecords = new DbRecords();
-        
         this.setState(this.dbState());
     };
 

@@ -1,10 +1,6 @@
-import React from 'react';
-import { View } from 'react-native';
-
 // import navigation system
 import { DrawerNavigator } from 'react-navigation';
 import DrawerContent from 'ui/DrawerContent';
-import ScreenTransition from 'ui/ScreenTransition';
 
 // import all screens contained within the application
 import OverviewScreen from 'screens/Overview';
