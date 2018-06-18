@@ -61,7 +61,8 @@ export default class DateTimePicker extends React.Component {
                         cancelBtnText={this.props.buttonCancelText}
                         customStyles={{
                             dateIcon: { position: 'absolute', left: 0, top: 4, marginLeft: 0 },
-                            dateInput: { display:'none' }
+                            dateInput: { display:'none' },
+                            datePicker: {backgroundColor:'#000' }
                         }}
                         onDateChange={this.onDateChange}
                         />

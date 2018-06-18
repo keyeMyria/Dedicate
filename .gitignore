@@ -3,7 +3,7 @@ node_modules/
 npm-debug.*
 build/
 _app_compileDebugJavaWithJavac/
-
+*.keystore
 
 npm-debug.log
 yarn-error.log

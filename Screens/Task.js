@@ -321,7 +321,7 @@ export default class TaskScreen extends React.Component {
         var that = this;
         Alert.alert(
         'Delete Task?',
-        'Do you really want to delete this task? All data recorded about this task will also be perminently deleted as well.',
+        'Do you really want to delete this task? All data recorded about this task will also be permanently deleted as well.',
         [
             {text: 'Cancel', style: 'cancel'},
             {text: 'Delete Task', onPress: () => {
