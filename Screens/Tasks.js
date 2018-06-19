@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableHighlight } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { View, Text, StyleSheet, ScrollView, TouchableHighlight, BackHandler } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbTasks from 'db/DbTasks';
@@ -16,10 +15,26 @@ export default class TasksScreen extends React.Component {
             var task = this.state.tasks[x];
             task.analytics = this.dbTaskAnalytics.GetTaskChart({taskId:task.id});
         }
+
+        //bind events
+        this.hardwareBackPress = this.hardwareBackPress.bind(this);
     }
 
     dbTasks = new DbTasks();
     dbTaskAnalytics = new DbTaskAnalytics();
+    
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    componentWillUnmount(){
+        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    hardwareBackPress() {
+        this.props.navigation.navigate('Overview');
+        return true;
+    }
 
     render() {
         var tasklist = this.state.tasks.map((task) => {

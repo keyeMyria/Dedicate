@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Alert, 
-    Keyboard, KeyboardAvoidingView  } from 'react-native';
+    Keyboard, KeyboardAvoidingView, BackHandler  } from 'react-native';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
@@ -41,6 +41,12 @@ export default class TaskScreen extends React.Component {
             edited: false,
             newcat: {name:''}
         }
+
+        //bind events
+        this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.keyboardDidShow = this.keyboardDidShow.bind(this);
+        this.keyboardDidHide = this.keyboardDidHide.bind(this);
+
         if(this.state.task.id != null){
             //load task details
             var dbTasks = new DbTasks();
@@ -66,19 +72,25 @@ export default class TaskScreen extends React.Component {
 
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////
     componentWillMount(){
-        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this))
-        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide.bind(this))
+        BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
+        Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
     }
 
     componentDidMount() { 
         this.onLayoutChange();
-        //this.refs['tasklabel'].focus();
     }
 
     componentWillUnmount () {
-        this.keyboardDidShowListener.remove()
-        this.keyboardDidHideListener.remove()
+        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+        Keyboard.removeListener('keyboardDidShow', this.keyboardDidShow);
+        Keyboard.removeListener('keyboardDidHide', this.keyboardDidHide);
         this.onScrollView();
+    }
+
+    hardwareBackPress() {
+        this.props.navigation.navigate("Tasks");
+        return true;
     }
 
     // Keyboard Events  //////////////////////////////////////////////////////////////////////////////////////

@@ -1,12 +1,28 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { View, Text, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
+import { createStackNavigator } from 'react-navigation';
 import Body from 'ui/Body';
 import CategoriesScreen from 'screens/Settings/Categories';
 
 class DefaultScreen extends React.Component {
     constructor(props) {
         super(props);
+
+        //bind events
+        this.hardwareBackPress = this.hardwareBackPress.bind(this);
+    }
+
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    componentWillUnmount(){
+        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    hardwareBackPress() {
+        this.props.navigation.navigate("Overview");
+        return true;
     }
 
     render() {
@@ -32,8 +48,7 @@ const styles = StyleSheet.create({
     listText:{fontSize:17}
 });
 
-//Routing
-const SettingsScreen = StackNavigator(
+export default createStackNavigator(
     {
         Default: {screen: DefaultScreen},
         Categories: {screen: CategoriesScreen, path:'settings\categories'}
@@ -42,6 +57,4 @@ const SettingsScreen = StackNavigator(
         initialRouteName: 'Default',
         headerMode:'none'
     }
-);
-
-export default SettingsScreen;
+);;

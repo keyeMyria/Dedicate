@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, 
-    StyleSheet, Dimensions } from 'react-native';
+    StyleSheet, Dimensions, BackHandler } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import TouchableBox from 'ui/Touchable/Box';
@@ -19,6 +19,21 @@ export default class OverviewScreen extends React.Component {
             ...this.dbState(),
             analytics:dbTaskAnalytics.GetChart({datestart:(new Date(+new Date - 12096e5)), dateend:new Date()})
         };
+        //bind events
+        this.hardwareBackPress = this.hardwareBackPress.bind(this);
+    }
+
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    componentWillUnmount(){
+        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    hardwareBackPress() {
+        BackHandler.exitApp();
+        return true;
     }
 
     componentDidMount() { 

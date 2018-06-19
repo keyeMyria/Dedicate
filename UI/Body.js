@@ -33,7 +33,7 @@ export default class Body extends React.Component {
                     {this.props.buttonRecord == true && this.state.hasTasks ?
                         <ButtonRecord {...this.props} style={styles.buttonRecord} buttonType="rec"
                             onPress={() => {
-                            that.props.navigation.navigate('Record', {reload:true});}}
+                            that.props.navigation.navigate('Record');}}
                         />
                         : <View></View>
                     }

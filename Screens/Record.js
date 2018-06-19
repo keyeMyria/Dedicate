@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, BackHandler } from 'react-native';
+import { createStackNavigator } from 'react-navigation';
 import AppLang from 'dedicate/AppLang';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
@@ -8,14 +8,11 @@ import Textbox from 'fields/Textbox';
 import Picker from 'fields/Picker';
 import LocationPicker from 'fields/LocationPicker';
 import DateTimePicker from 'fields/DateTimePicker'
-import ButtonAdd from 'buttons/ButtonAdd';
 import ButtonSave from 'buttons/ButtonSave';
 import ButtonStopWatch from 'buttons/ButtonStopWatch';
-import Button from 'buttons/Button';
 import DbTasks from 'db/DbTasks';
 import DbCategories from 'db/DbCategories';
 import DbRecords from 'db/DbRecords';
-import DateFormat from 'utility/DateFormat';
 import StopWatch from 'ui/StopWatch';
 
 
@@ -38,7 +35,6 @@ class DefaultScreen extends React.Component {
         };
 
         var dbTasks = new DbTasks();
-        var dbRecords = new DbRecords();
 
         //load a list of tasks
         var dbTasks = new DbTasks();
@@ -47,6 +43,23 @@ class DefaultScreen extends React.Component {
         //load a list of categories
         var dbCategories = new DbCategories();
         this.state.categories = dbCategories.GetCategoriesList({filtered:'tasks > 0'});
+
+        //bind events
+        this.hardwareBackPress = this.hardwareBackPress.bind(this);
+    }
+
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    componentWillUnmount(){
+        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    hardwareBackPress() {
+        this.props.navigation.navigate('Overview');
+        //this.props.navigation.dispatch({ type: 'Navigation/BACK' });
+        return true;
     }
 
     onSelectCategory = (event, id) => {
@@ -147,9 +160,26 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                 }
             }
         }
+
+        //bind events
+        this.hardwareBackPress = this.hardwareBackPress.bind(this);
     }
 
     appLang = new AppLang();
+
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    componentWillUnmount(){
+        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+    }
+
+    hardwareBackPress() {
+        //this.props.navigation.navigate('Overview');
+        this.props.navigation.dispatch({ type: 'Navigation/BACK' });
+        return true;
+    }
 
     onLayoutChange = event => {
         this.setState({
@@ -606,7 +636,7 @@ const styles = StyleSheet.create({
     body:{backgroundColor:AppStyles.altBackgroundColor},
     container:{paddingVertical:30, paddingBottom:70},
     listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
-    tasksTitle:{fontSize:17, color:AppStyles.color, paddingBottom:20, paddingHorizontal:30, paddingTop:30},
+    tasksTitle:{fontSize:17, color:AppStyles.textColor, paddingBottom:20, paddingHorizontal:30, paddingTop:30},
     labelContainer:{paddingBottom:30, paddingHorizontal:30},
     labelText:{fontSize:30},
 
@@ -615,7 +645,7 @@ const styles = StyleSheet.create({
         paddingVertical:15, 
         paddingHorizontal:30, 
         borderBottomWidth:1, 
-        borderBottomColor:AppStyles.color + '55'
+        borderBottomColor:AppStyles.separatorColor
     },
     catText:{fontSize:22, color:AppStyles.color},
     taskContainer:{flexDirection:'row'},
@@ -628,7 +658,7 @@ const styles = StyleSheet.create({
         borderBottomColor:AppStyles.separatorColor, flexDirection:'row'
     },
     taskText:{fontSize:20},
-    subTaskGutter:{backgroundColor:AppStyles.color, height:60, width:45},
+    subTaskGutter:{backgroundColor:AppStyles.altBackgroundColor, height:60, width:45},
 
     //task input fields
     taskInfo:{backgroundColor:AppStyles.backgroundColor, paddingTop:20},
@@ -662,7 +692,7 @@ const styles = StyleSheet.create({
     buttonSave:{padding:12 },
 });
 
-const RecordScreen = StackNavigator( 
+export default createStackNavigator(
     {
         RecordDefault: {screen: DefaultScreen},
         RecordTask: {screen: RecordTaskScreen}
@@ -671,5 +701,3 @@ const RecordScreen = StackNavigator(
         headerMode:'none'
     }
 );
-
-export default RecordScreen;
