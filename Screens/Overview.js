@@ -6,18 +6,16 @@ import Body from 'ui/Body';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
-import DbTaskAnalytics from 'db/Analytics/DbTaskAnalytics';
+import {Svg, Polyline, Circle} from 'react-native-svg';
+import DatesMatch from 'utility/DatesMatch';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
         super(props);
-        
-        var dbTaskAnalytics = new DbTaskAnalytics();
 
         this.state = {
             styles: stylesLandscape,
-            ...this.dbState(),
-            analytics:dbTaskAnalytics.GetChart({datestart:(new Date(+new Date - 12096e5)), dateend:new Date()})
+            ...this.dbState()
         };
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -40,10 +38,6 @@ export default class OverviewScreen extends React.Component {
         this.onLayoutChange();
     }
 
-    componentWillReceiveProps() {
-        this.setState(this.dbState());
-    };
-
     dbState(){ //updates state from database
         var dbTasks = new DbTasks();
         var dbRecords = new DbRecords();
@@ -51,7 +45,8 @@ export default class OverviewScreen extends React.Component {
         return {
             totalTasks:dbTasks.TotalTasks(),
             totalRecords:dbRecords.TotalRecords(),
-            hasTask:dbTasks.HasTasks()
+            hasTask:dbTasks.HasTasks(),
+            charts:dbRecords.GetListByTask()
         };
     }
 
@@ -67,7 +62,150 @@ export default class OverviewScreen extends React.Component {
         }
     }
 
+    getCharts = () => {
+        var items = [];
+        var {height, width} = Dimensions.get('window');
+        for(var x = 0; x < this.state.charts.length; x++){
+            var chart = this.state.charts[x];
+            if(chart.name != ''){
+                items.push(this.chartItem(chart, width));
+            }
+            if(x < this.state.charts.length - 1){
+                items.push(<View key={'sep' + x} style={styles.separator}></View>);
+            }
+        }
+        return items;
+    }
+
+    //render 14 day chart
+    chartItem = (chart, width) => {
+        var line1 = (<View></View>);
+        var line1Min = "";
+        var line1Max = "";
+        var line2 = (<View></View>);
+        var line2Min = "";
+        var line2Max = "";
+        var dots = (<View></View>);
+
+        //get lines and dots for chart
+        var curr = 1;
+        var hasdots = false;
+        var cwidth = width - 40;
+        var height = 60;
+        var days = 14;
+        var record = chart.records[chart.records.length - 1];
+
+        for(var x = 0; x < record.inputs.length; x++){
+            var input = record.inputs[x];
+            if(input.type === 0){ //number
+                var info = this.chartPoints(chart, x, days);
+                if(curr == 1){
+                    line1 = (
+                        <Svg width={cwidth} height={height + 20}>
+                            {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine1Stroke)}
+                        </Svg>
+                    );
+                    line1Min = info.min;
+                    line1Max = info.max;
+                    curr++;
+                }else if(curr == 2){
+                    line2 = (
+                        <Svg width={cwidth} height={height + 20}>
+                            {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine2Stroke)}
+                        </Svg>
+                    );
+                    line2Min = info.min;
+                    line2Max = info.max;
+                    curr++;
+                }
+            }else if(input.type == 6 && hasdots == false){ //yes/no
+                hasdots = true;
+                dots = this.chartDots(chart, x);
+            }
+        }
+
+        return (
+            <View key={chart.id} style={styles.chartContainer}>
+                <View style={styles.chartArea}>
+                    <View style={styles.chartLine1MinMax}>
+                        <Text style={styles.chartLabel}>{line1Max}</Text>
+                        <Text style={[styles.chartLabel, styles.chartLine1Min]}>{line1Min}</Text>
+                    </View>
+                    <View style={styles.chartLine2MinMax}>
+                        <Text style={styles.chartLabel}>{line2Max}</Text>
+                        <Text style={[styles.chartLabel, styles.chartLine2Min]}>{line2Min}</Text>
+                    </View>
+                    <View style={[styles.chartLine2, styles.chart]}>
+                        {line2}
+                    </View>
+                    <View style={[styles.chartLine1, styles.chart]}>
+                        {line1}
+                    </View>
+                    <View style={[styles.chartDots, styles.chart]}>
+                        {dots}
+                    </View>
+                    <Text style={styles.chartName}>{chart.name}</Text>
+                </View>
+            </View>
+        );
+    }
+
+    chartPoints = (chart, index, days) => {
+        var min = 999999;
+        var max = 0;
+        var points = [];
+
+        //get totals for each day
+        for(var x = 0; x < days; x++){
+            //7 days for portait, 14 days for landscape
+            var count = 0;
+            var date = new Date();
+            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
+            for(var y = 0; y < chart.records.length; y++){
+                var rec = chart.records[y];
+                if(DatesMatch(date, new Date(rec.datestart))){
+                    if(rec.inputs.length > index){
+                        if(rec.inputs[index].number != null){
+                            count += rec.inputs[index].number;
+                        }
+                    }
+                }
+            }
+            points.push(count);
+        }
+
+        //check totals for min & max
+        for(var x = 1; x < points.length; x++){
+            if(points[x] < min){ min = points[x];}
+            if(points[x] > max){ max = points[x];}
+        }
+
+        return {points:points, min:min, max:max};
+    }
+
+    chartLine = (points, days, width, height, min, max, stroke) => {
+        //draw lines
+        var lines = [];
+        for(var x = 1; x < points.length; x++){
+            lines.push(Math.round((width / days) * (x)) + ',' + Math.round(height + 10 - (height / (max - min)) * (points[x] - min)));
+        }
+
+        return (
+            <Polyline key={'line' + x}
+                stroke={stroke}
+                strokeWidth="5"
+                fill="none"
+                points={lines.join(' ')}
+            ></Polyline>
+        );
+    }
+
+    chartDots = (chart, index) => {
+
+    }
+
     render() {
+        var that = this;
         if(this.state.hasTask === true){
             return (
                 <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true}>
@@ -85,10 +223,11 @@ export default class OverviewScreen extends React.Component {
                         </View>
                         </TouchableBox>
                     </View>
-                    
+                    {this.getCharts.call(that)}
                 </Body>
             );
         }else{
+            // Show Message instead of Overview of tasks
             return (
                 <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true}
                     footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
@@ -121,10 +260,25 @@ const styles = StyleSheet.create({
     p: { fontSize:17, paddingBottom:15, color:AppStyles.textColor },
     purple: { color: AppStyles.color},
     
-    counters:{flexDirection:'row', padding: 30, width:'100%' },
+    counters:{flexDirection:'row', padding: 15, width:'100%' },
     counterContainer:{alignSelf:'flex-start', paddingHorizontal:20},
-    counterLabel:{fontSize:17, paddingBottom:20},
-    counter:{fontSize:40, color:AppStyles.numberColor}
+    counter:{fontSize:30, color:AppStyles.numberColor},
+    counterLabel:{fontSize:17},
+
+    chartContainer: {paddingLeft:30, paddingRight:30, paddingBottom:20, paddingTop:5, width:'100%'},
+    chartArea:{height:120},
+    chart:{height:60, top:15},
+    chartName: {position:'absolute', bottom:0, fontSize:20, width:'100%', textAlign:'center'},
+    chartLine1:{position:'absolute', height:'100%'},
+    chartLine1MinMax:{position:'absolute', height:'100%'},
+    chartLine1Min:{position:'absolute', bottom:0},
+    chartLine2:{position:'absolute', height:'100%'},
+    chartLine2MinMax:{position:'absolute', height:'100%', right:0},
+    chartLine2Min:{position:'absolute', bottom:0},
+    chartLabel:{fontSize:20, opacity:0.5},
+    chartDots:{position:'absolute'},
+
+    separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10}
 });
 
 const stylesLandscape = StyleSheet.create({

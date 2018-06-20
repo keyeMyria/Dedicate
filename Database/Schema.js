@@ -3,7 +3,7 @@ import Realm from 'realm'
  export default function Schema() {
     global.realm = new Realm({
         schema: [Task, Input, Category, Record, RecordInput],
-        schemaVersion: 5,
+        schemaVersion: 6, //update version when schema changes dramatically
         migration: function(oldRealm, newRealm) {
             newRealm.deleteAll();
         }
@@ -93,7 +93,7 @@ import Realm from 'realm'
 
         //input information for record input
         taskId: {type: 'int', indexed:true},
-        inputtId: {type: 'int', indexed:true},
+        inputId: {type: 'int', indexed:true},
         input: {type: 'Input'}
      }
  }

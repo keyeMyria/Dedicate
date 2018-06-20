@@ -60,6 +60,6 @@ const styles = StyleSheet.create({
     buttonRecord:{alignSelf:'flex-start', bottom:20, left:20, position:'absolute'},
     buttonAdd:{alignSelf:'flex-end', bottom:20, right:20, position:'absolute'},
     footerStyle:{position:'relative'},
-    footerMessageContainer:{position:'absolute', bottom:0, right:100, height:60, maxWidth:250},
-    footerMessage:{paddingLeft:30, textAlign:'right'}
+    footerMessageContainer:{position:'absolute', bottom:5, right:100, height:60, maxWidth:270},
+    footerMessage:{paddingLeft:30, textAlign:'right', fontSize:16}
 });

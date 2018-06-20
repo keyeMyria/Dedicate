@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, TouchableHighlight, BackHandler } f
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbTasks from 'db/DbTasks';
-import DbTaskAnalytics from 'db/Analytics/DbTaskAnalytics';
 
 export default class TasksScreen extends React.Component {
     constructor(props) {
@@ -13,15 +12,13 @@ export default class TasksScreen extends React.Component {
         };
         for(var x = 0; x < this.state.tasks.length; x++){
             var task = this.state.tasks[x];
-            task.analytics = this.dbTaskAnalytics.GetTaskChart({taskId:task.id});
         }
 
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
     }
-
+    
     dbTasks = new DbTasks();
-    dbTaskAnalytics = new DbTaskAnalytics();
     
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);

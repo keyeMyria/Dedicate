@@ -21,5 +21,10 @@ export default AppStyles = {
 
     // font styling //////////////////////////
     titleFontSize: 24,
-    buttonFontSize:17
+    buttonFontSize:17,
+
+    // chart styling /////////////////////////
+    chartLine1Stroke: '#cccccc',
+    chartLine2Stroke: '#e6e6e6',
+    chartDotFill: '#b3e6ff'
 };

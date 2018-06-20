@@ -14,7 +14,7 @@ import DbTasks from 'db/DbTasks';
 import DbCategories from 'db/DbCategories';
 import DbRecords from 'db/DbRecords';
 import StopWatch from 'ui/StopWatch';
-
+import TimeLength from 'utility/TimeLength';
 
 class DefaultScreen extends React.Component {
     constructor(props) {
@@ -71,7 +71,7 @@ class DefaultScreen extends React.Component {
     }
     
     render() {
-        var that = this, i = 0;
+        var that = this;
         // Show List of Tasks to Choose From /////////////////////////////////////////////////////////////////////////////////////
         return (
             <Body {...this.props} style={styles.body} title="Record Event">
@@ -141,25 +141,37 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
 
         this.state = {
             task: props.navigation.state.params ? props.navigation.state.params.task : {},
-            record:{datestart: new Date(), dateend: new Date((new Date()).getTime() + 10 * 60000), inputs:[]},
+            record:{
+                datestart: new Date(), 
+                dateend: new Date(), 
+                inputs:[]
+            },
             stopWatch:{show:false, datestart:null, dateend:null},
             layoutChange:false
         }
         if(this.state.task.id){
+            //select task exists
             this.state.record.task = this.state.task;
-        }
-        if(this.state.task.inputs.length > 0){
-            for(var x = 0, task; x < this.state.task.inputs.length; x++){
-                var input = this.state.task.inputs[x];
-                this.state.record.inputs[x] = {
-                    type: input.type,
-                    number:null,
-                    text:null,
-                    date:null,
-                    input:input
+            this.state.record.taskId = this.state.task.id;
+
+            if(this.state.task.inputs.length > 0){
+                for(var x = 0, task; x < this.state.task.inputs.length; x++){
+                    var input = this.state.task.inputs[x];
+                    this.state.record.inputs[x] = {
+                        type: input.type,
+                        number:null,
+                        text:null,
+                        date:null,
+                        input:input,
+                        inputId: input.id,
+                        taskId: this.state.task.id
+                    }
                 }
             }
+        }else{
+            console.error("Please specify a task to record");
         }
+        
 
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -234,6 +246,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     onChangeText = (index, type, value, target) => {
         var record = this.state.record;
         var i = index - 1;
+        console.debug(i);
         switch(this.getInputDataType(type)){
             case  1: // Number data type
                 var number = typeof value == 'number' ? value : (
@@ -250,6 +263,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                 record.inputs[i].date = Date.parse(value);
                 break;
         }
+        console.debug(record);
         this.setState({record:record});
         this.validateForm();
     }
@@ -272,6 +286,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             }
         }
     }
+
+    //Start & End Dates /////////////////////////////////////////
 
     onDateChange = (ref, id, date) => {
         var record = this.state.record;
@@ -299,10 +315,6 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     onStopWatchStop = (datestart, dateend, ms) => {
-        console.log(typeof datestart);
-        console.log(typeof dateend);
-        console.log(datestart);
-        console.log(dateend);
         var stopWatch = this.state.stopWatch;
         var record = this.state.record;
         stopWatch.show = false;
@@ -314,11 +326,12 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         });
     }
 
+    // Save Event /////////////////////////////////////////////////////////////////////////////////////////////
+
     onPressButtonSave = () => {
         //save to database
         var db = new DbRecords();
         db.CreateRecord(this.state.record);
-        console.log(this.state.record);
         this.props.navigation.navigate('RecordDefault');
         setTimeout(() => {this.props.navigation.navigate('Overview');}, 100);
     }
@@ -334,23 +347,6 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                     </View>
                 )}
             </View>);
-    }
-
-    // Date & Time Utility //////////////////////////////////////////////////////////////////////////////////////
-    getTimeLength =  (datestart, dateend) => {
-        var diffMs = (dateend - datestart); // milliseconds between dates
-        var diffMins =   Math.floor((diffMs / 1000) / 60); // total minutes
-        var modSeconds = Math.floor((diffMs / 1000) % 60);
-        var modMins =    Math.floor(diffMins % 60);
-        var modHours =   Math.floor((diffMins / 60) % 24);
-        var modDays =    Math.floor(diffMins / 1440);
-
-        return 'Completed in' + 
-            (modDays  > 0 ? ' ' + modDays + ' day' + (modDays != 1 ? 's' : '') + ', ' + modHours + ' hour' + (modHours != 1 ? 's' : '') + ', ' + modMins + ' minute' + (modMins != 1 ? 's' : '') :
-            (modHours > 0 ? ' ' + modHours + ' hour' + (modHours != 1 ? 's' : '') + ', ' + modMins + ' minute' + (modMins != 1 ? 's' : '') :
-            (modMins  > 0 ? ' ' + modMins + ' minute' + (modMins != 1 ? 's' : '') : 
-            (modSeconds > 0 ? '' : ' no time')
-            ))) + (modSeconds > 0 ? ' ' + modSeconds + ' second' + (modSeconds != 1 ? 's' : '') : '') + '.';
     }
 
     render(){
@@ -414,7 +410,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 </View>
                                 
                                 <Text style={styles.recordTimeLength}>
-                                    {this.getTimeLength(this.state.record.datestart, this.state.record.dateend)}
+                                    {TimeLength(this.state.record.datestart, this.state.record.dateend)}
                                 </Text>
                             </View>
                         }

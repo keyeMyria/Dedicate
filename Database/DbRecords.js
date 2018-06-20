@@ -1,4 +1,3 @@
-import Realm from 'realm';
 import Db from 'db/Db';
 
 export default class DbRecords extends Db{
@@ -15,14 +14,15 @@ export default class DbRecords extends Db{
             global.realm.write(() => {
                 global.realm.create('Record', {
                     id:id, 
-                    datecreated: datecreated,
+                    taskId: record.taskId,
+                    datestart: record.datestart,
+                    dateend: record.dateend,
                     inputs: record.inputs || [],
                     task: record.task || null
                 });
             });
         } catch (e) {
-            console.log("Error on creation");
-            console.log(e);
+            console.error(e);
         }
     }
 
@@ -30,21 +30,55 @@ export default class DbRecords extends Db{
         return global.realm.objects('Record').length > 0;
     }
 
-    GetRecordsList(options){
+    GetList(options){
         if(!options){
-            options = {sorted:'name', descending:false}
+            var dateend = new Date();
+            var datestart = new Date(dateend.getDate());
+            datestart.setDate(datestart.getDate() - 14);
+            options = {
+                sorted:'datestart', 
+                descending:true,
+                startDate: datestart, //past 14 days of records
+                endDate: dateend
+            }
+        }
+        if(!options.sorted){
+            options.sorted = 'datestart';
+            options.descending = true;
         }
         
-        var tasks = global.realm.objects('Record').sorted('id', true)
+        var records = global.realm.objects('Record')
+            .filtered('datestart >= $0 AND dateend <= $1', options.startDate, options.endDate);
+
         if(options.sorted){
-            tasks.sorted(options.sorted, options.descending ? options.descending : false)
+            records.sorted(options.sorted, options.descending ? true : false)
+        }
+
+        return records;
+    }
+
+    GetListByTask(options){
+        var records = this.GetList(options);
+        var tasks = [];
+        for(var x = 0; x < records.length; x++){
+            var rec = records[x];
+            var index = tasks.map(a => a.id).indexOf(rec.taskId);
+            if(index < 0){
+                tasks.push({
+                    name:rec.task.name,
+                    id:rec.taskId,
+                    records: []
+                });
+            }
+            var task = tasks[tasks.map(a => a.id).indexOf(rec.taskId)];
+            task.records.push(rec);
         }
         return tasks;
     }
 
     TotalRecords(filtered){
-        var tasks = global.realm.objects('Record');
-        if(filtered){tasks.filtered(filtered);}
-        return tasks.length;
+        var records = global.realm.objects('Record');
+        if(filtered){records.filtered(filtered);}
+        return records.length;
     }
 }

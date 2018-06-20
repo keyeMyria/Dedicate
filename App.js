@@ -1,5 +1,5 @@
 // import navigation system
-import { DrawerNavigator } from 'react-navigation';
+import { createDrawerNavigator } from 'react-navigation';
 import DrawerContent from 'ui/DrawerContent';
 
 // import all screens contained within the application
@@ -11,7 +11,7 @@ import Schema from 'db/Schema';
 Schema();
 
 // set up navigation
-const Navigation = DrawerNavigator(
+export default createDrawerNavigator(
     {
         Overview: { screen: OverviewScreen, path: '' },
         ...Screens
@@ -22,5 +22,3 @@ const Navigation = DrawerNavigator(
         contentComponent: DrawerContent
     }
 );
-
-export default Navigation;
