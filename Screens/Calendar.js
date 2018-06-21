@@ -26,7 +26,7 @@ export default class CalendarScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} title="Calendar">
+            <Body {...this.props} title="Calendar" screen="Calendar">
                 <View>
                     
                 </View>

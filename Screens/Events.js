@@ -2,20 +2,20 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableHighlight, BackHandler } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
-import DbTasks from 'db/DbTasks';
+import DbRecords from 'db/DbRecords';
 
-export default class TasksScreen extends React.Component {
+export default class EventsScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            tasks: this.dbTasks.GetList()
+            events: this.dbRecords.GetList({length:25})
         };
 
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
     }
-
-    dbTasks = new DbTasks()
+    
+    dbRecords = new DbRecords();
     
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
@@ -31,19 +31,19 @@ export default class TasksScreen extends React.Component {
     }
 
     render() {
-        var tasklist = this.state.tasks.map((task) => {
+        var eventlist = this.state.events.map((event) => {
             return (
-                <TouchableHighlight key={task.id} underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.props.navigation.navigate('Task', {taskId:task.id})}}>
-                    <View style={styles.taskItemContainer}>
-                        <Text style={styles.taskName}>{task.name}</Text>
+                <TouchableHighlight key={event.id} underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.props.navigation.navigate('Event', {eventId:event.id})}}>
+                    <View style={styles.eventItemContainer}>
+                        <Text style={styles.eventName}>{event.task.name}</Text>
                     </View>
                 </TouchableHighlight>
             );
         });
         return (
-            <Body {...this.props} style={styles.body} title="Tasks" screen="Tasks" buttonAdd={true} buttonRecord={true}>
+            <Body {...this.props} style={styles.body} title="Events" screen="Events" buttonAdd={true} buttonRecord={true}>
                 <ScrollView>
-                    {tasklist}
+                    {eventlist}
                 </ScrollView>
             </Body>
         );
@@ -52,7 +52,7 @@ export default class TasksScreen extends React.Component {
 
 const styles = StyleSheet.create({
     body:{position:'absolute', top:0, bottom:0, left:0, right:0},
-    taskListContainer:{top:0, bottom:0, left:0, right:0},
-    taskItemContainer:{paddingHorizontal:30, paddingVertical:15, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
-    taskName:{fontSize:20},
+    eventListContainer:{top:0, bottom:0, left:0, right:0},
+    eventItemContainer:{paddingHorizontal:30, paddingVertical:15, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
+    eventName:{fontSize:20},
 });

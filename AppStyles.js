@@ -18,6 +18,10 @@ export default AppStyles = {
     buttonOutlineTextColor: '#6666cc',
     buttonOutlinePressedColor: '#5555bb',
     buttonOutlinePressedTextColor: '#5555bb',
+    buttonLightColor: '#999',
+    
+    // list item styling /////////////////////
+    listItemPressedColor: '#d1d1f0',
 
     // font styling //////////////////////////
     titleFontSize: 24,

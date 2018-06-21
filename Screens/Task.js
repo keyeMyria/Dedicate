@@ -89,7 +89,8 @@ export default class TaskScreen extends React.Component {
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate("Tasks");
+        var goback = this.props.navigation.getParam('goback', 'Tasks');
+        this.props.navigation.navigate(goback);
         return true;
     }
 
@@ -193,7 +194,7 @@ export default class TaskScreen extends React.Component {
         global.Modal.show();
     }
 
-    onNewCategoryTitleChangeText = text => {
+    onNewCategoryTitleChangeText = (text) => {
         var newcat = this.state.newcat;
         newcat.name = text;
         this.setState({newcat:newcat});
@@ -465,7 +466,7 @@ export default class TaskScreen extends React.Component {
             labelKeyType = 'next';
         }
         return (
-                <Body {...this.props} title={this.state.title} onLayout={this.onLayoutChange} 
+                <Body {...this.props} title={this.state.title} screen="Task" onLayout={this.onLayoutChange} 
                     titleBarButtons={this.TitleBarButtons.call(that)} onScroll={this.onScrollView}
                 >
                     <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={-500}>

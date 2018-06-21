@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import IconPickerArrow from 'icons/IconPickerArrow';
 
 export default class Picker extends React.Component {
@@ -26,7 +26,9 @@ export default class Picker extends React.Component {
 
     selectItem(index){
         global.Modal.hide();
-        this.props.onValueChange(this.state.items[index].key, index, this.state.items[index].label);
+        if(this.props.onValueChange){
+            this.props.onValueChange(this.state.items[index].key, index, this.state.items[index].label);
+        }
         this.setState({selectedIndex:index});
     }
 

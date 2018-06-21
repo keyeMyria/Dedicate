@@ -5,6 +5,8 @@ import AnalyticsScreen from 'screens/Analytics';
 import SettingsScreen from 'screens/Settings';
 import TaskScreen from 'screens/Task';
 import RecordScreen from 'screens/Record';
+import EventsScreen from 'screens/Events';
+import DatabaseScreen from 'screens/Database';
 
 const Screens = {
     Tasks: { screen: TasksScreen},
@@ -12,7 +14,9 @@ const Screens = {
     Analytics: { screen: AnalyticsScreen },
     Settings: { screen: SettingsScreen },
     Task: { screen: TaskScreen },
-    Record: { screen: RecordScreen }
+    Record: { screen: RecordScreen },
+    Events: { screen: EventsScreen },
+    Databases: { screen: DatabaseScreen }
 }
 
 export default Screens;

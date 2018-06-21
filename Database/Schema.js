@@ -1,13 +1,20 @@
 import Realm from 'realm'
 
- export default function Schema() {
+ export default function Schema(name = "default") {
+    var path = Realm.defaultPath;
+    path = path.substring(0, path.lastIndexOf('/') + 1) + name + '.realm';
     global.realm = new Realm({
+        path: path,
         schema: [Task, Input, Category, Record, RecordInput],
         schemaVersion: 6, //update version when schema changes dramatically
         migration: function(oldRealm, newRealm) {
             newRealm.deleteAll();
         }
     });
+    global.database = {
+        name: name,
+        path: path
+    };
  }
 
  ///////////////////////////////////////////////////////////////////////////

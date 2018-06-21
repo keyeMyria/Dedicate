@@ -25,7 +25,7 @@ export default class CategoriesScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} title="Categories">
+            <Body {...this.props} title="Categories" screen="Settings">
                 <View style={styles.container}>
                     <Text>Categories used to organize Tasks</Text>
                 </View>

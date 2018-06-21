@@ -43,6 +43,14 @@ export default class DateTimePicker extends React.Component {
         this.refs['datepicker'].onPressDate();
     }
 
+    componentWillReceiveProps = (props) => {
+        if(this.state.date != props.date){
+            this.setState({
+                date:props.date,
+                datestring:this.getDateString(props.date)
+            });
+        }
+    }
 
     render(){
         return (

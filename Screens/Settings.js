@@ -27,7 +27,7 @@ class DefaultScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} title="Settings">
+            <Body {...this.props} title="Settings" screen="Settings">
                 <View>
                     <TouchableOpacity onPress={()=> this.props.navigation.navigate('Categories')}>
                         <View style={styles.listItem}>

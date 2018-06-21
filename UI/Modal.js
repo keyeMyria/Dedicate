@@ -12,9 +12,10 @@ export default class Modal extends React.Component {
             styles:{
                 darkBackgroundContainer:{height:0},
                 darkBackground:{height:0},
-                modalContainer:{top:30, left:50}
+                modalContainer:{top:30, left:50, opacity:0}
             },
             visible:false,
+            opacity:{opacity:0},
             content: <View></View>
         }
         global.Modal = this;
@@ -31,11 +32,13 @@ export default class Modal extends React.Component {
         styles.darkBackgroundContainer = {height:win.height};
         styles.darkBackground = {height:win.height};
         styles.modalContainer = {
-            top:(win.height - modalContainer.height) / 2, 
-            left:(win.width - modalContainer.width) / 2,
+            top:Math.round((win.height - modalContainer.height) / 2), 
+            left:Math.round((win.width - modalContainer.width) / 2),
             maxHeight:win.height - 60,
-            maxWidth:win.width - 60
+            maxWidth:win.width - 60,
+            opacity:1
         };
+
         this.setState({styles:styles});
     }
 
@@ -60,7 +63,7 @@ export default class Modal extends React.Component {
     render(){
         if(this.state.visible === true){
             return (
-                <View style={styles.container}>
+                <View style={[styles.container]}>
                     <View style={[styles.modalContainer, this.state.styles.modalContainer]}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>{this.state.title}</Text>

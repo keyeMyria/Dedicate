@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, BackHandler } from 'react-native';
 import Body from 'ui/Body';
 
 
@@ -25,7 +25,7 @@ export default class AnalyticsScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} title="Analytics">
+            <Body {...this.props} title="Analytics" screen="Analytics">
                 <View>
                     
                 </View>

@@ -18,6 +18,7 @@ export default class DrawerContent extends React.Component{
         <DrawerItem {...this.props} text="Calendar" icon={IconOverview} />
         <DrawerItem {...this.props} text="Analytics" icon={IconOverview} />
         <DrawerItem {...this.props} text="Settings" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Databases" icon={IconOverview} />
       </View>
     );
   }
@@ -28,7 +29,7 @@ const DrawerItem = props => {
   var selectedStyle = {};
   if(props.activeItemKey == props.text){ selectedStyle = styles.drawerItemSelected; }
   return (
-    <TouchableHighlight onPress={() => props.navigation.navigate(props.text)}>
+    <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} onPress={() => props.navigation.navigate(props.text)}>
     <View style={[styles.drawerItem, selectedStyle]}>
       <View style={styles.column}>
         <Icon width="25" height="25" style={styles.drawerItemIcon} />

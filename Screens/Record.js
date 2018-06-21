@@ -38,7 +38,7 @@ class DefaultScreen extends React.Component {
 
         //load a list of tasks
         var dbTasks = new DbTasks();
-        this.state.tasks = dbTasks.GetTasksList({filtered:['category=$0 || category.id<=0',null]});
+        this.state.tasks = dbTasks.GetList({filtered:['category=$0 || category.id<=0',null]});
 
         //load a list of categories
         var dbCategories = new DbCategories();
@@ -57,8 +57,8 @@ class DefaultScreen extends React.Component {
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate('Overview');
-        //this.props.navigation.dispatch({ type: 'Navigation/BACK' });
+        var goback = this.props.navigation.getParam('goback', 'Overview');
+        this.props.navigation.navigate(goback);
         return true;
     }
 
@@ -66,7 +66,7 @@ class DefaultScreen extends React.Component {
         var dbTasks = new DbTasks();
         this.setState({selectedCategory:{
             id:id,
-            tasks: dbTasks.GetTasksList({filtered:['category.id=$0', id]})
+            tasks: dbTasks.GetList({filtered:['category.id=$0', id]})
         }});
     }
     
@@ -74,7 +74,7 @@ class DefaultScreen extends React.Component {
         var that = this;
         // Show List of Tasks to Choose From /////////////////////////////////////////////////////////////////////////////////////
         return (
-            <Body {...this.props} style={styles.body} title="Record Event">
+            <Body {...this.props} style={styles.body} title="Record Event" screen="Record">
                 <View style={styles.listContainer}>
                     <Text style={styles.tasksTitle}>Select a task to record your event with.</Text>
                     {this.state.categories.map((cat) => {
@@ -147,7 +147,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                 inputs:[]
             },
             stopWatch:{show:false, datestart:null, dateend:null},
-            layoutChange:false
+            layoutChange:false,
+            changedDateEnd: false
         }
         if(this.state.task.id){
             //select task exists
@@ -157,11 +158,21 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             if(this.state.task.inputs.length > 0){
                 for(var x = 0, task; x < this.state.task.inputs.length; x++){
                     var input = this.state.task.inputs[x];
+                    
+                    //set default value for input
+                    var number = null;
+                    var text = null;
+                    var date = null;
+
+                    if(input.type == 6){
+                        number = 0;
+                    }
+
                     this.state.record.inputs[x] = {
                         type: input.type,
-                        number:null,
-                        text:null,
-                        date:null,
+                        number:number,
+                        text:text,
+                        date:date,
                         input:input,
                         inputId: input.id,
                         taskId: this.state.task.id
@@ -188,8 +199,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     hardwareBackPress() {
-        //this.props.navigation.navigate('Overview');
-        this.props.navigation.dispatch({ type: 'Navigation/BACK' });
+        this.props.navigation.navigate('Record');
         return true;
     }
 
@@ -243,10 +253,9 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     // Input Field Events
-    onChangeText = (index, type, value, target) => {
+    onChangeText = (index, type, value) => {
         var record = this.state.record;
         var i = index - 1;
-        console.debug(i);
         switch(this.getInputDataType(type)){
             case  1: // Number data type
                 var number = typeof value == 'number' ? value : (
@@ -263,9 +272,15 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                 record.inputs[i].date = Date.parse(value);
                 break;
         }
-        console.debug(record);
         this.setState({record:record});
         this.validateForm();
+    }
+
+    onDateChange = (ref, id, date) => {
+        var record = this.state.record;
+        if(record.inputs == null){record.inputs = [];}
+        record.inputs[id].date = date;
+        this.setState(record);
     }
 
     onSubmitEditing = (keyType, index) => {
@@ -289,23 +304,20 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
 
     //Start & End Dates /////////////////////////////////////////
 
-    onDateChange = (ref, id, date) => {
-        var record = this.state.record;
-        if(record.inputs == null){record.inputs = [];}
-        record.inputs[id].date = date;
-        this.setState(record);
-    }
-
     onRecordedDateStartChange = (date) => {
         var record = this.state.record;
         record.datestart = date;
-        this.setState({record:record})
+        if(this.state.changedDateEnd == false){
+            //also change end date + 10 minutes
+            record.dateend = new Date(date);
+        }
+        this.setState({record:record});
     }
 
     onRecordedDateEndChange = (date) => {
         var record = this.state.record;
         record.dateend = date;
-        this.setState({record:record})
+        this.setState({record:record, changedDateEnd:true})
     }
 
     onPressButtonStopWatch = () => {
@@ -445,7 +457,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text, this)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
                                         />
                                     </View>
                                 )
@@ -461,7 +473,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, ref, keyType.toString(), e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text, this)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
                                         />
                                     </View>
                                 )
@@ -533,7 +545,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text, this)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
                                         />
                                     </View>
                                 )
@@ -548,6 +560,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                                 {key:0, label:'No'},
                                                 {key:1, label:'Yes'}
                                             ]}
+                                            onValueChange={(key, index, label) => {that.onChangeText.call(that, e, input.type, key)}}
                                         />
                                     </View>
                                 )
@@ -586,7 +599,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text, this)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
                                         />
                                     </View>
                                 )
@@ -606,7 +619,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text, this)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
                                         />
                                     </View>
                                 )

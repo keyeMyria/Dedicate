@@ -65,7 +65,8 @@ export default class OverviewScreen extends React.Component {
     getCharts = () => {
         var items = [];
         var {height, width} = Dimensions.get('window');
-        for(var x = 0; x < this.state.charts.length; x++){
+        var maxCharts = 6;
+        for(var x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
             var chart = this.state.charts[x];
             if(chart.name != ''){
                 items.push(this.chartItem(chart, width));
@@ -120,7 +121,11 @@ export default class OverviewScreen extends React.Component {
                 }
             }else if(input.type == 6 && hasdots == false){ //yes/no
                 hasdots = true;
-                dots = this.chartDots(chart, x);
+                dots = (
+                    <Svg width={cwidth} height={height + 20}>
+                        {this.chartDots(chart, x, days, cwidth, height)}
+                    </Svg>
+                );
             }
         }
 
@@ -157,7 +162,6 @@ export default class OverviewScreen extends React.Component {
 
         //get totals for each day
         for(var x = 0; x < days; x++){
-            //7 days for portait, 14 days for landscape
             var count = 0;
             var date = new Date();
             date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
@@ -200,15 +204,41 @@ export default class OverviewScreen extends React.Component {
         );
     }
 
-    chartDots = (chart, index) => {
-
+    chartDots = (chart, index, days, width, height) => {
+        var dots = [];
+        var log = [chart.name];
+        for(var x = 0; x < days; x++){
+            var date = new Date();
+            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
+            for(var y = 0; y < chart.records.length; y++){
+                var rec = chart.records[y];
+                if(DatesMatch(date, new Date(rec.datestart))){
+                    log.push('match! ' + date.getDate() + ' = ' + rec.inputs[index].number);
+                    if(rec.inputs.length > index){
+                        if(rec.inputs[index].number != null){
+                            if(rec.inputs[index].number == 1){
+                                dots.push(
+                                    <Circle key={'dot' + x}
+                                        cx={Math.round((width / days) * (x))}
+                                        cy={height + 5}
+                                        r={5}
+                                        fill={AppStyles.chartDotFill}
+                                    ></Circle>
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return dots;
     }
 
     render() {
         var that = this;
         if(this.state.hasTask === true){
             return (
-                <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true}>
+                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true}>
                     <View style={styles.counters}>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
                             <View style={styles.counterContainer}>
@@ -216,20 +246,26 @@ export default class OverviewScreen extends React.Component {
                                 <Text style={styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
                             </View>
                         </TouchableBox>
-                        <TouchableBox onPress={() => this.props.navigation.navigate('Records')}>
+                        <TouchableBox onPress={() => this.props.navigation.navigate('Events')}>
                         <View style={styles.counterContainer}>
                             <Text style={styles.counter}>{this.state.totalRecords}</Text>
                             <Text style={styles.counterLabel}>{this.state.totalRecords != 1 ? 'Events' : 'Event'}</Text>
                         </View>
                         </TouchableBox>
+                        <TouchableBox onPress={() => this.props.navigation.navigate('Databases')}>
+                        <View style={styles.counterContainerRight}>
+                            <Text style={styles.counterName}>{global.database.name}</Text>
+                            <Text style={styles.counterLabel}>Database</Text>
+                        </View>
+                        </TouchableBox>
                     </View>
-                    {this.getCharts.call(that)}
+                    <View style={styles.chartsContainer}>{this.getCharts.call(that)}</View>
                 </Body>
             );
         }else{
             // Show Message instead of Overview of tasks
             return (
-                <Body {...this.props} title="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true}
+                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true}
                     footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
                 >
                     <View style={[styles.container]}>
@@ -262,9 +298,12 @@ const styles = StyleSheet.create({
     
     counters:{flexDirection:'row', padding: 15, width:'100%' },
     counterContainer:{alignSelf:'flex-start', paddingHorizontal:20},
+    counterContainerRight:{alignSelf:'flex-end', paddingHorizontal:20, paddingTop:13},
     counter:{fontSize:30, color:AppStyles.numberColor},
+    counterName:{fontSize:20, color:AppStyles.numberColor},
     counterLabel:{fontSize:17},
 
+    chartsContainer:{paddingBottom:60},
     chartContainer: {paddingLeft:30, paddingRight:30, paddingBottom:20, paddingTop:5, width:'100%'},
     chartArea:{height:120},
     chart:{height:60, top:15},

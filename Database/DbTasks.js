@@ -51,7 +51,7 @@ export default class DbTasks extends Db{
         return global.realm.objects('Task').length > 0;
     }
 
-    GetTasksList(options){
+    GetList(options){
         if(!options){
             options = {sorted:'name', descending:false, filtered:null}
         }
