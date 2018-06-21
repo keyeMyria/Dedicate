@@ -199,7 +199,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate('Record');
+        this.props.navigation.navigate('RecordDefault');
         return true;
     }
 
@@ -344,8 +344,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         //save to database
         var db = new DbRecords();
         db.CreateRecord(this.state.record);
-        this.props.navigation.navigate('RecordDefault');
-        setTimeout(() => {this.props.navigation.navigate('Overview');}, 100);
+        //this.props.navigation.navigate('RecordDefault');
+        this.props.navigation.navigate('Overview');
     }
 
     // TitleBar Button ////////////////////////////////////////////////////////////////////////////////////////

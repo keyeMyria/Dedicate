@@ -131,7 +131,7 @@ export default class DatabaseScreen extends React.Component {
             'Do you really want to permanently delete the database "' + name + '"?. This cannot be undone!',
             [
               {text: 'Cancel', onPress: () => {}, style: 'cancel'},
-              {text: 'Delete!', onPress: () => {
+              {text: 'Delete', onPress: () => {
                   if(global.database.name == name){
                       Alert.alert('Delete Database', 'Cannot delete currently loaded database. Switch to another database before deleting this one.');
                   }else{
@@ -222,7 +222,7 @@ export default class DatabaseScreen extends React.Component {
                 );
             });
         }else{
-            filelist = (<View><Text>Could not find any databases!</Text></View>);
+            filelist = (<View></View>);
         }
         
         return (

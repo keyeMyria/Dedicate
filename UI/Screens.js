@@ -6,7 +6,7 @@ import SettingsScreen from 'screens/Settings';
 import TaskScreen from 'screens/Task';
 import RecordScreen from 'screens/Record';
 import EventsScreen from 'screens/Events';
-import DatabaseScreen from 'screens/Database';
+import DatabaseScreen from 'screens/Databases';
 
 const Screens = {
     Tasks: { screen: TasksScreen},

@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, Image, 
-    StyleSheet, Dimensions, BackHandler } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, ScrollView, BackHandler } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import TouchableBox from 'ui/Touchable/Box';
@@ -8,6 +7,7 @@ import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
 import {Svg, Polyline, Circle} from 'react-native-svg';
 import DatesMatch from 'utility/DatesMatch';
+import Files from 'react-native-fs';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -238,7 +238,9 @@ export default class OverviewScreen extends React.Component {
         var that = this;
         if(this.state.hasTask === true){
             return (
-                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true}>
+                <Body {...this.props} title="Overview" screen="Overview" noscroll="true" style={styles.body}
+                    onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true} bottomFade={true}
+                    >
                     <View style={styles.counters}>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
                             <View style={styles.counterContainer}>
@@ -259,7 +261,9 @@ export default class OverviewScreen extends React.Component {
                         </View>
                         </TouchableBox>
                     </View>
-                    <View style={styles.chartsContainer}>{this.getCharts.call(that)}</View>
+                    <ScrollView keyboardShouldPersistTaps="handled">
+                        <View style={styles.chartsContainer}>{this.getCharts.call(that)}</View>
+                    </ScrollView>
                 </Body>
             );
         }else{
@@ -303,7 +307,7 @@ const styles = StyleSheet.create({
     counterName:{fontSize:20, color:AppStyles.numberColor},
     counterLabel:{fontSize:17},
 
-    chartsContainer:{paddingBottom:60},
+    chartsContainer:{paddingBottom:70},
     chartContainer: {paddingLeft:30, paddingRight:30, paddingBottom:20, paddingTop:5, width:'100%'},
     chartArea:{height:120},
     chart:{height:60, top:15},

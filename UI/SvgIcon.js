@@ -7,6 +7,10 @@ export default function SvgIcon(props) {
     if(props.height){height = props.height;}
 
     switch(props.size){
+        case 'large':
+            width = 64; height = 64;
+            break;
+            
         case 'small':
             width = 36; height = 36;
             break;
