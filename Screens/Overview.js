@@ -5,9 +5,8 @@ import Body from 'ui/Body';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
-import {Svg, Polyline, Circle} from 'react-native-svg';
+import {Svg, Line, Polyline, Circle} from 'react-native-svg';
 import DatesMatch from 'utility/DatesMatch';
-import Files from 'react-native-fs';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -15,7 +14,10 @@ export default class OverviewScreen extends React.Component {
 
         this.state = {
             styles: stylesLandscape,
-            ...this.dbState()
+            ...this.dbState(),
+            rendered:{
+                charts:null
+            }
         };
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -23,6 +25,8 @@ export default class OverviewScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        //render charts
+        this.getCharts();
     }
 
     componentWillUnmount(){
@@ -63,19 +67,26 @@ export default class OverviewScreen extends React.Component {
     }
 
     getCharts = () => {
-        var items = [];
-        var {height, width} = Dimensions.get('window');
-        var maxCharts = 6;
-        for(var x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
-            var chart = this.state.charts[x];
-            if(chart.name != ''){
-                items.push(this.chartItem(chart, width));
+        if(this.state.rendered.charts == null){
+            var items = [];
+            var {height, width} = Dimensions.get('window');
+            var maxCharts = 6;
+            for(var x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
+                var chart = this.state.charts[x];
+                if(chart.name != ''){
+                    items.push(this.chartItem(chart, width));
+                }
+                if(x < this.state.charts.length - 1){
+                    items.push(<View key={'sep' + x} style={styles.separator}></View>);
+                }
             }
-            if(x < this.state.charts.length - 1){
-                items.push(<View key={'sep' + x} style={styles.separator}></View>);
-            }
+            var rendered = this.state.rendered;
+            rendered.charts = items;
+            this.setState({rendered:rendered});
+            return items;
+        }else{
+            return this.state.rendered.charts;
         }
-        return items;
     }
 
     //render 14 day chart
@@ -83,10 +94,13 @@ export default class OverviewScreen extends React.Component {
         var line1 = (<View></View>);
         var line1Min = "";
         var line1Max = "";
+        var line1Legend = (<View></View>);
         var line2 = (<View></View>);
         var line2Min = "";
         var line2Max = "";
+        var line2Legend = (<View></View>);
         var dots = (<View></View>);
+        var dotsLegend = (<View></View>);
 
         //get lines and dots for chart
         var curr = 1;
@@ -94,8 +108,7 @@ export default class OverviewScreen extends React.Component {
         var cwidth = width - 40;
         var height = 60;
         var days = 14;
-        var record = chart.records[chart.records.length - 1];
-
+        var record = chart.records[0];
         for(var x = 0; x < record.inputs.length; x++){
             var input = record.inputs[x];
             if(input.type === 0){ //number
@@ -106,6 +119,18 @@ export default class OverviewScreen extends React.Component {
                             {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine1Stroke)}
                         </Svg>
                     );
+                    line1Legend = (
+                        <View style={styles.legendItem}>
+                            <View style={styles.legendItemIcon}>
+                                <Svg width="20" height="10">
+                                    <Line x1="0" x2="20" y1="4" y2="4" strokeWidth="5" stroke={AppStyles.chartLine1Stroke}></Line>
+                                </Svg>
+                            </View>
+                            <View style={styles.legendItemLabel}>
+                                <Text style={styles.legendItemText}>{input.input.name}</Text>
+                            </View>
+                        </View>
+                    );
                     line1Min = info.min;
                     line1Max = info.max;
                     curr++;
@@ -114,6 +139,18 @@ export default class OverviewScreen extends React.Component {
                         <Svg width={cwidth} height={height + 20}>
                             {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine2Stroke)}
                         </Svg>
+                    );
+                    line2Legend = (
+                        <View style={styles.legendItem}>
+                            <View style={styles.legendItemIcon}>
+                                <Svg width="20" height="10">
+                                    <Line x1="0" x2="20" y1="4" y2="4" strokeWidth="5" stroke={AppStyles.chartLine2Stroke}></Line>
+                                </Svg>
+                            </View>
+                            <View style={styles.legendItemLabel}>
+                                <Text style={styles.legendItemText}>{input.input.name}</Text>
+                            </View>
+                        </View>
                     );
                     line2Min = info.min;
                     line2Max = info.max;
@@ -126,32 +163,56 @@ export default class OverviewScreen extends React.Component {
                         {this.chartDots(chart, x, days, cwidth, height)}
                     </Svg>
                 );
+                dotsLegend = (
+                    <View style={styles.legendItem}>
+                        <View style={styles.legendItemIcon}>
+                            <Svg width="20" height="10">
+                                <Circle cx={10} cy={5} r={5} fill={AppStyles.chartDotFill}></Circle>
+                            </Svg>
+                        </View>
+                        <View style={styles.legendItemLabel}>
+                            <Text style={styles.legendItemText}>{input.input.name}</Text>
+                        </View>
+                    </View>
+                );
             }
         }
 
         return (
-            <View key={chart.id} style={styles.chartContainer}>
-                <View style={styles.chartArea}>
-                    <View style={styles.chartLine1MinMax}>
-                        <Text style={styles.chartLabel}>{line1Max}</Text>
-                        <Text style={[styles.chartLabel, styles.chartLine1Min]}>{line1Min}</Text>
+            <ScrollView key={chart.id} horizontal={true} pagingEnabled={true} showsHorizontalScrollIndicator={false}>
+                <View style={[styles.chartContainer, {width:width}]}>
+                    <View style={styles.chartArea}>
+                        <View style={styles.chartLine1MinMax}>
+                            <Text style={styles.chartLabel}>{line1Max}</Text>
+                            <Text style={[styles.chartLabel, styles.chartLine1Min]}>{line1Min}</Text>
+                        </View>
+                        <View style={styles.chartLine2MinMax}>
+                            <Text style={styles.chartLabel}>{line2Max}</Text>
+                            <Text style={[styles.chartLabel, styles.chartLine2Min]}>{line2Min}</Text>
+                        </View>
+                        <View style={[styles.chartLine2, styles.chart]}>
+                            {line2}
+                        </View>
+                        <View style={[styles.chartLine1, styles.chart]}>
+                            {line1}
+                        </View>
+                        <View style={[styles.chartDots, styles.chart]}>
+                            {dots}
+                        </View>
+                        <Text style={styles.chartName}>{chart.name}</Text>
                     </View>
-                    <View style={styles.chartLine2MinMax}>
-                        <Text style={styles.chartLabel}>{line2Max}</Text>
-                        <Text style={[styles.chartLabel, styles.chartLine2Min]}>{line2Min}</Text>
-                    </View>
-                    <View style={[styles.chartLine2, styles.chart]}>
-                        {line2}
-                    </View>
-                    <View style={[styles.chartLine1, styles.chart]}>
-                        {line1}
-                    </View>
-                    <View style={[styles.chartDots, styles.chart]}>
-                        {dots}
-                    </View>
-                    <Text style={styles.chartName}>{chart.name}</Text>
                 </View>
-            </View>
+                <View style={[styles.legendContainer, {width:width}]}>
+                    <View style={styles.legendLines}>
+                        {line1Legend}
+                        {line2Legend}
+                    </View>
+                    <View style={styles.legendDot}>
+                        {dotsLegend}
+                    </View>
+                    <Text style={styles.legendName}>{chart.name}</Text>
+                </View>
+            </ScrollView>
         );
     }
 
@@ -213,7 +274,6 @@ export default class OverviewScreen extends React.Component {
             for(var y = 0; y < chart.records.length; y++){
                 var rec = chart.records[y];
                 if(DatesMatch(date, new Date(rec.datestart))){
-                    log.push('match! ' + date.getDate() + ' = ' + rec.inputs[index].number);
                     if(rec.inputs.length > index){
                         if(rec.inputs[index].number != null){
                             if(rec.inputs[index].number == 1){
@@ -316,12 +376,22 @@ const styles = StyleSheet.create({
     chartLine1MinMax:{position:'absolute', height:'100%'},
     chartLine1Min:{position:'absolute', bottom:0},
     chartLine2:{position:'absolute', height:'100%'},
-    chartLine2MinMax:{position:'absolute', height:'100%', right:0},
+    chartLine2MinMax:{position:'absolute', height:'100%', right:0, alignItems:'flex-end'},
     chartLine2Min:{position:'absolute', bottom:0},
     chartLabel:{fontSize:20, opacity:0.5},
+    chartTextRight:{textAlign:'right'},
     chartDots:{position:'absolute'},
 
-    separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10}
+    separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10},
+
+    legendContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', padding:30, height:125},
+    legendLines:{alignSelf:'flex-start'},
+    legendDot:{alignSelf:'flex-end'},
+    legendItem:{flex:1, flexDirection:'row'},
+    legendItemIcon:{paddingRight:10, paddingTop:7, height:20},
+    legendItemLabel:{},
+    legendItemText:{fontSize:17},
+    legendName:{position:'absolute', width:'100%', bottom:0, paddingLeft:55, fontSize:20, textAlign:'center', alignSelf:'center'}
 });
 
 const stylesLandscape = StyleSheet.create({

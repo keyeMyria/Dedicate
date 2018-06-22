@@ -237,7 +237,6 @@ export default class TaskScreen extends React.Component {
     onScrollView = event => {
         var visibleHeight = this.state.visibleHeight;
         var offset = event ? event.nativeEvent.contentOffset.y : this.state.contentOffset;
-        var viewOffset = Dimensions.get('window').height - visibleHeight;
         var headerOffset = this.state.taskForm.height + 15;
         if(offset > 0 && offset > headerOffset){
             //lock button to top of screen
@@ -255,7 +254,7 @@ export default class TaskScreen extends React.Component {
         }
         var task = this.state.task;
         var max = inputs.map(function(attrs){return attrs.key;}).reduce(function (a, b) { return (b > a) ? b : a; }, 0);
-        task.inputs.push({name:'', type:0, key:max + 1, isnew:true});
+        task.inputs.push({name:'', type:0, key:max + 1, isnew:true, isnewkey:true});
         this.setState({
            task:task,
            ButtonAddShow:show //show Button
@@ -303,30 +302,8 @@ export default class TaskScreen extends React.Component {
 
     onPressButtonSave = event => {
         var dbTasks = new DbTasks();
-        var dbCats = new DbCategories();
         var task = Object.assign({},this.state.task);
-
-        for(var x = 0; x < task.inputs.length; x++){
-            delete task.inputs[x].key;
-        }
-
-        //update existing category
-        var exCat = this.state.existingTask.category;
-        if(exCat != null && exCat.id > 0){
-            global.realm.write(()=>{
-                var cat = dbCats.GetCategory(exCat.id)
-                var total = dbTasks.TotalTasks(['category.id=$0',exCat.id]) - 1;
-                if(total < 0){total = 0;}
-                cat.tasks = total
-            });
-        }
-        
-        task = dbTasks.CreateTask(task, true);
-        if(this.state.task.category.id > 0){
-            global.realm.write(()=>{
-                task.category.tasks = dbTasks.TotalTasks(['category.id=$0',this.state.task.category.id])
-            });
-        }
+        task = dbTasks.CreateTask(task);
         this.props.navigation.navigate('Tasks')
     }
 
@@ -564,6 +541,22 @@ class TaskInputField extends React.Component{
         if(this.props.task.inputs.length > this.props.index){
             labelKeyType = 'next';
         }
+        var typeLabel = '';
+        switch(this.props.input.type){
+            case 0: typeLabel = 'Number'; break;
+            case 1: typeLabel = 'Text'; break;
+            case 2: typeLabel = 'Date'; break;
+            case 3: typeLabel = 'Time'; break;
+            case 4: typeLabel = 'Date & Time'; break;
+            case 5: typeLabel = 'Stop Watch'; break;
+            case 6: typeLabel = 'Yes/No'; break;
+            case 7: typeLabel = '5 Stars'; break;
+            case 8: typeLabel = 'Location'; break;
+            case 9: typeLabel = 'URL Link'; break;
+            case 10: typeLabel = 'Photo'; break;
+            case 11: typeLabel = 'Video'; break;
+
+        }
         return (
             <View style={styles.containerInputField}>
                 <View style={[styles.inputFieldLabel, {width:this.props.width - 210}]}>
@@ -580,31 +573,35 @@ class TaskInputField extends React.Component{
                     />
                 </View>
                 <View style={styles.inputFieldType}>
-                    <Picker
-                        ref={'inputType'}
-                        style={styles.pickerStyle}
-                        itemStyle={styles.pickerItemStyle}
-                        selectedValue={this.props.input.type}
-                        onValueChange={this.props.onPickerValueChange}
-                        value={this.props.input.type}
-                        items={
-                            [
-                                {label:"Number", key:0},
-                                {label:"Text", key:1},
-                                {label:"Date", key:2},
-                                {label:"Time", key:3},
-                                {label:"Date & Time", key:4},
-                                {label:"Stop Watch", key:5},
-                                {label:"Yes/No", key:6},
-                                {label:"5 Stars", key:7},
-                                {label:"Location", key:8},
-                                {label:"URL Link", key:9},
-                                {label:"Photo", key:10},
-                                {label:"Video", key:11}
-                            ]
-                        }
-                        title="Select A Data Type"
-                    />
+                    {this.props.input.isnewkey == true ?
+                        <Picker
+                            ref={'inputType'}
+                            style={styles.pickerStyle}
+                            itemStyle={styles.pickerItemStyle}
+                            selectedValue={this.props.input.type}
+                            onValueChange={this.props.onPickerValueChange}
+                            value={this.props.input.type}
+                            items={
+                                [
+                                    {label:"Number", key:0},
+                                    {label:"Text", key:1},
+                                    {label:"Date", key:2},
+                                    {label:"Time", key:3},
+                                    {label:"Date & Time", key:4},
+                                    {label:"Stop Watch", key:5},
+                                    {label:"Yes/No", key:6},
+                                    {label:"5 Stars", key:7},
+                                    {label:"Location", key:8},
+                                    {label:"URL Link", key:9},
+                                    {label:"Photo", key:10},
+                                    {label:"Video", key:11}
+                                ]
+                            }
+                            title="Select A Data Type"
+                        />
+                    :
+                        <Text style={styles.typeLabel}>{typeLabel}</Text>
+                    }
                 </View>
                 <View style={styles.buttonRemoveContainer}>
                     <ButtonClose size="xxsmall" color={AppStyles.color} style={styles.buttonRemoveInput}
@@ -650,6 +647,7 @@ const styles = StyleSheet.create({
     pickerItemStyle:{fontSize:20},
     buttonRemoveContainer:{position:'absolute', right:12},
     buttonRemoveInput:{paddingVertical:15, paddingHorizontal:10},
+    typeLabel:{ fontSize:20, paddingTop:10, paddingLeft:10},
 
     //title bar buttons
     titleBarButtons:{flexDirection:'row'},

@@ -9,7 +9,7 @@ export default class ButtonClose extends React.Component {
     }
 
     render() {
-        var color = this.props.color || "#fff";
+        var color = this.props.color || "#cc0000";
         return (
             <View style={this.props.style}>
                 <TouchableOpacity onPress={this.props.onPress}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Header from 'ui/Header';
 import Modal from 'ui/Modal';
@@ -13,7 +13,8 @@ export default class Body extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            buttonType: this.props.buttonType ? this.props.buttonType : 'rec'
+            buttonType: this.props.buttonType ? this.props.buttonType : 'rec',
+            layout:0
         }
         if(this.props.buttonRecord == true){
             var dbTasks = new DbTasks();
@@ -21,8 +22,21 @@ export default class Body extends React.Component {
         }
     }
 
+    // Screen Orientation changes
+    onLayoutChange = event => {
+        var {height, width} = Dimensions.get('window');
+        if(width > height){
+            //landscape
+            this.setState({layout: 1});
+        }else{
+            //portrait
+            this.setState({layout: 2});
+        }
+    }
+
     render() {
         var that = this;
+        var {width} = Dimensions.get('window');
         return (
             <View style={[styles.container, this.props.style]} onLayout={this.props.onLayout}>
                 <Header {...this.props} />
@@ -34,15 +48,15 @@ export default class Body extends React.Component {
                 }
                 <View style={[styles.footerStyle, this.props.footerStyle || {}]}>
                     {this.props.bottomFade == true && 
-                        <View style={styles.bottomFade} pointerEvents="none">
-                            <Svg width="100%" height="110">
+                        <View style={[styles.bottomFade, {width:width}]} pointerEvents="none">
+                            <Svg width={width} height="110">
                                 <Defs>
                                     <LinearGradient id="fade" x1="0" y1="0" x2="0" y2="110">
                                         <Stop offset="0" stopColor={AppStyles.backgroundColor} stopOpacity="0" />
                                         <Stop offset="0.9" stopColor={AppStyles.backgroundColor} stopOpacity="1" />
                                     </LinearGradient>
                                 </Defs>
-                                <Rect x="0" y="0" width="100%" height="110" fill="url(#fade)" />
+                                <Rect x="0" y="0" width={width} height="110" fill="url(#fade)" />
                             </Svg>
                         </View>
                     }
@@ -81,7 +95,7 @@ const styles = StyleSheet.create({
     buttonRecord:{alignSelf:'flex-end', bottom:10, right:20, position:'absolute'},
     buttonAdd:{alignSelf:'flex-start', bottom:20, left:20, position:'absolute'},
     footerStyle:{position:'relative'},
-    footerMessageContainer:{position:'absolute', bottom:5, right:100, height:60, maxWidth:270},
-    footerMessage:{paddingLeft:30, textAlign:'right', fontSize:16},
-    bottomFade:{width:'100%', position:'absolute', left:0, bottom:0, height:110, right:0}
+    footerMessageContainer:{position:'absolute', bottom:5, left:60, height:60, maxWidth:270},
+    footerMessage:{paddingLeft:30, textAlign:'left', fontSize:16},
+    bottomFade:{position:'absolute', left:0, bottom:0, height:110}
 });

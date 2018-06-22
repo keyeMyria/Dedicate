@@ -2,13 +2,12 @@ import Db from 'db/Db';
 
 export default class DbRecords extends Db{
     CreateRecord(record){
-        try {
             //generate id for Record
-            var datecreated = new Date();
             var id = 1;
             if(global.realm.objects('Record').length > 0){
                 id = (global.realm.objects('Record').sorted('id', true).slice(0,1)[0].id) + 1;
             }
+            var time = (record.dateend - record.datestart) / 1000;
 
             //save record (with inputs) into the database
             global.realm.write(() => {
@@ -17,13 +16,12 @@ export default class DbRecords extends Db{
                     taskId: record.taskId,
                     datestart: record.datestart,
                     dateend: record.dateend,
+                    time: time,
+                    timer: record.timer,
                     inputs: record.inputs || [],
                     task: record.task || null
                 });
             });
-        } catch (e) {
-            console.error(e);
-        }
     }
 
     HasRecords(){
@@ -31,10 +29,10 @@ export default class DbRecords extends Db{
     }
 
     GetList(options){
+        var dateend = new Date();
+        var datestart = new Date(dateend.getDate());
+        datestart.setDate(datestart.getDate() - 14);
         if(!options){
-            var dateend = new Date();
-            var datestart = new Date(dateend.getDate());
-            datestart.setDate(datestart.getDate() - 14);
             options = {
                 sorted:'datestart', 
                 descending:true,
@@ -42,16 +40,20 @@ export default class DbRecords extends Db{
                 endDate: dateend
             }
         }
-        if(!options.sorted){
+        if(typeof options.sorted == 'undefined'){
             options.sorted = 'datestart';
             options.descending = true;
         }
+        if(typeof options.startDate == 'undefined' || typeof options.endDate == 'undefined'){
+            options.startDate = datestart;
+            options.endDate = dateend;
+        }
         
-        var records = global.realm.objects('Record')
-            .filtered('datestart >= $0 AND dateend <= $1', options.startDate, options.endDate);
+        var records = global.realm.objects('Record')   
+        .filtered('datestart >= $0 AND dateend <= $1', options.startDate, options.endDate);
 
         if(options.sorted){
-            records.sorted(options.sorted, options.descending ? true : false)
+            records = records.sorted(options.sorted, options.descending === true ? true : false)
         }
 
         return records;
@@ -78,7 +80,9 @@ export default class DbRecords extends Db{
 
     TotalRecords(filtered){
         var records = global.realm.objects('Record');
-        if(filtered){records.filtered(filtered);}
+        if(filtered){
+            records = records.filtered(filtered);
+        }
         return records.length;
     }
 }

@@ -1,14 +1,14 @@
 import Realm from 'realm'
 
- export default function Schema(name = "default") {
+ export default function Schema(name = "Default") {
     var path = Realm.defaultPath;
     path = path.substring(0, path.lastIndexOf('/') + 1) + name + '.realm';
     global.realm = new Realm({
         path: path,
         schema: [Task, Input, Category, Record, RecordInput],
-        schemaVersion: 6, //update version when schema changes dramatically
+        schemaVersion: 7, //update version when schema changes dramatically
         migration: function(oldRealm, newRealm) {
-            newRealm.deleteAll();
+            //newRealm.deleteAll();
         }
     });
     global.database = {
@@ -80,6 +80,8 @@ import Realm from 'realm'
         //recorded date & time range
         datestart: {type: 'date', indexed: true},
         dateend: {type: 'date'},
+        time: {type: 'int'}, //total time in seconds
+        timer: {type: 'bool'}, //determines if timer is currently running
         
         //list of inputs & their values
         inputs: {type: 'list', objectType: 'RecordInput'},

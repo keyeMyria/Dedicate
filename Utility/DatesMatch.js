@@ -1,4 +1,5 @@
 export default DatesMatch = function(date, compare){
-    return date.getFullYear() + '/' + date.getMonth() + '/' + date.getDate() == 
-    compare.getFullYear() + '/' + compare.getMonth() + '/' + compare.getDate();
+    var d1 = date.getDate() + '/' + date.getMonth() + '/' + date.getFullYear();
+    var d2 = compare.getDate() + '/' + compare.getMonth() + '/' + compare.getFullYear();
+    return d1 == d2;
 }

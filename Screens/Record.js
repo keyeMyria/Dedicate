@@ -9,6 +9,7 @@ import Picker from 'fields/Picker';
 import LocationPicker from 'fields/LocationPicker';
 import DateTimePicker from 'fields/DateTimePicker'
 import ButtonSave from 'buttons/ButtonSave';
+import ButtonClose from 'buttons/ButtonClose';
 import ButtonStopWatch from 'buttons/ButtonStopWatch';
 import DbTasks from 'db/DbTasks';
 import DbCategories from 'db/DbCategories';
@@ -144,7 +145,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             record:{
                 datestart: new Date(), 
                 dateend: new Date(), 
-                inputs:[]
+                inputs:[],
+                timer:false
             },
             stopWatch:{show:false, datestart:null, dateend:null},
             layoutChange:false,
@@ -338,6 +340,14 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         });
     }
 
+    hideStopWatch = () => {
+        var stopWatch = this.state.stopWatch;
+        stopWatch.show = false;
+        this.setState({
+            stopWatch:stopWatch
+        });
+    }
+
     // Save Event /////////////////////////////////////////////////////////////////////////////////////////////
 
     onPressButtonSave = () => {
@@ -377,7 +387,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                             <Text style={[styles.fieldTitle, {alignSelf:'flex-start'}]}>Recorded Date & Time</Text>
                             {this.state.stopWatch.show == false && 
                                 <View style={styles.buttonStopWatchContainer}>
-                                    <ButtonStopWatch size="xsmall" style={styles.buttonStopWatch} onPress={this.onPressButtonStopWatch}/>
+                                    <ButtonStopWatch size="small" style={styles.buttonStopWatch} onPress={this.onPressButtonStopWatch}/>
                                 </View>
                             }
                             
@@ -428,7 +438,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                         }
                         {this.state.stopWatch.show == true && // Show Stop Watch Instead /////////////////////////////////////////////////
                             <View style={styles.stopWatchContainer}>
-                                <StopWatch width={width - 120} height={width - 120}
+                                <ButtonClose style={styles.closeStopWatch} size="xxsmall" color={AppStyles.color} onPress={() => this.hideStopWatch.call(that)}></ButtonClose>
+                                <StopWatch width={(width > 500 ? 500 : width) - 120} height={(width > 500 ? 500 : width) - 120}
                                     onStop={this.onStopWatchStop}
                                  />
                             </View>
@@ -646,7 +657,7 @@ const styles = StyleSheet.create({
     container:{paddingVertical:30, paddingBottom:70},
     listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
     tasksTitle:{fontSize:17, color:AppStyles.textColor, paddingBottom:20, paddingHorizontal:30, paddingTop:30},
-    labelContainer:{paddingBottom:30, paddingHorizontal:30},
+    labelContainer:{paddingBottom:15, paddingHorizontal:30},
     labelText:{fontSize:30},
 
     //Categories & Tasks List
@@ -681,19 +692,20 @@ const styles = StyleSheet.create({
     recordTimeTitle:{flex:1, flexDirection:'row', width:'100%'},
 
     //Stop Watch Button
-    buttonStopWatchContainer:{position:'absolute', right:0},
+    buttonStopWatchContainer:{position:'absolute', right:0, top:-7},
     buttonStopWatch:{},
 
     //Record Task form
     recordTimeContainer:{paddingBottom:20, paddingHorizontal:30, width:'100%'},
-    recordTimeFlex:{flexDirection:'row'},
+    recordTimeFlex:{flexDirection:'row', paddingTop:10},
     recordTimeLabel:{alignSelf:'flex-start', width:35, paddingTop:17},
     recordTimePicker:{alignSelf:'flex-start', paddingLeft:10},
     recordTimeLength:{paddingTop:10},
     recordTimeField:{width:250, paddingTop:5},
 
     //Stop Watch UI
-    stopWatchContainer:{paddingTop:15, paddingHorizontal:30},
+    stopWatchContainer:{flex:1, flexDirection:'row', justifyContent:'center', paddingTop:15, paddingHorizontal:30},
+    closeStopWatch:{position:'absolute', right:8, top:-18},
 
     //title bar buttons
     titleBarButtons:{flexDirection:'row'},

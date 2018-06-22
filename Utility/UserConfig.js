@@ -10,7 +10,7 @@ function Path(){
 
 export async function getUserConfig(){
     var path = Path();
-    var data = await Files.readFile(path + '/user.json');
+    var data = await Files.readFile(path + '/user.json').catch((err) => {});
     if(typeof data != 'undefined' && data != null){
         global.config = JSON.parse(data);
     }else{
