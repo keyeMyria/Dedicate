@@ -23,7 +23,7 @@ export default LightPurple =
     buttonLightColor: '#999',
 
     // list item styling /////////////////////
-    listItemPressedColor: '#d1d1f0',
+    listItemPressedColor: '#f0f0ff',
 
     // font styling //////////////////////////
     titleFontSize: 24,

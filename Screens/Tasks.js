@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableHighlight, BackHandler } f
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbTasks from 'db/DbTasks';
+import IconTasks from 'icons/IconTasks';
 
 export default class TasksScreen extends React.Component {
     constructor(props) {
@@ -35,6 +36,7 @@ export default class TasksScreen extends React.Component {
             return (
                 <TouchableHighlight key={task.id} underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.props.navigation.navigate('Task', {taskId:task.id})}}>
                     <View style={styles.taskItemContainer}>
+                        <View style={styles.taskIcon}><IconTasks size="xsmall"></IconTasks></View>
                         <Text style={styles.taskName}>{task.name}</Text>
                     </View>
                 </TouchableHighlight>
@@ -53,6 +55,7 @@ export default class TasksScreen extends React.Component {
 const styles = StyleSheet.create({
     body:{position:'absolute', top:0, bottom:0, left:0, right:0},
     taskListContainer:{top:0, bottom:0, left:0, right:0},
-    taskItemContainer:{paddingHorizontal:30, paddingVertical:15, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
+    taskItemContainer:{flex:1, flexDirection:'row', padding:15, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
+    taskIcon:{paddingRight:10},
     taskName:{fontSize:20},
 });

@@ -16,6 +16,7 @@ import DbCategories from 'db/DbCategories';
 import DbRecords from 'db/DbRecords';
 import StopWatch from 'ui/StopWatch';
 import TimeLength from 'utility/TimeLength';
+import IconTasks from 'icons/IconTasks';
 
 class DefaultScreen extends React.Component {
     constructor(props) {
@@ -127,6 +128,7 @@ class DefaultScreen extends React.Component {
                 <View style={styles.taskContainer}>
                     {catId > 0 && <View style={styles.subTaskGutter}></View>}
                     <View style={catId > 0 ? styles.taskSubItem : styles.taskItem}>
+                        <View style={styles.taskIcon}><IconTasks size="xsmall"></IconTasks></View>
                         <Text style={styles.taskText}>{task.name}</Text>
                     </View>
                 </View>
@@ -381,11 +383,12 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             titleBarButtons={this.TitleBarButtons.call(that)}>
                 <View style={styles.taskInfo}>
                     <View style={styles.labelContainer}>
+                        <View style={styles.labelIcon}><IconTasks size="small"></IconTasks></View>
                         <Text style={styles.labelText}>{this.state.task.name}</Text>
                     </View>
                     <View style={styles.recordTimeContainer}>
                         <View style={styles.recordTimeTitle}>
-                            <Text style={[styles.fieldTitle, {alignSelf:'flex-start'}]}>Recorded Date & Time</Text>
+                            <Text style={[styles.fieldTitle, {alignSelf:'flex-start'}]}>Event Date & Time</Text>
                             {this.state.stopWatch.show == false && 
                                 <View style={styles.buttonStopWatchContainer}>
                                     <ButtonStopWatch size="small" style={styles.buttonStopWatch} onPress={this.onPressButtonStopWatch}/>
@@ -656,8 +659,9 @@ const styles = StyleSheet.create({
     body:{backgroundColor:AppStyles.altBackgroundColor},
     container:{paddingVertical:30, paddingBottom:70},
     listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
-    tasksTitle:{fontSize:17, color:AppStyles.textColor, paddingBottom:20, paddingHorizontal:30, paddingTop:30},
-    labelContainer:{paddingBottom:15, paddingHorizontal:30},
+    tasksTitle:{fontSize:17, color:AppStyles.textColor, paddingBottom:20, paddingHorizontal:15, paddingTop:30},
+    labelContainer:{paddingBottom:15, paddingHorizontal:15, flexDirection:'row'},
+    labelIcon:{paddingRight:10},
     labelText:{fontSize:30},
 
     //Categories & Tasks List
@@ -671,12 +675,13 @@ const styles = StyleSheet.create({
     taskContainer:{flexDirection:'row'},
     taskItem:{
         paddingVertical:15, paddingHorizontal:30, borderBottomWidth:1,
-        borderBottomColor:AppStyles.separatorColor
+        borderBottomColor:AppStyles.separatorColor, flexDirection:'row'
     },
     taskSubItem:{
         paddingVertical:15, paddingHorizontal:30, borderBottomWidth:1,
         borderBottomColor:AppStyles.separatorColor, flexDirection:'row'
     },
+    taskIcon:{paddingRight:10},
     taskText:{fontSize:20},
     subTaskGutter:{backgroundColor:AppStyles.altBackgroundColor, height:60, width:45},
 
@@ -684,7 +689,7 @@ const styles = StyleSheet.create({
     taskInfo:{backgroundColor:AppStyles.backgroundColor, paddingTop:20},
     inputsContainer:{backgroundColor:AppStyles.altBackgroundColor, paddingTop:20, paddingBottom:70},
     inputFieldContainer:{paddingBottom:15},
-    padding:{marginHorizontal:30},
+    padding:{marginHorizontal:20},
     fieldTitle: {fontSize:16, fontWeight:'bold'},
     inputField: {fontSize:20},
 
@@ -692,11 +697,11 @@ const styles = StyleSheet.create({
     recordTimeTitle:{flex:1, flexDirection:'row', width:'100%'},
 
     //Stop Watch Button
-    buttonStopWatchContainer:{position:'absolute', right:0, top:-7},
+    buttonStopWatchContainer:{position:'absolute', right:0, top:75},
     buttonStopWatch:{},
 
     //Record Task form
-    recordTimeContainer:{paddingBottom:20, paddingHorizontal:30, width:'100%'},
+    recordTimeContainer:{paddingBottom:20, paddingHorizontal:20, width:'100%'},
     recordTimeFlex:{flexDirection:'row', paddingTop:10},
     recordTimeLabel:{alignSelf:'flex-start', width:35, paddingTop:17},
     recordTimePicker:{alignSelf:'flex-start', paddingLeft:10},

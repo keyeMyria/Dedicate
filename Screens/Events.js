@@ -13,6 +13,7 @@ import Collapsible from 'react-native-collapsible';
 import DropShadow from 'ui/DropShadow';
 import StartEndDateTimePicker from 'fields/StartEndDateTimePicker';
 import TextLink from 'text/TextLink';
+import IconEvents from 'icons/IconEvents';
 
 export default class EventsScreen extends React.Component {
     constructor(props) {
@@ -212,7 +213,7 @@ export default class EventsScreen extends React.Component {
                                 var d2 = DayInYear(today);
                                 items.push(
                                     <View key={'date_' + today.getMonth() + '_' + today.getDate()} style={styles.dateContainer}>
-                                        <Text style={[styles.dateCount, {opacity:0}]}>{d1 - d2}d</Text>
+                                        <View style={{opacity:0.35}}><IconEvents size="xsmall" color={AppStyles.textColor}></IconEvents></View>
                                         <Text style={styles.dateName}>{DateSentence(today)}</Text>
                                         <Text style={styles.dateCount}>{d1 - d2}d</Text>
                                     </View>
@@ -281,12 +282,12 @@ const styles = StyleSheet.create({
     
     dateContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', backgroundColor:AppStyles.altBackgroundColor, padding:10},
     dateName:{fontSize:18, fontWeight:'bold', alignSelf:'center'},
-    dateCount:{alignSelf:'flex-end', opacity:0.5, fontSize:17},
+    dateCount:{alignSelf:'flex-end', opacity:0.65, fontSize:17},
 
-    eventItemContainer:{paddingHorizontal:30, paddingTop:10, paddingBottom:5, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
+    eventItemContainer:{paddingHorizontal:15, paddingTop:10, paddingBottom:7, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
     eventName:{fontSize:22},
     
     inputs:{flex:1, flexDirection:'row', flexWrap:'wrap'},
-    input:{alignSelf:'flex-start', paddingRight:20, paddingTop:5, paddingBottom:5},
+    input:{alignSelf:'flex-start', paddingRight:20, paddingVertical:3},
     inputText:{fontSize:17, color:AppStyles.color}
 });

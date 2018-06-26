@@ -9,6 +9,7 @@ import Realm from 'realm';
 import Schema from 'db/Schema';
 import Files from 'react-native-fs';
 import {UserConfig} from 'utility/UserConfig';
+import IconDatabases from 'icons/IconDatabases';
 
 export default class DatabaseScreen extends React.Component {
     constructor(props) {
@@ -215,7 +216,10 @@ export default class DatabaseScreen extends React.Component {
                 return (
                     <TouchableHighlight key={file.name} underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.openDatabase.call(that, name)}}>
                         <View style={styles.databaseItemContainer}>
-                            <Text style={styles.databaseName}>{file.name.replace('.realm', '')}</Text>
+                            <View style={styles.databaseLabel}>
+                                <View style={styles.databaseIcon}><IconDatabases size="xsmall"></IconDatabases></View>
+                                <Text style={styles.databaseName}>{file.name.replace('.realm', '')}</Text>
+                            </View>
                             <ButtonDots style={styles.btnDots} size="small" fill={AppStyles.buttonLightColor} onPress={() => {this.showDatabaseMenu.call(that, name)}}></ButtonDots>
                         </View>
                     </TouchableHighlight>
@@ -239,6 +243,8 @@ const styles = StyleSheet.create({
     body:{position:'absolute', top:0, bottom:0, left:0, right:0},
     databaseListContainer:{top:0, bottom:0, left:0, right:0},
     databaseItemContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', paddingHorizontal:30, paddingVertical:15, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
+    databaseLabel:{flexDirection:'row', justifyContent:'flex-start'},
+    databaseIcon:{paddingRight:10, paddingTop:2},
     databaseName:{fontSize:20},
     btnDots:{alignSelf:'flex-end'},
 

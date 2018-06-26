@@ -8,6 +8,9 @@ import DbRecords from 'db/DbRecords';
 import {Svg, Line, Polyline, Circle} from 'react-native-svg';
 import DatesMatch from 'utility/DatesMatch';
 import DropShadow from 'ui/DropShadow';
+import IconTasks from 'icons/IconTasks';
+import IconEvents from 'icons/IconEvents';
+import IconDatabases from 'icons/IconDatabases';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -310,20 +313,35 @@ export default class OverviewScreen extends React.Component {
                     <View style={styles.counters}>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
                             <View style={styles.counterContainer}>
-                                <Text style={styles.counter}>{this.state.totalTasks}</Text>
-                                <Text style={styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
+                                <View style={styles.counterIcon}>
+                                    <IconTasks size="small"></IconTasks>
+                                </View>
+                                <View style={styles.counterText}>
+                                    <Text style={styles.counterName}>{this.state.totalTasks}</Text>
+                                    <Text style={styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
+                                </View>
                             </View>
                         </TouchableBox>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Events')}>
                         <View style={styles.counterContainer}>
-                            <Text style={styles.counter}>{this.state.totalRecords}</Text>
-                            <Text style={styles.counterLabel}>{this.state.totalRecords != 1 ? 'Events' : 'Event'}</Text>
+                            <View style={styles.counterIcon}>
+                                <IconEvents size="small"></IconEvents>
+                            </View>
+                            <View style={styles.counterText}>
+                                <Text style={styles.counterName}>{this.state.totalRecords}</Text>
+                                <Text style={styles.counterLabel}>{this.state.totalRecords != 1 ? 'Events' : 'Event'}</Text>
+                            </View>
                         </View>
                         </TouchableBox>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Databases')}>
-                        <View style={styles.counterContainerRight}>
-                            <Text style={styles.counterName}>{global.database.name}</Text>
-                            <Text style={styles.counterLabel}>Database</Text>
+                        <View style={styles.counterContainer}>
+                            <View style={styles.counterIcon}>
+                                <IconDatabases size="small"></IconDatabases>
+                            </View>
+                            <View style={styles.counterText}>
+                                <Text style={styles.counterName}>{global.database.name}</Text>
+                                <Text style={styles.counterLabel}>Database</Text>
+                            </View>
                         </View>
                         </TouchableBox>
                     </View>
@@ -368,12 +386,11 @@ const styles = StyleSheet.create({
     purple: { color: AppStyles.color},
     dropshadow:{zIndex:10},
     
-    counters:{flexDirection:'row', padding: 15, width:'100%' },
-    counterContainer:{alignSelf:'flex-start', paddingHorizontal:20},
-    counterContainerRight:{alignSelf:'flex-end', paddingHorizontal:20, paddingTop:13},
-    counter:{fontSize:30, color:AppStyles.numberColor},
+    counters:{flexDirection:'row', padding: 7, width:'100%' },
+    counterContainer:{flexDirection:"row", alignSelf:'flex-start', paddingHorizontal:10, paddingTop:13},
+    counterIcon:{paddingRight:8},
     counterName:{fontSize:20, color:AppStyles.numberColor},
-    counterLabel:{fontSize:17},
+    counterLabel:{fontSize:17, position:'relative', top:-3},
 
     chartsContainer:{paddingBottom:70},
     chartContainer: {paddingLeft:25, paddingRight:25, paddingBottom:20, paddingTop:5, width:'100%'},
