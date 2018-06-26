@@ -166,8 +166,9 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                     var text = null;
                     var date = null;
 
-                    if(input.type == 6){
-                        number = 0;
+                    switch(input.type){
+                        case 2: case 3: case 4: date = new Date(); break;
+                        case 6: number = 0; break;
                     }
 
                     this.state.record.inputs[x] = {
@@ -231,7 +232,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             else if(dtype == 3){ // Date data type
                 if(input.date == null){show = false;}
                 try{
-                    var d = Date(input.date);
+                    var d = Date(input.date); 
                 }catch(ex){
                     show = false;
                 }
@@ -281,7 +282,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     onDateChange = (ref, id, date) => {
         var record = this.state.record;
         if(record.inputs == null){record.inputs = [];}
-        record.inputs[id].date = date;
+        record.inputs[record.inputs.map(a => a.id).indexOf(id)].date = new Date(date);
         this.setState(record);
     }
 
@@ -580,7 +581,6 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 return (
                                     <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
                                         <Text style={styles.fieldTitle}>{input.name}</Text>
-                                        
                                     </View>
                                 )
                                 break;

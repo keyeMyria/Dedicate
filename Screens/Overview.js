@@ -7,6 +7,7 @@ import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
 import {Svg, Line, Polyline, Circle} from 'react-native-svg';
 import DatesMatch from 'utility/DatesMatch';
+import DropShadow from 'ui/DropShadow';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -15,9 +16,8 @@ export default class OverviewScreen extends React.Component {
         this.state = {
             styles: stylesLandscape,
             ...this.dbState(),
-            rendered:{
-                charts:null
-            }
+            chartList:[],
+            shadowOpacity:0
         };
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -25,8 +25,6 @@ export default class OverviewScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
-        //render charts
-        this.getCharts();
     }
 
     componentWillUnmount(){
@@ -57,36 +55,40 @@ export default class OverviewScreen extends React.Component {
     // Screen Orientation changes
     onLayoutChange = event => {
         var {height, width} = Dimensions.get('window');
+        var styles = stylesPortrait;
         if(width > height){
-            //landscape
-            this.setState({styles: stylesLandscape});
-        }else{
-            //portrait
-            this.setState({styles: stylesPortrait});
+            styles = stylesLandscape;
+        }
+        this.setState({styles: styles});
+        this.getCharts();
+    }
+
+    scroll = (e) => {
+        var y = e.nativeEvent.contentOffset.y;
+        if(y <= 50){
+            this.setState({shadowOpacity:(1 / 50) * y});
+        }else if(this.state.shadowOpacity < 1){
+            this.setState({shadowOpacity:1});
         }
     }
 
     getCharts = () => {
-        if(this.state.rendered.charts == null){
-            var items = [];
-            var {height, width} = Dimensions.get('window');
-            var maxCharts = 6;
-            for(var x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
-                var chart = this.state.charts[x];
-                if(chart.name != ''){
-                    items.push(this.chartItem(chart, width));
-                }
-                if(x < this.state.charts.length - 1){
-                    items.push(<View key={'sep' + x} style={styles.separator}></View>);
+        var items = [];
+        var {width} = Dimensions.get('window');
+        var maxCharts = 6;
+        for(var x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
+            var chart = this.state.charts[x];
+            if(chart.name != ''){
+                var item = this.chartItem(chart, width);
+                if(item != null){
+                    items.push(item);
+                    if(x < this.state.charts.length - 1){
+                        items.push(<View key={'sep' + x} style={styles.separator}></View>);
+                    }
                 }
             }
-            var rendered = this.state.rendered;
-            rendered.charts = items;
-            this.setState({rendered:rendered});
-            return items;
-        }else{
-            return this.state.rendered.charts;
         }
+        this.setState({chartList:items});
     }
 
     //render 14 day chart
@@ -105,14 +107,17 @@ export default class OverviewScreen extends React.Component {
         //get lines and dots for chart
         var curr = 1;
         var hasdots = false;
-        var cwidth = width - 40;
+        var cwidth = width;
         var height = 60;
         var days = 14;
         var record = chart.records[0];
+        var haspoints = false;
         for(var x = 0; x < record.inputs.length; x++){
             var input = record.inputs[x];
             if(input.type === 0){ //number
                 var info = this.chartPoints(chart, x, days);
+                if(info.points.length == 0){ continue; }
+                haspoints = true;
                 if(curr == 1){
                     line1 = (
                         <Svg width={cwidth} height={height + 20}>
@@ -177,6 +182,8 @@ export default class OverviewScreen extends React.Component {
                 );
             }
         }
+
+        if(haspoints == false && hasdots == false){return null;}
 
         return (
             <ScrollView key={chart.id} horizontal={true} pagingEnabled={true} showsHorizontalScrollIndicator={false}>
@@ -295,10 +302,9 @@ export default class OverviewScreen extends React.Component {
     }
 
     render() {
-        var that = this;
         if(this.state.hasTask === true){
             return (
-                <Body {...this.props} title="Overview" screen="Overview" noscroll="true" style={styles.body}
+                <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={styles.body}
                     onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true} bottomFade={true}
                     >
                     <View style={styles.counters}>
@@ -321,8 +327,9 @@ export default class OverviewScreen extends React.Component {
                         </View>
                         </TouchableBox>
                     </View>
-                    <ScrollView keyboardShouldPersistTaps="handled">
-                        <View style={styles.chartsContainer}>{this.getCharts.call(that)}</View>
+                    <DropShadow style={[styles.dropshadow]} opacity={0.075 * this.state.shadowOpacity} height={20}></DropShadow>
+                    <ScrollView onScroll={this.scroll} keyboardShouldPersistTaps="handled" scrollEventThrottle={1000 / 24.9}>
+                        <View style={styles.chartsContainer}>{this.state.chartList}</View>
                     </ScrollView>
                 </Body>
             );
@@ -359,6 +366,7 @@ const styles = StyleSheet.create({
     h4: {fontSize:20},
     p: { fontSize:17, paddingBottom:15, color:AppStyles.textColor },
     purple: { color: AppStyles.color},
+    dropshadow:{zIndex:10},
     
     counters:{flexDirection:'row', padding: 15, width:'100%' },
     counterContainer:{alignSelf:'flex-start', paddingHorizontal:20},
@@ -368,9 +376,9 @@ const styles = StyleSheet.create({
     counterLabel:{fontSize:17},
 
     chartsContainer:{paddingBottom:70},
-    chartContainer: {paddingLeft:30, paddingRight:30, paddingBottom:20, paddingTop:5, width:'100%'},
+    chartContainer: {paddingLeft:25, paddingRight:25, paddingBottom:20, paddingTop:5, width:'100%'},
     chartArea:{height:120},
-    chart:{height:60, top:15},
+    chart:{height:60, top:15, left:-25},
     chartName: {position:'absolute', bottom:0, fontSize:20, width:'100%', textAlign:'center'},
     chartLine1:{position:'absolute', height:'100%'},
     chartLine1MinMax:{position:'absolute', height:'100%'},

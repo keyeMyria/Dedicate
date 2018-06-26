@@ -41,7 +41,7 @@ export default class Body extends React.Component {
             <View style={[styles.container, this.props.style]} onLayout={this.props.onLayout}>
                 <Header {...this.props} />
                 <Modal/>
-                {this.props.noscroll == 'true' ? this.props.children : 
+                {this.props.noscroll == true ? this.props.children : 
                 <ScrollView onScroll={this.props.onScroll} style={[styles.ScrollView, this.props.scrollViewStyle || {}]}  keyboardShouldPersistTaps="handled">
                 {this.props.children}
                 </ScrollView>
@@ -67,7 +67,7 @@ export default class Body extends React.Component {
                         />
                         : <View></View>
                     }
-                    {this.props.footerMessage != null && this.props.footerMessage != '' && 
+                    {this.props.footerMessage != null && this.props.footerMessage != '' && !this.state.hasTasks && 
                         (
                             <View style={styles.footerMessageContainer}>
                                 <Text style={styles.footerMessage}>{this.props.footerMessage}</Text>
@@ -92,8 +92,8 @@ export default class Body extends React.Component {
 
 const styles = StyleSheet.create({
     container:{backgroundColor:AppStyles.backgroundColor},
-    buttonRecord:{alignSelf:'flex-end', bottom:10, right:20, position:'absolute'},
-    buttonAdd:{alignSelf:'flex-start', bottom:20, left:20, position:'absolute'},
+    buttonRecord:{alignSelf:'flex-end', bottom:10, right:20, position:'absolute', zIndex:100},
+    buttonAdd:{alignSelf:'flex-start', bottom:20, left:20, position:'absolute', zIndex:100},
     footerStyle:{position:'relative'},
     footerMessageContainer:{position:'absolute', bottom:5, left:60, height:60, maxWidth:270},
     footerMessage:{paddingLeft:30, textAlign:'left', fontSize:16},

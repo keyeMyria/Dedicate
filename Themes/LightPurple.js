@@ -3,6 +3,7 @@ export default LightPurple =
     // colors ///////////////////////////////
     color: '#6666cc',
     textColor: '#444',
+    linkColor: '#6666cc',
     numberColor: '#333',
     headerColor: '#6666cc',
     headerDarkColor: '#4D4DAD',

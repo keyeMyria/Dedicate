@@ -41,7 +41,7 @@ const TitleBarButtons = (props) => {
 }
 
 const styles = StyleSheet.create({
-    container: { },
+    container: { zIndex:100},
     container_menu: { alignSelf: 'flex-start', padding: 15 },
     container_title: { position:'absolute', top: 14, alignSelf: 'center' },
     container_buttons: {position: 'absolute', top:0, right:0, height:55},

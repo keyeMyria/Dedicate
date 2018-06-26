@@ -13,12 +13,12 @@ export default class DrawerContent extends React.Component{
         <View style={styles.container_logo}>
           <Image style={styles.logo} source={require('images/logo_sm.png')} resizeMode='contain'/>
         </View>
-        <DrawerItem {...this.props} text="Overview" icon={IconOverview} />
-        <DrawerItem {...this.props} text="Tasks" icon={IconOverview} />
-        <DrawerItem {...this.props} text="Calendar" icon={IconOverview} />
-        <DrawerItem {...this.props} text="Analytics" icon={IconOverview} />
-        <DrawerItem {...this.props} text="Settings" icon={IconOverview} />
-        <DrawerItem {...this.props} text="Databases" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Overview" screen="Overview" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Tasks" screen="Tasks" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Events" screen="Events" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Analytics" screen="Analytics" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Settings" screen="Settings" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Databases" screen="Databases" icon={IconOverview} />
       </View>
     );
   }
@@ -29,7 +29,7 @@ const DrawerItem = props => {
   var selectedStyle = {};
   if(props.activeItemKey == props.text){ selectedStyle = styles.drawerItemSelected; }
   return (
-    <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} onPress={() => props.navigation.navigate(props.text)}>
+    <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} onPress={() => props.navigation.navigate(props.screen)}>
     <View style={[styles.drawerItem, selectedStyle]}>
       <View style={styles.column}>
         <Icon width="25" height="25" style={styles.drawerItemIcon} />
