@@ -5,7 +5,7 @@ import DrawerContent from 'ui/DrawerContent';
 import OverviewScreen from 'screens/Overview';
 import Screens from 'ui/Screens';
 import Schema from 'db/Schema';
-import {getUserConfig} from 'utility/UserConfig';
+import {getUserConfig} from 'datasilk/UserConfig';
 
 export default class App extends React.Component{
     constructor(props) {

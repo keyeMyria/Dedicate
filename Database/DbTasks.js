@@ -1,6 +1,6 @@
 import Realm from 'realm';
 import Db from 'db/Db';
-import DbCategories from 'db/DbCategories';
+import DbRecords from './DbRecords';
 
 export default class DbTasks extends Db{
     CreateTask(task){
@@ -32,14 +32,14 @@ export default class DbTasks extends Db{
 
                 if(typeof utask.category != 'undefined'){
                     //update new category with total task count
-                    var total = TotalTasks(['category.id=$0',utask.category.id]);
+                    var total = this.TotalTasks(['category.id=$0',utask.category.id]);
                     global.realm.write(()=>{
                         utask.category.tasks = total;
                     });
                 }
                 if(oldcatid != null){
                     //update old category with total task count
-                    var total = TotalTasks(['category.id=$0',oldcatid]);
+                    var total = this.TotalTasks(['category.id=$0',oldcatid]);
                     var oldcat = global.realm.objects('Category').filtered('id = $0', oldcatid);
                     global.realm.write(()=>{
                         oldcat.tasks = total;
@@ -142,6 +142,10 @@ export default class DbTasks extends Db{
 
         //save task (with inputs) into the database
         if(isnew == true){
+            var cat = null;
+            if(task.category.id > 0){
+                cat = global.realm.objects('Category').filtered('id = $0', task.category.id)[0];
+            }
             global.realm.write(() => {
                 task = global.realm.create('Task', {
                     id:id, 
@@ -149,13 +153,13 @@ export default class DbTasks extends Db{
                     icon:task.icon || 0, 
                     color:task.color || 0,
                     inputs: task.inputs || [],
-                    category: task.category
+                    category: cat
                 });
             });
 
             if(task.category.id > -1){
                 //update category with total task count
-                var total = TotalTasks(['category.id=$0',task.category.id]);
+                var total = this.TotalTasks(['category.id=$0',task.category.id]);
                 global.realm.write(()=>{
                     task.category.tasks = total;
                 });
@@ -173,7 +177,7 @@ export default class DbTasks extends Db{
             options = {sorted:'name', descending:false, filtered:null}
         }
         
-        var tasks = global.realm.objects('Task')
+        var tasks = global.realm.objects('Task');
         if(options.sorted){
             tasks = tasks.sorted(options.sorted, options.descending ? options.descending : false)
         }else{
@@ -204,7 +208,16 @@ export default class DbTasks extends Db{
     DeleteTask(taskId){
         global.realm.write(() => {
             //delete task recordings
-            global.realm.delete(global.realm.objects('Record').filtered('task.id=' + taskId));
+            var db = new DbRecords();
+            var records = global.realm.objects('Record').filtered('task.id=' + taskId);
+            if(records.length > 0){
+                records = records.map(a => a.id);
+                for(var x = 0; x < records.length;x++){
+                    //delete all records for task
+                    db.DeleteRecord(global.realm.objects('Record').filtered('id = $0', records[x]));
+                }
+            }
+            
             //finally, delete task
             global.realm.delete(global.realm.objects('Task').filtered('id=' + taskId));
         });

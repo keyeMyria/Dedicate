@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableHighlight, BackHandler, FlatList, Picker } from 'react-native';
+import {NavigationActions} from 'react-navigation';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbRecords from 'db/DbRecords';
@@ -25,14 +26,19 @@ export default class EventsScreen extends React.Component {
             refreshing: false,
             nomore: false, //no more records to load
             refresh:0,
-            filterForm:false, //toggle filter form
-            filterDates:false,
+            filterForm:this.props.navigation.getParam('filterForm', false), //toggle filter form
+            filterDates:this.props.navigation.getParam('filterDates', false), //toggle dates within filter form
             filter:{
                 taskId:-1,
                 datestart:null,
                 dateend:null
             }
         };
+
+        var filter = this.props.navigation.getParam('filter', null);
+        if(filter != null){
+            this.state.filter = filter;
+        }
 
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -137,7 +143,6 @@ export default class EventsScreen extends React.Component {
         var filter = this.state.filter;
         filter.datestart = datestart;
         filter.dateend = dateend;
-        console.warn(JSON.stringify(filter, null, 4));
         this.updateFilter(filter);
     }
 
@@ -236,10 +241,10 @@ export default class EventsScreen extends React.Component {
                                         val = DateFormat(input.date, 'm/d/yyyy');
                                         break;
                                     case 3: //time
-                                    val = DateFormat(input.date, 'h:mm:ss tt');
+                                    val = DateFormat(input.date, 'h:MM:ss tt');
                                         break;
                                     case 4: //date & time
-                                        val = DateFormat(input.date, 'm/d/yyyy h:mm:ss tt');
+                                        val = DateFormat(input.date, 'm/d/yyyy @ h:MM:ss tt');
                                         break;
                                     case 6: //Yes/No
                                         val = input.number == 1 ? 'Yes' : 'No';
@@ -254,7 +259,20 @@ export default class EventsScreen extends React.Component {
                             //render item
                             items.push(
                                 <View key={item.id}>
-                                    <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.props.navigation.navigate('Event', {eventId:item.id})}}>
+                                    <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} 
+                                        onPress={() => {
+                                            this.props.navigation.navigate('RecordTask', {
+                                                goback:'Events', 
+                                                gobackParams:{
+                                                    filter:this.state.filter,
+                                                    filterForm: this.state.filterForm,
+                                                    filterDates: this.state.filterDates
+                                                }, 
+                                                recordId:item.id}, 
+                                                { type: "Navigate", routeName: "Record", params: { }
+                                            });
+                                        }}
+                                    >
                                         <View style={styles.eventItemContainer}>
                                             <Text style={styles.eventName}>{item.task.name}</Text>
                                             <View style={styles.inputs}>{inputs}</View>

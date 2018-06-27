@@ -63,7 +63,8 @@ export default class Body extends React.Component {
                     {this.props.buttonRecord == true && this.state.hasTasks ?
                         <ButtonRecord {...this.props} style={styles.buttonRecord} buttonType="rec" size="large"
                             onPress={() => {
-                            that.props.navigation.navigate('Record', {goback:this.props.screen});}}
+                                this.props.navigation.navigate('RecordDefault', {goback:this.props.screen}, { type: "Navigate", routeName: "Record", params: { }});
+                            }}
                         />
                         : <View></View>
                     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Keyboard } from 'react-native';
+import { View, StyleSheet, Keyboard } from 'react-native';
 import DatePicker from 'react-native-datepicker'
 import Textbox from 'fields/Textbox';
 
@@ -35,10 +35,12 @@ export default class DateTimePicker extends React.Component {
             date:args[1],
             datestring:this.getDateString(args[1])
         });
-        if(this.props.onDateChange){this.props.onDateChange(...args);}
+        if(typeof this.props.onDateChange != 'undefined'){
+            this.props.onDateChange(...args);
+        }
     }
 
-    onTextboxFocus = (event) => {
+    onTextboxFocus = () => {
         Keyboard.dismiss();
         this.refs['datepicker'].onPressDate();
     }

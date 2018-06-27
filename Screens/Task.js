@@ -235,7 +235,6 @@ export default class TaskScreen extends React.Component {
 
     // Child Events //////////////////////////////////////////////////////////////////////////////////////
     onScrollView = event => {
-        var visibleHeight = this.state.visibleHeight;
         var offset = event ? event.nativeEvent.contentOffset.y : this.state.contentOffset;
         var headerOffset = this.state.taskForm.height + 15;
         if(offset > 0 && offset > headerOffset){
@@ -300,14 +299,14 @@ export default class TaskScreen extends React.Component {
         this.validateForm();
     }
 
-    onPressButtonSave = event => {
+    onPressButtonSave = () => {
         var dbTasks = new DbTasks();
         var task = Object.assign({},this.state.task);
         task = dbTasks.CreateTask(task);
         this.props.navigation.navigate('Tasks')
     }
 
-    onDeleteTask = event => {
+    onDeleteTask = () => {
         var that = this;
         Alert.alert(
         'Delete Task?',
@@ -548,7 +547,7 @@ class TaskInputField extends React.Component{
             case 2: typeLabel = 'Date'; break;
             case 3: typeLabel = 'Time'; break;
             case 4: typeLabel = 'Date & Time'; break;
-            case 5: typeLabel = 'Stop Watch'; break;
+            //case 5: typeLabel = 'Stop Watch'; break;
             case 6: typeLabel = 'Yes/No'; break;
             case 7: typeLabel = '5 Stars'; break;
             case 8: typeLabel = 'Location'; break;
@@ -588,7 +587,7 @@ class TaskInputField extends React.Component{
                                     {label:"Date", key:2},
                                     {label:"Time", key:3},
                                     {label:"Date & Time", key:4},
-                                    {label:"Stop Watch", key:5},
+                                    //{label:"Stop Watch", key:5},
                                     {label:"Yes/No", key:6},
                                     {label:"5 Stars", key:7},
                                     {label:"Location", key:8},

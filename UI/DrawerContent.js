@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableHighlight } from "react-native";
+import AppStyles from 'dedicate/AppStyles';
 import IconOverview from 'icons/IconOverview';
 import IconTasks from 'icons/IconTasks';
 import IconEvents from 'icons/IconEvents';
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
   container_logo: { padding: 15, backgroundColor:'#6666cc', marginBottom:20},
   logo: { width:'40%', tintColor: 'white', alignSelf:'center'},
   drawerItem: {flexDirection:'row', flexWrap:'wrap', paddingVertical: 15, paddingHorizontal:20},
-  drawerItemSelected: { backgroundColor:'#C9E4FF'},
+  drawerItemSelected: { backgroundColor:AppStyles.listItemHoverColor},
   drawerItemIcon:{paddingRight:20},
   drawerItemText: {fontSize:17, fontWeight:'bold', paddingTop:7, color: AppStyles.textColor}
 });

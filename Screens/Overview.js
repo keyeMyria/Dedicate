@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, ScrollView, BackHandler } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableHighlight, Dimensions, ScrollView, BackHandler } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import TouchableBox from 'ui/Touchable/Box';
@@ -11,15 +11,24 @@ import DropShadow from 'ui/DropShadow';
 import IconTasks from 'icons/IconTasks';
 import IconEvents from 'icons/IconEvents';
 import IconDatabases from 'icons/IconDatabases';
+import Timer from 'fields/Timer';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
         super(props);
 
+        var dbTasks = new DbTasks();
+        var dbRecords = new DbRecords();
+
         this.state = {
             styles: stylesLandscape,
-            ...this.dbState(),
+            totalTasks:dbTasks.TotalTasks(),
+            totalRecords:dbRecords.TotalRecords(),
+            hasTask:dbTasks.HasTasks(),
+            charts:dbRecords.GetListByTask(),
+            timers:dbRecords.GetActiveTimers(),
             chartList:[],
+            timerList:[],
             shadowOpacity:0
         };
         //bind events
@@ -28,6 +37,10 @@ export default class OverviewScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+
+        //get rendered timers & charts
+        this.getTimers();
+        this.getCharts();
     }
 
     componentWillUnmount(){
@@ -43,27 +56,14 @@ export default class OverviewScreen extends React.Component {
         this.onLayoutChange();
     }
 
-    dbState(){ //updates state from database
-        var dbTasks = new DbTasks();
-        var dbRecords = new DbRecords();
-
-        return {
-            totalTasks:dbTasks.TotalTasks(),
-            totalRecords:dbRecords.TotalRecords(),
-            hasTask:dbTasks.HasTasks(),
-            charts:dbRecords.GetListByTask()
-        };
-    }
-
     // Screen Orientation changes
-    onLayoutChange = event => {
+    onLayoutChange = () => {
         var {height, width} = Dimensions.get('window');
         var styles = stylesPortrait;
         if(width > height){
             styles = stylesLandscape;
         }
         this.setState({styles: styles});
-        this.getCharts();
     }
 
     scroll = (e) => {
@@ -73,6 +73,50 @@ export default class OverviewScreen extends React.Component {
         }else if(this.state.shadowOpacity < 1){
             this.setState({shadowOpacity:1});
         }
+    }
+
+    getTimers = () => {
+        var that = this;
+        var timers = this.state.timers;
+        var items = [];
+        if(timers.length > 0){
+            for(var x = 0; x < timers.length; x++){
+                var timer = timers[x];
+                items.push(
+                    <TouchableHighlight key={'timer' + timer.id} onPress={() => {
+                        this.props.navigation.navigate('RecordTask', {goback:'Overview', recordId:timer.id}, { type: "Navigate", routeName: "Record", params: { }});
+                    }}>
+                        <View style={styles.timerContainer}>
+                            <View style={styles.timerTask}>
+                                <View style={styles.timerTaskIcon}><IconTasks size="xsmall"></IconTasks></View>
+                                <Text style={styles.timerTaskLabel}>{timer.task.name}</Text>
+                            </View>
+                            <View style={styles.timerCounter}>
+                                <Timer startDate={timer.datestart} onStop={(datestart, dateend) => this.onTimerStop.call(that, datestart, dateend, timer)}></Timer>
+                            </View>
+                        </View>
+                    </TouchableHighlight>
+                );
+                if(x < timers.length - 1){
+                    items.push(<View key={'sep' + x} style={styles.separator}></View>);
+                }
+            }
+        }
+        this.setState({timerList:items});
+    }
+
+    onTimerStop = (datestart, dateend, record) => {
+        global.realm.write(() => {
+            record.dateend = dateend;
+            record.time = (dateend - record.datestart) / 1000;
+            record.timer = false;
+        });
+        
+        //var dbRecords = new DbRecords();
+        //this.setState({timers:dbRecords.GetActiveTimers()},
+        //() =>{
+        //    this.getTimers();
+        //});
     }
 
     getCharts = () => {
@@ -277,7 +321,6 @@ export default class OverviewScreen extends React.Component {
 
     chartDots = (chart, index, days, width, height) => {
         var dots = [];
-        var log = [chart.name];
         for(var x = 0; x < days; x++){
             var date = new Date();
             date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
@@ -347,6 +390,7 @@ export default class OverviewScreen extends React.Component {
                     </View>
                     <DropShadow style={[styles.dropshadow]} opacity={0.075 * this.state.shadowOpacity} height={20}></DropShadow>
                     <ScrollView onScroll={this.scroll} keyboardShouldPersistTaps="handled" scrollEventThrottle={1000 / 24.9}>
+                        <View style={styles.timersContainer}>{this.state.timerList}</View>
                         <View style={styles.chartsContainer}>{this.state.chartList}</View>
                     </ScrollView>
                 </Body>
@@ -389,8 +433,15 @@ const styles = StyleSheet.create({
     counters:{flexDirection:'row', padding: 7, width:'100%' },
     counterContainer:{flexDirection:"row", alignSelf:'flex-start', paddingHorizontal:10, paddingTop:13},
     counterIcon:{paddingRight:8},
-    counterName:{fontSize:20, color:AppStyles.numberColor},
-    counterLabel:{fontSize:17, position:'relative', top:-3},
+    counterName:{fontSize:20, color:AppStyles.numberColor, position:'relative', top:-5},
+    counterLabel:{fontSize:17, position:'relative', top:-8},
+
+    timersContainer:{},
+    timerContainer:{flexDirection:'row', justifyContent:'space-between', width:'100%', paddingHorizontal:15, paddingTop:10, paddingBottom:20},
+    timerTask:{flexDirection:'row'},
+    timerTaskIcon:{paddingRight:10, paddingTop:6},
+    timerTaskLabel:{fontSize:20, paddingTop:6},
+    timerTaskCounter:{alignSelf:'flex-end'},
 
     chartsContainer:{paddingBottom:70},
     chartContainer: {paddingLeft:25, paddingRight:25, paddingBottom:20, paddingTop:5, width:'100%'},

@@ -2,14 +2,47 @@ import Db from 'db/Db';
 
 export default class DbRecords extends Db{
     CreateRecord(record){
-            //generate id for Record
-            var id = 1;
+        //generate id for Record
+        var id = 1;
+        var exists = false;
+        if(typeof record.id != 'undefined' && record.id != null && record.id > 0){
+            id = record.id;
+            exists = true;
+        } else {
             if(global.realm.objects('Record').length > 0){
                 id = (global.realm.objects('Record').sorted('id', true).slice(0,1)[0].id) + 1;
             }
-            var time = (record.dateend - record.datestart) / 1000;
+            record.id = id;
+        }
+        
+        var time = (record.dateend - record.datestart) / 1000;
 
-            //save record (with inputs) into the database
+        //validate input content
+        for(var x = 0; x < record.inputs.length; x++){
+            //update all inputs for record
+            var input = record.inputs[x];
+            switch(input.type){
+                case 0: case 6: case 7: //number, yes/no, 5 stars
+                    if(input.number == null){
+                        input.number = 0;
+                    }
+                    break;
+                case 1: case 8: case 9: case 10: case 11: //text, location, url link, photo, video
+                    if(input.text == null){
+                        input.text = '';
+                    }
+                    break;
+                case 2: case 3: case 4: //date, time, date & time
+                    if(input.date == null){
+                        input.date = new Date();
+                    }
+                    break;
+            }
+        }
+
+        //save record (with inputs) into the database
+        if(exists == false){
+            //record doesn't exist in database yet
             global.realm.write(() => {
                 global.realm.create('Record', {
                     id:id, 
@@ -19,19 +52,58 @@ export default class DbRecords extends Db{
                     time: time,
                     timer: record.timer,
                     inputs: record.inputs || [],
-                    task: record.task || null
+                    task: record.task || global.realm.objects('Task').filtered('id = $0', record.taskId)[0]
                 });
             });
+        }else{
+            //record exists in database
+            var rec = global.realm.objects('Record').filtered('id = $0', id)[0];
+            global.realm.write(() => {
+                rec.datestart = record.datestart;
+                rec.dateend = record.dateend;
+                rec.time = time;
+                rec.timer = record.timer;
+
+                for(var x = 0; x < record.inputs.length; x++){
+                    //update all inputs for record
+                    var input = record.inputs[x];
+                    var i = rec.inputs.map(a => a.id).indexOf(input.id);
+                    if(i >= 0){
+                        //input exists in record
+                        var inp = rec.inputs[i];
+                        inp.number = input.number;
+                        inp.text = input.text;
+                        inp.date = input.date;
+                    }else{
+                        //input doesn't exist in record yet
+                        rec.inputs.push(input);
+                    }
+                }
+            });
+            record = rec;
+        }
+
+        return record;
     }
 
     HasRecords(){
         return global.realm.objects('Record').length > 0;
     }
 
+    GetRecord(id){
+        var result = global.realm.objects('Record').filtered('id = $0', id);
+        if(result.length == 1){
+            return result[0];
+        }else{
+            return null;
+        }
+    }
+
     GetList(options){
         var dateend = new Date();
         var datestart = new Date(dateend.getDate());
         datestart.setYear(datestart.getFullYear() - 100);
+        dateend.setYear(dateend.getFullYear() + 100);
         if(!options){
             options = {
                 sorted:'datestart', 
@@ -92,11 +164,28 @@ export default class DbRecords extends Db{
         return tasks;
     }
 
+    GetActiveTimers(){
+        return this.GetList().filtered('timer = true');
+    }
+
     TotalRecords(filtered){
         var records = global.realm.objects('Record');
         if(filtered){
             records = records.filtered(filtered);
         }
         return records.length;
+    }
+
+    DeleteRecord(record){
+        global.realm.write(() => {
+            for(var x = 0; x < record.inputs.length;x++){
+                //delete all input records within record
+                global.realm.delete(record.inputs[x]);
+                x--;
+            }
+            
+            //finally, delete record
+            global.realm.delete(record);
+        });
     }
 }

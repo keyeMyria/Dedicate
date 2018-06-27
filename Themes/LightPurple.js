@@ -23,6 +23,7 @@ export default LightPurple =
     buttonLightColor: '#999',
 
     // list item styling /////////////////////
+    listItemHoverColor: '#f0f0ff',
     listItemPressedColor: '#f0f0ff',
 
     // font styling //////////////////////////

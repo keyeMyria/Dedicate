@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import {Svg, Use, Path, G, Defs} from 'react-native-svg';
+import {Svg, Path} from 'react-native-svg';
 import ButtonOutline from 'buttons/ButtonOutline';
 export default class StopWatch extends React.Component {
     constructor(props){
@@ -8,7 +8,7 @@ export default class StopWatch extends React.Component {
 
         this.state = {
             color: this.props.color ? this.props.color : '#ccc',
-            started:null,
+            started:this.props.dateStart || null,
             ended:null,
             total:0,
             time:'00:00',
@@ -18,7 +18,26 @@ export default class StopWatch extends React.Component {
         }
     }
 
-    onPressCounterButton = event => {
+    componentWillMount(){
+        var that = this;
+        if(this.state.started != null){
+            this.setState({
+                buttonTitle:'Stop',
+                total:0
+            }, ()=> {
+                this.setState({
+                    interval:setInterval(() => this.updateCounter.call(that), 1000 / 30)
+                });
+            });
+        }
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.state.interval);
+    }
+
+    onPressCounterButton = () => {
+        var that = this;
         if(this.state.interval != null){
             //stop
             var ms = this.updateCounter(true);
@@ -32,8 +51,7 @@ export default class StopWatch extends React.Component {
                 var dateend = new Date();
                 dateend.setTime(ms + this.state.started.getTime());
                 this.props.onStop(this.state.started, dateend, this.state.total);
-                }
-
+            }
         }else{
             //start
             if(this.props.onStart){this.props.onStart(this.state.total);}
@@ -41,11 +59,13 @@ export default class StopWatch extends React.Component {
                 started:new Date(),
                 buttonTitle:'Stop',
                 total:0
-            });
-            var that = this;
-
-            this.setState({
-                interval:setInterval(() => this.updateCounter.call(that), 40)
+            }, ()=> {
+                this.setState({
+                    interval:setInterval(() => this.updateCounter.call(that), 1000 / 30)
+                });
+                if(this.props.onStart){
+                    this.props.onStart(this.state.started);
+                }
             });
         }
         
