@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableHighlight, Dimensions, ScrollView, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, TouchableHighlight, Dimensions, ScrollView, BackHandler } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import TouchableBox from 'ui/Touchable/Box';
@@ -12,6 +12,7 @@ import IconTasks from 'icons/IconTasks';
 import IconEvents from 'icons/IconEvents';
 import IconDatabases from 'icons/IconDatabases';
 import Timer from 'fields/Timer';
+import Logo from 'ui/Logo';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -21,7 +22,7 @@ export default class OverviewScreen extends React.Component {
         var dbRecords = new DbRecords();
 
         this.state = {
-            styles: stylesLandscape,
+            styles: null,
             totalTasks:dbTasks.TotalTasks(),
             totalRecords:dbRecords.TotalRecords(),
             hasTask:dbTasks.HasTasks(),
@@ -37,10 +38,6 @@ export default class OverviewScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
-
-        //get rendered timers & charts
-        this.getTimers();
-        this.getCharts();
     }
 
     componentWillUnmount(){
@@ -63,7 +60,14 @@ export default class OverviewScreen extends React.Component {
         if(width > height){
             styles = stylesLandscape;
         }
-        this.setState({styles: styles});
+        if(this.state.styles != styles){
+            this.setState({styles: styles},
+            () => {
+                //get rendered timers & charts
+                this.getTimers();
+                this.getCharts();
+            });
+        }
     }
 
     scroll = (e) => {
@@ -402,7 +406,7 @@ export default class OverviewScreen extends React.Component {
                     footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
                 >
                     <View style={[styles.container]}>
-                        <Image source={require('images/logo.png')} style={[styles.logo, this.state.styles.logo]} resizeMode='contain' />
+                        <View style={styles.logo}><Logo width="200" height="38.65"></Logo></View>
                         <View style={styles.text}>
                             <Text style={[styles.p, styles.purple, styles.h4]}>
                                 "Follow your dreams and dedicate your life to all the things that you truly believe in,
@@ -423,7 +427,7 @@ export default class OverviewScreen extends React.Component {
 const styles = StyleSheet.create({
     container: {padding: 30 },
     body:{position:'absolute', top:0, bottom:0, left:0, right:0},
-    logo: { marginVertical:10, width: 200, alignSelf: 'center', tintColor:AppStyles.logoColor },
+    logo: { marginVertical:10, flexDirection:'row', justifyContent:'center', width:'100%' },
     text: {alignSelf:'center'},
     h4: {fontSize:20},
     p: { fontSize:17, paddingBottom:15, color:AppStyles.textColor },

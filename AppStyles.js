@@ -7,7 +7,6 @@ getColorScheme = (theme) => {
             result = LightPurple;
         break;
     }
-    console.warn(JSON.stringify(result, null, 4));
     return result;
 }
 

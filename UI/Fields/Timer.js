@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import AppStyles from 'dedicate/AppStyles';
 import ButtonOutline from 'buttons/ButtonOutline';
 
 export default class Timer extends React.Component{

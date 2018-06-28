@@ -54,7 +54,6 @@ export default class StopWatch extends React.Component {
             }
         }else{
             //start
-            if(this.props.onStart){this.props.onStart(this.state.total);}
             this.setState({
                 started:new Date(),
                 buttonTitle:'Stop',

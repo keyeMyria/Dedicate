@@ -1,10 +1,13 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableHighlight } from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight } from "react-native";
 import AppStyles from 'dedicate/AppStyles';
 import IconOverview from 'icons/IconOverview';
 import IconTasks from 'icons/IconTasks';
 import IconEvents from 'icons/IconEvents';
+import IconAnalytics from 'icons/IconAnalytics';
+import IconSettings from 'icons/IconSettings';
 import IconDatabases from 'icons/IconDatabases';
+import Logo from 'ui/Logo';
 
 export default class DrawerContent extends React.Component{
   constructor(props){
@@ -14,14 +17,14 @@ export default class DrawerContent extends React.Component{
   render(){
     return (
       <View style={styles.container}>
-        <View style={styles.container_logo}>
-          <Image style={styles.logo} source={require('images/logo_sm.png')} resizeMode='contain'/>
+        <View style={styles.header}>
+          <Logo width="129" height="25" color={AppStyles.backgroundColor}/>
         </View>
         <DrawerItem {...this.props} text="Overview" screen="Overview" icon={IconOverview} />
         <DrawerItem {...this.props} text="Tasks" screen="Tasks" icon={IconTasks} />
         <DrawerItem {...this.props} text="Events" screen="Events" icon={IconEvents} />
-        <DrawerItem {...this.props} text="Analytics" screen="Analytics" icon={IconOverview} />
-        <DrawerItem {...this.props} text="Settings" screen="Settings" icon={IconOverview} />
+        <DrawerItem {...this.props} text="Analytics" screen="Analytics" icon={IconAnalytics} />
+        <DrawerItem {...this.props} text="Settings" screen="Settings" icon={IconSettings} />
         <DrawerItem {...this.props} text="Databases" screen="Databases" icon={IconDatabases} />
       </View>
     );
@@ -44,8 +47,7 @@ const DrawerItem = props => {
 
 const styles = StyleSheet.create({
   container: { flex:1 },
-  container_logo: { padding: 15, backgroundColor:'#6666cc', marginBottom:20},
-  logo: { width:'40%', tintColor: 'white', alignSelf:'center'},
+  header: { padding: 15, backgroundColor:'#6666cc', marginBottom:20, flexDirection:'row', justifyContent:'center', width:'100%'},
   drawerItem: {flexDirection:'row', flexWrap:'wrap', paddingVertical: 15, paddingHorizontal:20},
   drawerItemSelected: { backgroundColor:AppStyles.listItemHoverColor},
   drawerItemIcon:{paddingRight:20},

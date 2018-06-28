@@ -51,6 +51,6 @@ const styles = StyleSheet.create({
     },
     buttonText:{
         color:AppStyles.buttonOutlineTextColor, 
-        fontSize:AppStyles.buttonFontSize
+        fontSize:17
     }
 });

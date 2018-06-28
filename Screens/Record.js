@@ -9,6 +9,7 @@ import Picker from 'fields/Picker';
 import StopWatch from 'fields/StopWatch';
 import LocationPicker from 'fields/LocationPicker';
 import DateTimePicker from 'fields/DateTimePicker'
+import FiveStars from 'fields/FiveStars';
 import Button from 'buttons/Button';
 import ButtonSave from 'buttons/ButtonSave';
 import ButtonClose from 'buttons/ButtonClose';
@@ -169,6 +170,30 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                     this.state.stopWatch.show = record.timer;
                     this.state.stopWatch.datestart = record.timer ? record.datestart : null;
                 }
+
+                //check all task inputs and create missing inputs for record
+                for(var x = 0; x < this.state.task.inputs.length; x++){
+                    var input = this.state.task.inputs[x];
+                    var i = record.inputs.map(a => a.inputId).indexOf(input.id);
+                    if(i >= 0){continue;}
+                    var number = null;
+                    var date = null;
+                    switch(input.type){
+                        case 2: case 3: case 4: date = new Date(); break;
+                        case 6: number = 0; break;
+                    }
+                    global.realm.write(() => {
+                        record.inputs.push({
+                            number:number, 
+                            text:null, 
+                            date:date, 
+                            type:input.type, 
+                            taskId:this.state.task.id,
+                            inputId:input.id, 
+                            input:input
+                        });
+                    });
+                }
             }
         }
         if(typeof this.state.task != 'undefined' && this.state.task.id != null){
@@ -192,15 +217,30 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                         case 6: number = 0; break;
                     }
 
-                    this.state.record.inputs[x] = {
-                        type: input.type,
-                        number:number,
-                        text:text,
-                        date:date,
-                        input:input,
-                        inputId: input.id,
-                        taskId: this.state.task.id
+                    if(islive == true){
+                        global.realm.write(() => {
+                            this.state.record.inputs.push({
+                                type: input.type,
+                                number:number,
+                                text:text,
+                                date:date,
+                                input:input,
+                                inputId: input.id,
+                                taskId: this.state.task.id
+                            });
+                        });
+                    }else{
+                        this.state.record.inputs.push({
+                            type: input.type,
+                            number:number,
+                            text:text,
+                            date:date,
+                            input:input,
+                            inputId: input.id,
+                            taskId: this.state.task.id
+                        });
                     }
+                    
                 }
             }
         }else{
@@ -216,6 +256,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.validateForm();
     }
 
     componentWillUnmount(){
@@ -229,7 +270,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         return true;
     }
 
-    onLayoutChange = event => {
+    onLayoutChange = () => {
         this.setState({
             layoutChange:true
         });
@@ -241,26 +282,33 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     //validate form
     validateForm = () => {
         var show = true;
-        for(x = 0; x < this.state.task.inputs.length; x++){
-            var input = this.state.record.inputs[x];
-            var dtype = this.getInputDataType(input.type);
-            if(dtype == 1){ // Number data type
-                if(input.number == null){show = false;}
-                if(!Number.isInteger(input.number)){ show = false;}
-            }
-            else if(dtype == 2){ // Text data type
-                if(input.text == null){show = false;}
-                if(input.text == ''){show = false;}
-            }
-            else if(dtype == 3){ // Date data type
-                if(input.date == null){show = false;}
-                try{
-                    var d = Date(input.date); 
-                }catch(ex){
-                    show = false;
+        var inputs = this.state.task.inputs;
+        if(typeof inputs != 'undefined' && inputs != null && inputs.length > 0){
+            for(x = 0; x < inputs.length; x++){
+                var i = this.state.record.inputs.map(a => a.inputId).indexOf(inputs[x].id);
+                if(i < 0){continue;} //record doesn't contain input
+                var input = this.state.record.inputs[i];
+                if(typeof input != 'undefined'){
+                    var dtype = this.getInputDataType(input.type);
+                    if(dtype == 1){ // Number data type
+                        if(input.number == null){show = false;}
+                        if(isNaN(input.number)){ show = false;}
+                    }
+                    else if(dtype == 2){ // Text data type
+                        if(input.text == null){show = false;}
+                        if(input.text == ''){show = false;}
+                    }
+                    else if(dtype == 3){ // Date data type
+                        if(input.date == null){show = false;}
+                        try{
+                            var d = Date(input.date); 
+                        }catch(ex){
+                            show = false;
+                        }
+                    }
+                    if(show == false){break;}
                 }
             }
-            if(show == false){break;}
         }
         this.setState({edited:show});
     }
@@ -279,14 +327,15 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     // Input Field Events
-    onChangeText = (index, type, value) => {
+    onChangeText = (id, type, value) => {
         var record = this.state.record;
-        var i = index - 1;
+        var i = record.inputs.map(a => a.inputId).indexOf(id);
+        if(i < 0){return;} //record doesn't contain input
         switch(this.getInputDataType(type)){
             case  1: // Number data type
-                var number = typeof value == 'number' ? value : (
-                    typeof value == 'string' ? (value == '' ? null : parseInt(value)) : value
-                );
+                var number = typeof value == 'number' ? value : 
+                    (typeof value == 'string' ? 
+                    (value == '' ? null : parseInt(value)) : value);
                 if(this.state.islive == true){
                     global.realm.write(() => {
                         record.inputs[i].number = number;
@@ -324,6 +373,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     onDateChange = (id, date) => {
         var record = this.state.record;
         var i = record.inputs.map(a => a.inputId).indexOf(id);
+        if(i < 0){return;} //record doesn't contain input
         if(this.state.islive == true){
             global.realm.write(() => {
                 record.inputs[i].date = date;
@@ -358,18 +408,52 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
 
     onRecordedDateStartChange = (date) => {
         var record = this.state.record;
-        record.datestart = date;
         if(this.state.changedDateEnd == false){
             //also change end date + 10 minutes
-            record.dateend = new Date(date);
+            if(this.state.islive == true){
+                global.realm.write(() => {
+                    record.dateend = new Date(date);
+                });
+            }else{
+                record.dateend = new Date(date);
+            }
+        }else{
+            if(record.dateend < date){
+                Alert.alert("Date Range Error", "Your starting date must use a date that comes before your ending date.");
+                this.setState({record:record});
+                return;
+            }
         }
-        this.setState({record:record});
+        if(this.state.islive == true){
+            global.realm.write(() => {
+                record.datestart = date;
+            });
+        }else{
+            record.datestart = date;
+        }
+        this.setState({record:record}, () => {
+            this.validateForm();
+        });
     }
 
     onRecordedDateEndChange = (date) => {
         var record = this.state.record;
-        record.dateend = date;
-        this.setState({record:record, changedDateEnd:true})
+        if(record.datestart > date){
+            Alert.alert("Date Range Error", "Your ending date must use a date that comes after your starting date.");
+            this.setState({record:record});
+            return;
+        }
+        if(this.state.islive == true){
+            global.realm.write(() => {
+                record.dateend = date;
+            });
+        }else{
+            record.dateend = date;
+        }
+        this.setState({record:record, changedDateEnd:true},
+        () => {
+            this.validateForm();
+        })
     }
 
     onPressButtonStopWatch = () => {
@@ -391,13 +475,17 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                 record.datestart = date;
                 record.dateend = date;
             });
-            this.setState({islive:true, stopWatch:stopWatch});
+            this.setState({stopWatch:stopWatch}, ()=>{
+                this.validateForm();
+            });
         }else{
             record.time = 0;
             record.timer = true;
             record.datestart = date;
             record.dateend = date;
-            this.setState({record:db.CreateRecord(record), islive:true, stopWatch:stopWatch});
+            this.setState({record:db.CreateRecord(record), islive:true, stopWatch:stopWatch}, () => {
+                this.validateForm();
+            });
         }
     }
 
@@ -433,12 +521,29 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         });
     }
 
+    // 5 Stars ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    onChangeFiveStars = (value, id) => {
+        var record = this.state.record;
+        var i = record.inputs.map(a => a.inputId).indexOf(id);
+        if(i < 0){return;} //record doesn't contain input
+        if(this.state.islive){
+            global.realm.write(() => {
+                record.inputs[i].number = value;
+            });
+        }else{
+            record.inputs[i].number = value;
+        }
+        this.setState({record:record}, () => {
+            this.validateForm();
+        });
+    }
+
     // Save Event /////////////////////////////////////////////////////////////////////////////////////////////
 
     SaveRecord = () => {
         //save to database
         if(this.state.islive == false){
-            console.warn(JSON.stringify(this.state.record, null, 4));
             var db = new DbRecords();
             db.CreateRecord(this.state.record);
         }
@@ -573,12 +678,12 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             ref={ref}
                                             style={styles.inputField}
                                             placeholder={'10'}
+                                            defaultValue={(recinput.number ? recinput.number.toString() : null) || ''}
                                             keyboardType="numeric"
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
-                                            defaultValue={(recinput.number ? recinput.number.toString() : null) || ''}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, input.id, input.type, text)}}
                                         />
                                     </View>
                                 )
@@ -590,11 +695,11 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             ref={ref}
                                             style={styles.inputField}
                                             placeholder={'Text'}
+                                            defaultValue={recinput.text || ''}
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
-                                            defaultValue={recinput.text || ''}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, ref, keyType.toString(), e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, input.id, input.type, text)}}
                                         />
                                     </View>
                                 )
@@ -661,7 +766,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                                 {key:1, label:'Yes'}
                                             ]}
                                             selectedValue={recinput.number || 0}
-                                            onValueChange={(key, index, label) => {that.onChangeText.call(that, e, input.type, key)}}
+                                            onValueChange={(key) => {that.onChangeText.call(that, input.id, input.type, key)}}
                                         />
                                     </View>
                                 )
@@ -669,16 +774,18 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 return (
                                     <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
                                         <Text style={styles.fieldTitle}>{input.name}</Text>
+                                        <FiveStars color={AppStyles.starColor} stars={recinput.number || 0} onChange={(value) => this.onChangeFiveStars.call(that, value, input.id)}></FiveStars>
                                     </View>
                                 )
                             case 8: //Location
                                 return (
                                     <View key={input.id} style={styles.inputFieldContainer}>
-                                        <Text style={[styles.fieldTitle, styles.padding]} defaultValue={recinput.text || ''}>{input.name}</Text>
+                                        <Text style={[styles.fieldTitle, styles.padding]}>{input.name}</Text>
                                         <LocationPicker 
                                             ref={ref}
                                             textInputStyle={[styles.inputField, styles.padding]}
                                             placeholder={'search'}
+                                            defaultValue={recinput.text || ''}
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
@@ -693,10 +800,11 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             ref={ref}
                                             style={styles.inputField}
                                             placeholder={'URL link'}
+                                            defaultValue={recinput.text || ''}
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
-                                            onChangeText={(text) => {that.onChangeText.call(that, e, input.type, text)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, input.id, input.type, text)}}
                                         />
                                     </View>
                                 )
@@ -765,8 +873,7 @@ const styles = StyleSheet.create({
     recordTimeTitle:{flex:1, flexDirection:'row', width:'100%'},
 
     //Stop Watch Button
-    buttonStopWatchContainer:{position:'absolute', right:0, top:75},
-    buttonStopWatch:{},
+    buttonStopWatchContainer:{position:'absolute', left:320, top:75},
 
     //Record Task form
     recordTimeContainer:{paddingBottom:20, paddingHorizontal:20, width:'100%'},

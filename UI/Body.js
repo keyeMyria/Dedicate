@@ -35,7 +35,6 @@ export default class Body extends React.Component {
     }
 
     render() {
-        var that = this;
         var {width} = Dimensions.get('window');
         return (
             <View style={[styles.container, this.props.style]} onLayout={this.props.onLayout}>

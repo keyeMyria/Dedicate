@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
 
     // inputs form
     containerInputs: {minHeight:100, paddingTop:15, paddingBottom:70, backgroundColor:AppStyles.altBackgroundColor},
-    inputsTitle: {fontSize:AppStyles.titleFontSize, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
+    inputsTitle: {fontSize:24, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
     containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
     inputsDescription: { fontSize:16, paddingHorizontal:10, position:'relative', color: AppStyles.color },
     buttonAddInput:{position:'absolute', right:12, zIndex:1},

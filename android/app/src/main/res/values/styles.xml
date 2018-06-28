@@ -5,6 +5,11 @@
         <!-- Customize your theme here. -->
         <!--<item name="android:datePickerDialogTheme">@style/CalendarDatePickerDialog</item>
         <item name="android:timePickerDialogTheme">@style/TimePickerDialogStyle</item>-->
+        <item name="android:statusBarColor">@color/status_bar_color</item>
+    </style>
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/background_splash</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
     </style>
 
     <!--<style name="CalendarDatePickerDialog">

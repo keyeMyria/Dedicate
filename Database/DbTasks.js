@@ -11,7 +11,6 @@ export default class DbTasks extends Db{
             id = task.id;
             isnew = false;
             var utask = global.realm.objects('Task').filtered('id = $0', id)[0];
-            //console.warn(JSON.stringify([task, utask], null, 4));
             var oldcatid = null;
             if(typeof utask.category != 'undefined' && utask.category != null){
                 //get id of current task category to use later

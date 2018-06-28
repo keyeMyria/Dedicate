@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, View, Text, StyleSheet } from 'react-native';
+import { TextInput, View, StyleSheet } from 'react-native';
 
 export default class Textbox extends React.Component {
     constructor(props){

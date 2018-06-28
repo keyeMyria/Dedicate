@@ -3,6 +3,7 @@ package com.dedicate;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.horcrux.svg.SvgPackage;
 import io.realm.react.RealmReactPackage;
@@ -27,10 +28,11 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-          new MapsPackage(),
-          new SvgPackage(),
+          new SplashScreenReactPackage(),
           new RealmReactPackage(),
-          new RNFSPackage()
+          new SvgPackage(),
+          new RNFSPackage(),
+          new MapsPackage()
       );
     }
 

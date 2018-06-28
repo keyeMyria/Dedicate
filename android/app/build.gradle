@@ -76,12 +76,13 @@ android {
 }
 
 dependencies {
-    implementation project(':react-native-maps')
-    implementation project(':react-native-svg')
-    implementation project(':realm')
+    implementation project(':react-native-splash-screen')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'com.android.support:appcompat-v7:26.0.2'
     implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation project(':realm')
+    implementation project(':react-native-svg')
+    implementation project(':react-native-maps')
     implementation project(':react-native-fs')
 }
 

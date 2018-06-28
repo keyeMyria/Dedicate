@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet} from 'react-native';
 import Textbox from 'fields/Textbox';
 import MapView from 'react-native-maps';
-import MapTheme from 'ui/Maps/Themes/Default.js';
 
 // NOTE: Find Google Android Maps Developer API Key within /android/app/src/main/AndroidManifest.xml :
 //       com.google.android.geo.API_KEY

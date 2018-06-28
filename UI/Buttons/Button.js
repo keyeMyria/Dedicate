@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
     },
     buttonText:{
         color:AppStyles.buttonTextColor, 
-        fontSize:AppStyles.buttonFontSize
+        fontSize:17
     }
 });

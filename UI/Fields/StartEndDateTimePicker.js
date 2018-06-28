@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, Text} from 'react-native';
+import {View, StyleSheet, Text, Alert} from 'react-native';
 import AppLang from 'dedicate/AppLang';
 import DateTimePicker from 'fields/DateTimePicker'
 
@@ -30,6 +30,13 @@ export default class StartEndDateTimePicker extends React.Component{
     }
 
     onRecordedDateStartChange = (date) => {
+        if(this.state.changedDateEnd == true){
+            if(this.state.dateend < date){
+                Alert.alert("Date Range Error", "Your starting date must use a date that comes before your ending date.");
+                this.setState({dateend:this.state.dateend});
+                return;
+            }
+        }
         this.setState({datestart:date}, () => {
             var dateend = this.state.dateend;
             if(this.state.changedDateEnd == false){
@@ -48,6 +55,11 @@ export default class StartEndDateTimePicker extends React.Component{
     }
 
     onRecordedDateEndChange = (date) => {
+        if(this.state.datestart > date){
+            Alert.alert("Date Range Error", "Your ending date must use a date that comes after your starting date.");
+            this.setState({datestart:this.state.datestart});
+            return;
+        }
         this.setState({dateend:date, changedDateEnd:true}, () => {
             if(typeof this.props.onChange != 'undefined'){
                 this.props.onChange(this.state.datestart, date);

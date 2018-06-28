@@ -1,11 +1,8 @@
 import React from 'react';
-import { 
-    AppRegistry, StyleSheet,
-    Text, View, Image,
-    TouchableOpacity
-} from 'react-native';
+import { AppRegistry, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import { DrawerActions } from 'react-navigation';
+import IconMenu from 'icons/IconMenu';
 
 export default class TitleBar extends React.Component {
     constructor(props){
@@ -18,7 +15,7 @@ export default class TitleBar extends React.Component {
             <View style={styles.container}>
                 <View style={styles.container_menu}>
                     <TouchableOpacity onPress={() => this.props.navigation.dispatch(DrawerActions.openDrawer())}>
-                        <Image style={styles.menu} source={require('icons/Menu.png')} />
+                        <IconMenu size="xsmall" color={AppStyles.headerTextColor}></IconMenu>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.container_title}>
@@ -45,7 +42,6 @@ const styles = StyleSheet.create({
     container_menu: { alignSelf: 'flex-start', padding: 15 },
     container_title: { position:'absolute', top: 14, alignSelf: 'center' },
     container_buttons: {position: 'absolute', top:0, right:0, height:55},
-    menu: { width:25, height:25, tintColor: AppStyles.headerTextColor },
     title:{ fontSize:19, color:'white' }
 });
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
 import DatePicker from 'react-native-datepicker'
 import Textbox from 'fields/Textbox';
+import IconEvents from 'icons/IconEvents';
 
 export default class DateTimePicker extends React.Component {
     constructor(props){
@@ -75,6 +76,7 @@ export default class DateTimePicker extends React.Component {
                             datePicker: {backgroundColor:'#000' }
                         }}
                         onDateChange={this.onDateChange}
+                        iconComponent={<View style={styles.iconEvents}><IconEvents size="xsmall"></IconEvents></View>}
                         />
                 </View>
                 <View style={styles.column_two}>
@@ -95,5 +97,6 @@ const styles = StyleSheet.create({
     container:{flexDirection:'row'},
     column_one:{paddingTop:9, width:40, overflow:'hidden'},
     column_two:{},
-    textbox:{fontSize:17, minWidth:100}
+    textbox:{fontSize:17, minWidth:100},
+    iconEvents:{position:'relative', left:-55, top:-2}
 });

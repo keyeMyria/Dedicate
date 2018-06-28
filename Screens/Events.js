@@ -15,6 +15,7 @@ import DropShadow from 'ui/DropShadow';
 import StartEndDateTimePicker from 'fields/StartEndDateTimePicker';
 import TextLink from 'text/TextLink';
 import IconEvents from 'icons/IconEvents';
+import FiveStars from 'fields/FiveStars';
 
 export default class EventsScreen extends React.Component {
     constructor(props) {
@@ -69,7 +70,7 @@ export default class EventsScreen extends React.Component {
 
     getEvents = (callback) => {
         //get events from database
-        if(this.state.nomore == true){return;}
+        if(this.state.nomore == true || this.state.refreshing == true){return;}
         this.setState({refreshing:true});
         var results = this.dbRecords.GetList({
             start:this.state.start, 
@@ -203,8 +204,7 @@ export default class EventsScreen extends React.Component {
                     data={this.state.events}
                     keyExtractor={item => item.id.toString()}
                     onEndReached={() => this.onEndReached.call(that)}
-                    onEndReachedThreshold={0.2}
-                    refreshing={this.state.refreshing}
+                    onEndReachedThreshold={0.5}
                     ListFooterComponent={<View style={{height:60}}></View>}
                     extraData={this.state.refresh}
                     renderItem={
@@ -229,12 +229,15 @@ export default class EventsScreen extends React.Component {
                             for(var x = 0; x < item.inputs.length; x++){
                                 var input = item.inputs[x];
                                 var val = '';
+                                var extraStyles = {};
                                 inputIndex++;
+
+                                //get value for input
                                 switch(input.type){
-                                    case 0: //number
+                                    case 0: case 7: //number
                                         val = input.number;
                                         break;
-                                    case 1: //text
+                                    case 1: case 8: case 9: //text
                                         val = input.text;
                                         break;
                                     case 2: //date
@@ -248,12 +251,34 @@ export default class EventsScreen extends React.Component {
                                         break;
                                     case 6: //Yes/No
                                         val = input.number == 1 ? 'Yes' : 'No';
+                                        break;
                                 }
-                                inputs.push(
-                                    <View key={'input' + inputIndex} style={styles.input}>
-                                        <Text style={styles.inputText}>{input.input.name}: {val}</Text>
-                                    </View>
-                                );
+
+                                //get extra styling for input
+                                switch(input.type){
+                                    case 7: case 9: // 5 stars, URL link
+                                    extraStyles['width'] = '100%';
+                                }
+
+                                //render input
+                                switch(input.type){
+                                    case 0: case 1: case 2: case 3: case 4: case 6: case 8: case 9:
+                                        inputs.push(
+                                            <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
+                                                <Text style={styles.inputText}>{input.input.name}: {val}</Text>
+                                            </View>
+                                        );
+                                        break;
+                                    case 7: // 5 stars
+                                        inputs.push(
+                                            <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
+                                                <FiveStars size="xxsmall" stars={input.number} color={AppStyles.starColor} locked={true}></FiveStars>
+                                            </View>
+                                        );
+                                        break;
+
+                                }
+                                
                             }
                 
                             //render item

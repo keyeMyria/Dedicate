@@ -8,7 +8,7 @@ import ButtonDots from 'buttons/ButtonDots';
 import Realm from 'realm';
 import Schema from 'db/Schema';
 import Files from 'react-native-fs';
-import {UserConfig} from 'utility/UserConfig';
+import {UserConfig} from 'dedicate/UserConfig';
 import IconDatabases from 'icons/IconDatabases';
 
 export default class DatabaseScreen extends React.Component {

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none" width="64" height="64">
+	<defs>
+		<path fill="#FFF" d="M64 11V0H0v11h64M0 53v11h64V53H0m64-15V27H0v11h64z" id="a" />
+	</defs>
+	<use xlink:href="#a" />
+</svg>

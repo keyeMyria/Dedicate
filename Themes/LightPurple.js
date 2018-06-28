@@ -26,9 +26,8 @@ export default LightPurple =
     listItemHoverColor: '#f0f0ff',
     listItemPressedColor: '#f0f0ff',
 
-    // font styling //////////////////////////
-    titleFontSize: 24,
-    buttonFontSize:17,
+    // star color //////////////////////////
+    starColor:'#ff9900',
 
     // chart styling /////////////////////////
     chartLine1Stroke: '#cccccc',
