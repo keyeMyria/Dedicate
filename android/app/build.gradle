@@ -82,8 +82,9 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation project(':realm')
     implementation project(':react-native-svg')
-    implementation project(':react-native-maps')
     implementation project(':react-native-fs')
+    implementation project(':react-native-maps')
+    implementation project(':react-native-geocoder')
 }
 
 // Run this once to be able to run the application with BUCK

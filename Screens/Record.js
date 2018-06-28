@@ -217,7 +217,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                         case 6: number = 0; break;
                     }
 
-                    if(islive == true){
+                    if(this.state.islive == true){
                         global.realm.write(() => {
                             this.state.record.inputs.push({
                                 type: input.type,
@@ -271,12 +271,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     onLayoutChange = () => {
-        this.setState({
-            layoutChange:true
-        });
-        this.setState({
-            layoutChange:false
-        });
+        this.setState({ layoutChange:!this.state.layoutChange });
     }
 
     //validate form
@@ -582,7 +577,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     render(){
-        var {width} = Dimensions.get('window');
+        var {width, height} = Dimensions.get('window');
         var that = this;
         var i = 0;
         return (
@@ -774,7 +769,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 return (
                                     <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
                                         <Text style={styles.fieldTitle}>{input.name}</Text>
-                                        <FiveStars color={AppStyles.starColor} stars={recinput.number || 0} onChange={(value) => this.onChangeFiveStars.call(that, value, input.id)}></FiveStars>
+                                        <FiveStars ref={ref} color={AppStyles.starColor} stars={recinput.number || 0} onChange={(value) => this.onChangeFiveStars.call(that, value, input.id)}></FiveStars>
                                     </View>
                                 )
                             case 8: //Location
@@ -783,12 +778,15 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                         <Text style={[styles.fieldTitle, styles.padding]}>{input.name}</Text>
                                         <LocationPicker 
                                             ref={ref}
-                                            textInputStyle={[styles.inputField, styles.padding]}
+                                            style={[styles.inputField, styles.padding]}
+                                            mapStyle={{height:height * 0.5}}
                                             placeholder={'search'}
                                             defaultValue={recinput.text || ''}
                                             returnKeyType={keyType} 
                                             blurOnSubmit={false}
                                             onSubmitEditing={() => {that.onSubmitEditing.call(that, keyType, e)}}
+                                            onChangeText={(text) => {that.onChangeText.call(that, input.id, input.type, text)}}
+                                            markerTitle={this.state.task.name}
                                         />
                                     </View>
                                 )
