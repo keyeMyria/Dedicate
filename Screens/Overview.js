@@ -32,12 +32,14 @@ export default class OverviewScreen extends React.Component {
             chartList:[],
             timerList:[],
             shadowOpacity:0,
-            loading:true
+            loading:true,
+            layoutWidth:0
         };
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
         this.getTimers = this.getTimers.bind(this);
         this.getCharts = this.getCharts.bind(this);
+        this.onLayout = this.onLayout.bind(this);
     }
 
     componentWillMount() {
@@ -73,6 +75,14 @@ export default class OverviewScreen extends React.Component {
                 resolve();
             }, 1);
         });
+    }
+
+    onLayout(){
+        const {width} = Dimensions.get('window');
+        if(this.state.layoutWidth != width){
+            this.setState({layoutWidth:width});
+            this.getCharts();
+        }
     }
 
     scroll = (e) => {
@@ -361,7 +371,7 @@ export default class OverviewScreen extends React.Component {
         if(this.state.hasTask === true){
             return (
                 <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={styles.body}
-                    buttonAdd={true} buttonRecord={true} bottomFade={true}
+                    buttonAdd={true} buttonRecord={true} bottomFade={true} onLayout={this.onLayout}
                     >
                     <View style={styles.counters}>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
@@ -413,7 +423,7 @@ export default class OverviewScreen extends React.Component {
         }else{
             // Show Message instead of Overview of tasks
             return (
-                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} buttonAdd={true}
+                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} buttonAdd={true} onLayout={this.onLayout}
                     footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
                 >
                     <View style={[styles.container]}>
