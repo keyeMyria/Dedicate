@@ -9,7 +9,7 @@ export default class TasksScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            tasks: this.dbTasks.GetList()
+            tasks: []
         };
 
         //bind events
@@ -20,6 +20,10 @@ export default class TasksScreen extends React.Component {
     
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        //get list of tasks
+        setTimeout(() => {
+            this.setState({tasks:this.dbTasks.GetList()});
+        }, 10);
     }
 
     componentWillUnmount(){

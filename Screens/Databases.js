@@ -29,7 +29,10 @@ export default class DatabaseScreen extends React.Component {
     
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
-        this.getFiles();
+        //get list of databases
+        setTimeout(() => {
+            this.getFiles();
+        }, 10);
     }
 
     componentWillUnmount(){

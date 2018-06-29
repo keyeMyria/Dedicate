@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableHighlight, BackHandler, FlatList, Picker } from 'react-native';
-import {NavigationActions} from 'react-navigation';
+import { View, Text, StyleSheet, TouchableHighlight, BackHandler, FlatList, Picker, Dimensions } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
 import DbRecords from 'db/DbRecords';
@@ -16,13 +15,14 @@ import StartEndDateTimePicker from 'fields/StartEndDateTimePicker';
 import TextLink from 'text/TextLink';
 import IconEvents from 'icons/IconEvents';
 import FiveStars from 'fields/FiveStars';
+import Loading from 'ui/Loading';
 
 export default class EventsScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             events: [],
-            tasks: this.dbTasks.GetList(),
+            tasks: [],
             start:0,
             refreshing: false,
             nomore: false, //no more records to load
@@ -33,7 +33,8 @@ export default class EventsScreen extends React.Component {
                 taskId:-1,
                 datestart:null,
                 dateend:null
-            }
+            },
+            loading:true
         };
 
         var filter = this.props.navigation.getParam('filter', null);
@@ -54,7 +55,10 @@ export default class EventsScreen extends React.Component {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
 
         //get initial list of events
-        this.getEvents();
+        setTimeout(() => {
+            this.setState({tasks:this.dbTasks.GetList()});
+            this.getEvents();
+        }, 10);
     }
 
     componentWillUnmount(){
@@ -87,7 +91,7 @@ export default class EventsScreen extends React.Component {
             start: this.state.start + this.paging
         }, 
         () => {
-            this.setState({refreshing:false});
+            this.setState({refreshing:false, loading:false});
             if(typeof callback != 'undefined'){
                 callback();
             }
@@ -159,8 +163,13 @@ export default class EventsScreen extends React.Component {
         var today = new Date();
         today.setDate(today.getDate() + 10);
         var inputIndex = 0;
+        var {height} = Dimensions.get('window');
         return (
-            <Body {...this.props} style={styles.body} title="Events" screen="Events" buttonAdd={true} buttonRecord={true} noscroll={true} bottomFade={true}
+            <Body {...this.props} style={styles.body} title="Events" screen="Events" 
+            buttonAdd={!this.state.loading} 
+            buttonRecord={!this.state.loading} 
+            noscroll={!this.state.loading} 
+            bottomFade={!this.state.loading}
             titleBarButtons={
                 <View style={styles.titlebarButtons}>
                     <ButtonSearch size="xsmall" onPress={() => this.toggleFilterForm.call(that)}></ButtonSearch>
@@ -199,116 +208,122 @@ export default class EventsScreen extends React.Component {
                 </Collapsible>
 
                 {this.state.filterForm && <DropShadow style={[styles.dropshadow]} opacity={0.075} height={20}></DropShadow>}
+                        
 
-                <FlatList
-                    data={this.state.events}
-                    keyExtractor={item => item.id.toString()}
-                    onEndReached={() => this.onEndReached.call(that)}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={<View style={{height:60}}></View>}
-                    extraData={this.state.refresh}
-                    renderItem={
-                        ({item}) => {
-                            var items = [];
-                            var inputs = [];
-                            if(!DatesMatch(today, item.datestart)){
-                                //render date header
-                                today = new Date(item.datestart);
-                                var d1 = DayInYear(new Date());
-                                var d2 = DayInYear(today);
-                                items.push(
-                                    <View key={'date_' + today.getMonth() + '_' + today.getDate()} style={styles.dateContainer}>
-                                        <View style={{opacity:0.35}}><IconEvents size="xsmall" color={AppStyles.textColor}></IconEvents></View>
-                                        <Text style={styles.dateName}>{DateSentence(today)}</Text>
-                                        <Text style={styles.dateCount}>{d1 - d2}d</Text>
-                                    </View>
-                                )
-                            }
-                
-                            //render inputs for item
-                            for(var x = 0; x < item.inputs.length; x++){
-                                var input = item.inputs[x];
-                                var val = '';
-                                var extraStyles = {};
-                                inputIndex++;
-
-                                //get value for input
-                                switch(input.type){
-                                    case 0: case 7: //number
-                                        val = input.number;
-                                        break;
-                                    case 1: case 8: case 9: //text
-                                        val = input.text;
-                                        break;
-                                    case 2: //date
-                                        val = DateFormat(input.date, 'm/d/yyyy');
-                                        break;
-                                    case 3: //time
-                                    val = DateFormat(input.date, 'h:MM:ss tt');
-                                        break;
-                                    case 4: //date & time
-                                        val = DateFormat(input.date, 'm/d/yyyy @ h:MM:ss tt');
-                                        break;
-                                    case 6: //Yes/No
-                                        val = input.number == 1 ? 'Yes' : 'No';
-                                        break;
-                                }
-
-                                //get extra styling for input
-                                switch(input.type){
-                                    case 7: case 9: // 5 stars, URL link
-                                    extraStyles['width'] = '100%';
-                                }
-
-                                //render input
-                                switch(input.type){
-                                    case 0: case 1: case 2: case 3: case 4: case 6: case 8: case 9:
-                                        inputs.push(
-                                            <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
-                                                <Text style={styles.inputText}>{input.input.name}: {val}</Text>
-                                            </View>
-                                        );
-                                        break;
-                                    case 7: // 5 stars
-                                        inputs.push(
-                                            <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
-                                                <FiveStars size="xxsmall" stars={input.number} color={AppStyles.starColor} locked={true}></FiveStars>
-                                            </View>
-                                        );
-                                        break;
-
-                                }
-                                
-                            }
-                
-                            //render item
-                            items.push(
-                                <View key={item.id}>
-                                    <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} 
-                                        onPress={() => {
-                                            this.props.navigation.navigate('RecordTask', {
-                                                goback:'Events', 
-                                                gobackParams:{
-                                                    filter:this.state.filter,
-                                                    filterForm: this.state.filterForm,
-                                                    filterDates: this.state.filterDates
-                                                }, 
-                                                recordId:item.id}, 
-                                                { type: "Navigate", routeName: "Record", params: { }
-                                            });
-                                        }}
-                                    >
-                                        <View style={styles.eventItemContainer}>
-                                            <Text style={styles.eventName}>{item.task.name}</Text>
-                                            <View style={styles.inputs}>{inputs}</View>
+                {this.state.loading ? 
+                    <View style={[styles.loading, {paddingTop:(height / 2) - 100}]}><Loading></Loading></View> : 
+                    <FlatList
+                        data={this.state.events}
+                        keyExtractor={item => item.id.toString()}
+                        onEndReached={() => this.onEndReached.call(that)}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={<View style={{height:90}}></View>}
+                        extraData={this.state.refresh}
+                        renderItem={
+                            ({item}) => {
+                                var items = [];
+                                var inputs = [];
+                                if(!DatesMatch(today, item.datestart)){
+                                    //render date header
+                                    today = new Date(item.datestart);
+                                    var d1 = DayInYear(new Date());
+                                    var d2 = DayInYear(today);
+                                    items.push(
+                                        <View key={'date_' + today.getMonth() + '_' + today.getDate()} style={styles.dateContainer}>
+                                            <View style={{opacity:0.35}}><IconEvents size="xsmall" color={AppStyles.textColor}></IconEvents></View>
+                                            <Text style={styles.dateName}>{DateSentence(today)}</Text>
+                                            <Text style={styles.dateCount}>{d1 - d2}d</Text>
                                         </View>
-                                    </TouchableHighlight>
-                                </View>
-                            );
-                            return items;
+                                    )
+                                }
+                    
+                                //render inputs for item
+                                for(var x = 0; x < item.inputs.length; x++){
+                                    var input = item.inputs[x];
+                                    var val = '';
+                                    var extraStyles = {};
+                                    inputIndex++;
+
+                                    //get value for input
+                                    switch(input.type){
+                                        case 0: case 7: //number
+                                            val = input.number;
+                                            break;
+                                        case 1: case 8: case 9: //text
+                                            val = input.text;
+                                            break;
+                                        case 2: //date
+                                            val = DateFormat(input.date, 'm/d/yyyy');
+                                            break;
+                                        case 3: //time
+                                        val = DateFormat(input.date, 'h:MM:ss tt');
+                                            break;
+                                        case 4: //date & time
+                                            val = DateFormat(input.date, 'm/d/yyyy @ h:MM:ss tt');
+                                            break;
+                                        case 6: //Yes/No
+                                            val = input.number == 1 ? 'Yes' : 'No';
+                                            break;
+                                    }
+
+                                    //get extra styling for input
+                                    switch(input.type){
+                                        case 7: case 9: // 5 stars, URL link
+                                        extraStyles['width'] = '100%';
+                                    }
+
+                                    //render input
+                                    switch(input.type){
+                                        case 0: case 1: case 2: case 3: case 4: case 6: case 8: case 9:
+                                            inputs.push(
+                                                <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
+                                                    <Text style={styles.inputText}>{input.input.name}: {val}</Text>
+                                                </View>
+                                            );
+                                            break;
+                                        case 7: // 5 stars
+                                            inputs.push(
+                                                <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
+                                                    <FiveStars size="xxsmall" stars={input.number} color={AppStyles.starColor} locked={true}></FiveStars>
+                                                </View>
+                                            );
+                                            break;
+
+                                    }
+                                    
+                                }
+                    
+                                //render item
+                                items.push(
+                                    <View key={item.id}>
+                                        <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} 
+                                            onPress={() => {
+                                                this.props.navigation.navigate('RecordTask', {
+                                                    goback:'Events', 
+                                                    gobackParams:{
+                                                        filter:this.state.filter,
+                                                        filterForm: this.state.filterForm,
+                                                        filterDates: this.state.filterDates
+                                                    }, 
+                                                    recordId:item.id}, 
+                                                    { type: "Navigate", routeName: "Record", params: { }
+                                                });
+                                            }}
+                                        >
+                                            <View style={styles.eventItemContainer}>
+                                                <Text style={styles.eventName}>{item.task.name}</Text>
+                                                <View style={styles.inputs}>{inputs}</View>
+                                            </View>
+                                        </TouchableHighlight>
+                                    </View>
+                                );
+                                return items;
+                            }
                         }
-                    }
-                ></FlatList>
+                    ></FlatList>
+                }
+
+                
             </Body>
         );
     }
@@ -318,6 +333,7 @@ const styles = StyleSheet.create({
     body:{position:'absolute', top:0, bottom:0, left:0, right:0},
     titlebarButtons:{paddingTop:15, paddingRight:15},
     dropshadow:{zIndex:10},
+    loading:{width:'100%', flexDirection:'row', justifyContent:'center'},
 
     filterFormContainer:{padding:20},
     formLabel:{fontSize:15, opacity:0.75},

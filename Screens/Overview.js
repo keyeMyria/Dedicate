@@ -13,6 +13,7 @@ import IconEvents from 'icons/IconEvents';
 import IconDatabases from 'icons/IconDatabases';
 import Timer from 'fields/Timer';
 import Logo from 'ui/Logo';
+import Loading from 'ui/Loading';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -26,14 +27,17 @@ export default class OverviewScreen extends React.Component {
             totalTasks:dbTasks.TotalTasks(),
             totalRecords:dbRecords.TotalRecords(),
             hasTask:dbTasks.HasTasks(),
-            charts:dbRecords.GetListByTask(),
-            timers:dbRecords.GetActiveTimers(),
+            charts:[],
+            timers:[],
             chartList:[],
             timerList:[],
-            shadowOpacity:0
+            shadowOpacity:0,
+            loading:true
         };
-        //bind events
+        //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.getTimers = this.getTimers.bind(this);
+        this.getCharts = this.getCharts.bind(this);
     }
 
     componentWillMount() {
@@ -50,24 +54,25 @@ export default class OverviewScreen extends React.Component {
     }
 
     componentDidMount() { 
-        this.onLayoutChange();
+        this.loadContent().then(() =>{
+            this.setState({loading:false});
+        }).catch();
     }
 
-    // Screen Orientation changes
-    onLayoutChange = () => {
-        var {height, width} = Dimensions.get('window');
-        var styles = stylesPortrait;
-        if(width > height){
-            styles = stylesLandscape;
-        }
-        if(this.state.styles != styles){
-            this.setState({styles: styles},
-            () => {
-                //get rendered timers & charts
-                this.getTimers();
-                this.getCharts();
-            });
-        }
+    loadContent(){
+        return new Promise(resolve => {
+            setTimeout(()=>{
+                var dbRecords = new DbRecords();
+                this.setState({
+                    charts:dbRecords.GetListByTask(),
+                    timers:dbRecords.GetActiveTimers()
+                }, () => {
+                    this.getTimers();
+                    this.getCharts();
+                });
+                resolve();
+            }, 1);
+        });
     }
 
     scroll = (e) => {
@@ -79,7 +84,7 @@ export default class OverviewScreen extends React.Component {
         }
     }
 
-    getTimers = () => {
+    getTimers() {
         var that = this;
         var timers = this.state.timers;
         var items = [];
@@ -123,7 +128,7 @@ export default class OverviewScreen extends React.Component {
         //});
     }
 
-    getCharts = () => {
+    getCharts() {
         var items = [];
         var {width} = Dimensions.get('window');
         var maxCharts = 6;
@@ -352,10 +357,11 @@ export default class OverviewScreen extends React.Component {
     }
 
     render() {
+        var {height} = Dimensions.get('window');
         if(this.state.hasTask === true){
             return (
                 <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={styles.body}
-                    onLayout={this.onLayoutChange} buttonAdd={true} buttonRecord={true} bottomFade={true}
+                    buttonAdd={true} buttonRecord={true} bottomFade={true}
                     >
                     <View style={styles.counters}>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
@@ -394,15 +400,20 @@ export default class OverviewScreen extends React.Component {
                     </View>
                     <DropShadow style={[styles.dropshadow]} opacity={0.075 * this.state.shadowOpacity} height={20}></DropShadow>
                     <ScrollView onScroll={this.scroll} keyboardShouldPersistTaps="handled" scrollEventThrottle={1000 / 24.9}>
-                        <View style={styles.timersContainer}>{this.state.timerList}</View>
-                        <View style={styles.chartsContainer}>{this.state.chartList}</View>
+                        {this.state.loading == true ? 
+                            <View style={[styles.loading, {paddingTop:(height / 2) - 200}]}><Loading></Loading></View> : 
+                            <View>
+                                <View style={styles.timersContainer}>{this.state.timerList}</View>
+                                <View style={styles.chartsContainer}>{this.state.chartList}</View>
+                            </View>
+                        }
                     </ScrollView>
                 </Body>
             );
         }else{
             // Show Message instead of Overview of tasks
             return (
-                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} onLayout={this.onLayoutChange} buttonAdd={true}
+                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} buttonAdd={true}
                     footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
                 >
                     <View style={[styles.container]}>
@@ -433,6 +444,7 @@ const styles = StyleSheet.create({
     p: { fontSize:17, paddingBottom:15, color:AppStyles.textColor },
     purple: { color: AppStyles.color},
     dropshadow:{zIndex:10},
+    loading:{width:'100%', flexDirection:'row', justifyContent:'center'},
     
     counters:{flexDirection:'row', padding: 7, width:'100%' },
     counterContainer:{flexDirection:"row", alignSelf:'flex-start', paddingHorizontal:10, paddingTop:13},
@@ -472,14 +484,4 @@ const styles = StyleSheet.create({
     legendItemLabel:{},
     legendItemText:{fontSize:17},
     legendName:{position:'absolute', width:'100%', bottom:0, paddingLeft:55, fontSize:20, textAlign:'center', alignSelf:'center'}
-});
-
-const stylesLandscape = StyleSheet.create({
-    tooltip: {position:'absolute', bottom:5, right:100, height:60, maxWidth:250, textAlign:'right'},
-    logo: {marginTop:30, marginBottom:20}
-});
-
-const stylesPortrait = StyleSheet.create({
-    tooltip: {position:'absolute', bottom:10, left:30, height:60, maxWidth:250},
-    logo: {marginTop:60, marginBottom:30}
 });
