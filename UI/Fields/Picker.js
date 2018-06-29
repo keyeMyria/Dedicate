@@ -35,24 +35,22 @@ export default class Picker extends React.Component {
     ShowModal = event => {
         if(this.state.items.length <= 1){return;}
         var that = this;
-        global.Modal.setContent(this.props.title, () => {
-            var i = 0;
-            return (
-                <View style={styles.modalContainer}>
-                    {this.state.items.map((input) => {
-                        i++;
-                        var e = parseInt(i.toString());
-                        return (
-                            <TouchableOpacity key={input.key} onPress={() => {this.selectItem.call(that, e-1)}}>
-                            <View style={styles.modalItemContainer}>
-                                <Text style={styles.modalItemText}>{input.label}</Text>
-                            </View>
-                            </TouchableOpacity>
-                        );
-                    })}
-                </View>
-            )
-        });
+        var i = 0;
+        global.Modal.setContent(this.props.title, (
+            <View style={styles.modalContainer}>
+                {this.state.items.map((input) => {
+                    i++;
+                    var e = parseInt(i.toString());
+                    return (
+                        <TouchableOpacity key={input.key} onPress={() => {this.selectItem.call(that, e-1)}}>
+                        <View style={styles.modalItemContainer}>
+                            <Text style={styles.modalItemText}>{input.label}</Text>
+                        </View>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        ));
         global.Modal.show();
     }
 

@@ -1,4 +1,3 @@
-import Realm from 'realm';
 import Db from 'db/Db';
 import DbRecords from './DbRecords';
 
@@ -11,11 +10,6 @@ export default class DbTasks extends Db{
             id = task.id;
             isnew = false;
             var utask = global.realm.objects('Task').filtered('id = $0', id)[0];
-            var oldcatid = null;
-            if(typeof utask.category != 'undefined' && utask.category != null){
-                //get id of current task category to use later
-                oldcatid = utask.category.id;
-            }
 
             if(utask.category.id != task.category.id){
                 //update category id for existing task
@@ -28,22 +22,6 @@ export default class DbTasks extends Db{
                     }
                     utask.category = cat;
                 });
-
-                if(typeof utask.category != 'undefined'){
-                    //update new category with total task count
-                    var total = this.TotalTasks(['category.id=$0',utask.category.id]);
-                    global.realm.write(()=>{
-                        utask.category.tasks = total;
-                    });
-                }
-                if(oldcatid != null){
-                    //update old category with total task count
-                    var total = this.TotalTasks(['category.id=$0',oldcatid]);
-                    var oldcat = global.realm.objects('Category').filtered('id = $0', oldcatid);
-                    global.realm.write(()=>{
-                        oldcat.tasks = total;
-                    });
-                }
             }
 
             if(task.inputs.length > 0){
@@ -205,19 +183,20 @@ export default class DbTasks extends Db{
     }
 
     DeleteTask(taskId){
-        global.realm.write(() => {
-            //delete task recordings
-            var db = new DbRecords();
-            var records = global.realm.objects('Record').filtered('task.id=' + taskId);
-            if(records.length > 0){
-                records = records.map(a => a.id);
-                for(var x = 0; x < records.length;x++){
-                    //delete all records for task
-                    db.DeleteRecord(global.realm.objects('Record').filtered('id = $0', records[x]));
-                }
+        
+        //delete task recordings
+        var db = new DbRecords();
+        var records = global.realm.objects('Record').filtered('task.id=' + taskId);
+        if(records.length > 0){
+            records = records.map(a => a.id);
+            for(var x = 0; x < records.length;x++){
+                //delete all records for task
+                db.DeleteRecord(global.realm.objects('Record').filtered('id = $0', records[x]));
             }
-            
-            //finally, delete task
+        }
+        
+        //finally, delete task
+        global.realm.write(() => {
             global.realm.delete(global.realm.objects('Task').filtered('id=' + taskId));
         });
     }

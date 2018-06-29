@@ -68,8 +68,7 @@ android {
             def versionCodes = ["armeabi-v7a":1, "x86":2]
             def abi = output.getFilter(OutputFile.ABI)
             if (abi != null) {  // null for the universal-debug, universal-release variants
-                output.versionCodeOverride =
-                        versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
+                output.versionCodeOverride = versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
             }
         }
     }
@@ -85,6 +84,9 @@ dependencies {
     implementation project(':react-native-fs')
     implementation project(':react-native-maps')
     implementation project(':react-native-geocoder')
+    implementation project(':react-native-zip-archive')
+    implementation project(':react-native-document-picker')
+    implementation project(':react-native-file-utils')
 }
 
 // Run this once to be able to run the application with BUCK

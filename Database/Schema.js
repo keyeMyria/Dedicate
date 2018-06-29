@@ -6,7 +6,7 @@ import Realm from 'realm'
     global.realm = new Realm({
         path: path,
         schema: [Task, Input, Category, Record, RecordInput],
-        schemaVersion: 7, //update version when schema changes dramatically
+        schemaVersion: 8, //update version when schema changes dramatically
         migration: function(oldRealm, newRealm) {
             //newRealm.deleteAll();
         }
@@ -64,8 +64,7 @@ import Realm from 'realm'
     primaryKey: 'id',
     properties: {
         id: 'int',
-        name: 'string',
-        tasks: {type:'int', default:0}
+        name: 'string'
      }
  }
 
@@ -81,7 +80,7 @@ import Realm from 'realm'
         datestart: {type: 'date', indexed: true},
         dateend: {type: 'date'},
         time: {type: 'int'}, //total time in seconds
-        timer: {type: 'bool'}, //determines if timer is currently running
+        timer: {type: 'bool', indexed: true}, //determines if timer is currently running
         
         //list of inputs & their values
         inputs: {type: 'list', objectType: 'RecordInput'},

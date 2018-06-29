@@ -173,24 +173,22 @@ export default class TaskScreen extends React.Component {
     onPressAddCategory = event => {
         var that = this;
         this.setState({categoryIndex: Math.floor(Math.random() * (this.categories.length))});
-        global.Modal.setContent('Add A New Category',() => {
-            return (
-                <View style={[styles.modalContainer, {minWidth:300}]}>
-                    <Text style={styles.fieldTitle}>Label</Text>
-                    <Textbox 
-                        ref="tasklabel"
-                        value={that.state.newcat.name}
-                        style={styles.inputField} 
-                        placeholder={that.placeholderCategoryName()}
-                        returnKeyType={'done'}
-                        onChangeText={that.onNewCategoryTitleChangeText}
-                    />
-                    <View style={styles.createCategoryButton}>
-                        <Button text="Create Category" onPress={() => that.onPressCreateCategory()}/>
-                    </View>
+        global.Modal.setContent('Add A New Category',(
+            <View style={[styles.modalContainer, {minWidth:300}]}>
+                <Text style={styles.fieldTitle}>Label</Text>
+                <Textbox 
+                    ref="tasklabel"
+                    value={that.state.newcat.name}
+                    style={styles.inputField} 
+                    placeholder={that.placeholderCategoryName()}
+                    returnKeyType={'done'}
+                    onChangeText={that.onNewCategoryTitleChangeText}
+                />
+                <View style={styles.createCategoryButton}>
+                    <Button text="Create Category" onPress={() => that.onPressCreateCategory()}/>
                 </View>
-            );
-        });
+            </View>
+        ));
         global.Modal.show();
     }
 

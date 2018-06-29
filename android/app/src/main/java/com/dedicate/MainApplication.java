@@ -26,6 +26,15 @@ import com.airbnb.android.react.maps.MapsPackage;
 //Geolocation Imports
 import com.devfd.RNGeocoder.RNGeocoderPackage;
 
+//ZIP Imports
+import com.rnziparchive.RNZipArchivePackage;
+
+//Document Picker Imports
+import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
+
+//File Utilities Imports
+import com.anumang.rnfileutils.RNFUPackage;
+
 //Java Imports
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +56,10 @@ public class MainApplication extends Application implements ReactApplication {
           new SvgPackage(),
           new RNFSPackage(),
           new MapsPackage(),
-          new RNGeocoderPackage()
+          new RNGeocoderPackage(),
+          new RNZipArchivePackage(),
+          new ReactNativeDocumentPicker(),
+          new RNFUPackage()
       );
     }
 

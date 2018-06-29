@@ -46,7 +46,7 @@ class DefaultScreen extends React.Component {
 
         //load a list of categories
         var dbCategories = new DbCategories();
-        this.state.categories = dbCategories.GetCategoriesList({filtered:'tasks > 0'});
+        this.state.categories = dbCategories.GetCategoriesList();
 
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -542,13 +542,12 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             var db = new DbRecords();
             db.CreateRecord(this.state.record);
         }
-        this.props.navigation.navigate('Overview');
+        this.hardwareBackPress();
     }
 
     // Delete Event /////////////////////////////////////////////////////////////////////////////////////////////
 
     DeleteRecord = () => {
-        var that = this;
         Alert.alert(
         'Delete Event?',
         'Do you really want to delete this event? All data recorded about this event will be permanently deleted.',
@@ -556,8 +555,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             {text: 'Cancel', style: 'cancel'},
             {text: 'Delete Event', onPress: () => {
                 var db = new DbRecords();
-                db.DeleteRecord(that.state.record);
-                that.props.navigation.navigate('Overview');
+                db.DeleteRecord(this.state.record);
+                this.hardwareBackPress();
             }}
         ],
         { cancelable: true }
@@ -809,12 +808,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                             case 10: //Photo
                                 return (<View></View>);
                             case 11: //Video
-                                return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
-                                        
-                                    </View>
-                                )
+                                return (<View></View>);
                         }
                         return (<View key={input.id}></View>)
                     })}

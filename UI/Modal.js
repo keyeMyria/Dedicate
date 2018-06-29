@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { AppRegistry, View, StyleSheet, Text, 
-    Dimensions, TouchableWithoutFeedback, TextInput, ScrollView, Keyboard  } from 'react-native';
+import { View, StyleSheet, Text, Dimensions, TouchableWithoutFeedback, TextInput, ScrollView, Keyboard  } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 
 export default class Modal extends React.Component {
@@ -14,31 +13,54 @@ export default class Modal extends React.Component {
                 darkBackground:{height:0},
                 modalContainer:{top:30, left:50, opacity:0}
             },
+            modalContainer:{width:0, height:0},
+            win:{width:0, height:0},
             visible:false,
             opacity:{opacity:0},
             content: <View></View>
         }
         global.Modal = this;
+
+        //bind methods
+        this.onLayoutChange = this.onLayoutChange.bind(this);
+        this.onOrientationChange = this.onOrientationChange.bind(this);
     }
 
-    ComponentDidMount = () => {
-        this.onLayoutChange();
+    ComponentWillMount(){
+        Dimensions.addEventListener('change', this.onOrientationChange);
     }
 
-    onLayoutChange = event => {
-        var win = Dimensions.get('window');
-        var modalContainer = event.nativeEvent.layout;
+    componentWillUnmount(){
+        Dimensions.removeEventListener('change', this.onOrientationChange);
+    }
+
+    onLayoutChange(event){
+        var {width, height} = Dimensions.get('screen');
+        if(this.state.win.width != width || this.state.win.height != height){
+            var layout = event.nativeEvent.layout;
+            this.setState({
+                modalContainer:{width:layout.width, height:layout.height}, 
+                win:{width:width, height:height}
+            }, () => {
+                this.onOrientationChange();
+            });
+        }
+    }
+
+    onOrientationChange(){
+        //realign modal window
+        var {width, height} = Dimensions.get('window');
         var styles = this.state.styles;
-        styles.darkBackgroundContainer = {height:win.height};
-        styles.darkBackground = {height:win.height};
+        var modalContainer = this.state.modalContainer;
+        styles.darkBackgroundContainer = {height:height};
+        styles.darkBackground = {height:height};
         styles.modalContainer = {
-            top:Math.round((win.height - modalContainer.height) / 2), 
-            left:Math.round((win.width - modalContainer.width) / 2),
-            maxHeight:win.height - 60,
-            maxWidth:win.width - 60,
+            top:Math.round((height - modalContainer.height) / 2), 
+            left:Math.round((width - modalContainer.width) / 2),
+            maxHeight:height - 60,
+            maxWidth:width - 60,
             opacity:1
         };
-
         this.setState({styles:styles});
     }
 
@@ -68,21 +90,13 @@ export default class Modal extends React.Component {
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>{this.state.title}</Text>
                         </View>
-                        <ScrollView 
-                            onLayout={this.onLayoutChange}
-                        >
-                        
-                    
-
-                            {this.state.content(this)}
+                        <ScrollView onLayout={this.onLayoutChange}>
+                            {this.state.content}
                         </ScrollView>
                     </View>
                     <View style={[styles.darkBackgroundContainer, this.state.styles.darkBackgroundContainer]}>
                         <TouchableWithoutFeedback onPress={this.onPressDarkBackground}>
-                            <View 
-                                style={[styles.darkBackground, this.state.styles.darkBackground]} 
-                                onLayout={this.onLayoutChange}
-                            ></View>
+                            <View style={[styles.darkBackground, this.state.styles.darkBackground]}></View>
                         </TouchableWithoutFeedback>
                     </View>
                 </View>

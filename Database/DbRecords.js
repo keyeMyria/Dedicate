@@ -178,10 +178,15 @@ export default class DbRecords extends Db{
 
     DeleteRecord(record){
         global.realm.write(() => {
-            for(var x = 0; x < record.inputs.length;x++){
-                //delete all input records within record
-                global.realm.delete(record.inputs[x]);
-                x--;
+            if(typeof record.inputs != 'undefined' && record.inputs != null && record.inputs.length > 0){
+                for(var x = 0; x < record.inputs.length;x++){
+                    //delete all input records within record
+                    global.realm.delete(record.inputs[x]);
+                    x--;
+                    if(typeof record.inputs == 'undefined'){
+                        break;
+                    }
+                }
             }
             
             //finally, delete record
