@@ -59,7 +59,12 @@ export default class DatabaseScreen extends React.Component {
                     filelist = files.map((file) => {
                         var name = file.name.replace('.realm', '');
                         return (
-                            <TouchableHighlight key={file.name} underlayColor={AppStyles.listItemPressedColor} onPress={() => {that.openDatabase.call(that, name)}}>
+                            <TouchableHighlight key={file.name} underlayColor={AppStyles.listItemPressedColor} 
+                                onPress={() => {
+                                    that.openDatabase.call(that, name); 
+                                    this.props.navigation.navigate('Overview');}
+                                }
+                            >
                                 <View style={styles.databaseItemContainer}>
                                     <View style={styles.databaseLabel}>
                                         <View style={styles.databaseIcon}><IconDatabases size="xsmall"></IconDatabases></View>
@@ -133,7 +138,6 @@ export default class DatabaseScreen extends React.Component {
         var config = new UserConfig();
         config.setDefaultDatabase(name);
         Schema(name);
-        this.props.navigation.navigate('Overview');
     }
     
     // Create Database //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,9 +147,8 @@ export default class DatabaseScreen extends React.Component {
         global.Modal.setContent('New Database', (
             <View style={[styles.modalContainer, {minWidth:300}]}>
                 <Text style={styles.fieldTitle}>Database Name</Text>
-                <Textbox 
-                    ref="tasklabel"
-                    value={that.state.newDatabase}
+                <Textbox
+                    defaultValue={that.state.newDatabase}
                     style={styles.inputField} 
                     placeholder="MyData"
                     returnKeyType={'done'}
@@ -173,32 +176,8 @@ export default class DatabaseScreen extends React.Component {
             return;
         }
         this.openDatabase(this.state.newDatabase.replace(' ', ''));
-    }
-    
-    // Delete Database //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    showDeleteDatabaseAlert = (name) => {
-        Alert.alert(
-            'Delete Database',
-            'Do you really want to permanently delete the database "' + name + '"?. This cannot be undone!',
-            [
-              {text: 'Cancel', onPress: () => {}, style: 'cancel'},
-              {text: 'Delete', onPress: () => {
-                  if(global.database.name == name){
-                      Alert.alert('Delete Database', 'Cannot delete currently loaded database. Switch to another database before deleting this one.');
-                  }else{
-                    //permanently delete database files
-                    var path = this.Path();
-                    try{ Files.unlink(path + name + '.realm').catch((err) => {}); }catch(ex){}
-                    try{ Files.unlink(path + name + '.realm.management').catch((err) => {}); }catch(ex){}
-                    try{ Files.unlink(path + name + '.realm.lock').catch((err) => {}); }catch(ex){}
-                    try{ Files.unlink(path + name + '.realm.note').catch((err) => {}); }catch(ex){}
-                    this.getFiles();
-                  }
-              }}
-            ],
-            { cancelable: true }
-          )
+        this.getFiles();
+        global.Modal.hide();
     }
     
     // Rename Database //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,13 +188,12 @@ export default class DatabaseScreen extends React.Component {
         global.Modal.setContent('Rename Database "' + name + '"', (
             <View style={[styles.modalContainer, {minWidth:300}]}>
                 <Text style={styles.fieldTitle}>Database Name</Text>
-                <Textbox 
-                    ref="tasklabel"
-                    value={that.state.newDatabase}
+                <Textbox
+                    defaultValue={this.state.newDatabase}
                     style={styles.inputField} 
                     placeholder="MyData"
                     returnKeyType={'done'}
-                    onChangeText={that.onAddDatabaseTextChange}
+                    onChangeText={this.onRenameDatabaseTextChange}
                 />
                 <View style={styles.createDatabaseButton}>
                     <Button text="Rename Database" onPress={() => that.onPressRenameDatabase.call(that, name)}/>
@@ -225,7 +203,12 @@ export default class DatabaseScreen extends React.Component {
         global.Modal.show();
     }
 
+    onRenameDatabaseTextChange = (value) => {
+        this.setState({newDatabase:value});
+    }
+
     onPressRenameDatabase = (name) => {
+        name = name.replace(' ', '');
         if(this.state.newDatabase == ''){
             Alert.alert('New Database', "Please specify a name for your new database");
             return;
@@ -257,13 +240,39 @@ export default class DatabaseScreen extends React.Component {
         }
         global.Modal.hide();
     }
+    
+    // Delete Database //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    showDeleteDatabaseAlert = (name) => {
+        Alert.alert(
+            'Delete Database',
+            'Do you really want to permanently delete the database "' + name + '"?. This cannot be undone!',
+            [
+              {text: 'Cancel', onPress: () => {}, style: 'cancel'},
+              {text: 'Delete', onPress: () => {
+                  if(global.database.name == name){
+                      Alert.alert('Delete Database', 'Cannot delete currently loaded database. Switch to another database before deleting this one.');
+                  }else{
+                    //permanently delete database files
+                    var path = this.Path();
+                    try{ Files.unlink(path + name + '.realm').catch((err) => {}); }catch(ex){}
+                    try{ Files.unlink(path + name + '.realm.management').catch((err) => {}); }catch(ex){}
+                    try{ Files.unlink(path + name + '.realm.lock').catch((err) => {}); }catch(ex){}
+                    try{ Files.unlink(path + name + '.realm.note').catch((err) => {}); }catch(ex){}
+                    this.getFiles();
+                  }
+              }}
+            ],
+            { cancelable: true }
+          )
+    }
 
     // Export Database //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     exportDatabase = (name) => {
         var that = this;
         var path = this.Path();
-        var download = Files.ExternalStorageDirectoryPath + '/Download/';
+        var download = FileUtils.DownloadsDirectoryPath + '/';
         var exportFile = download + 'Dedicate_' + name.replace(/\s/g, '_') + '.zip';
         var exportPath = path + 'export/';
         var copyerr = 'Could not copy all required files';
