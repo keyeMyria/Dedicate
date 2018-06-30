@@ -33,7 +33,7 @@ export default class OverviewScreen extends React.Component {
             chartList:[],
             timerList:[],
             shadowOpacity:0,
-            loading:true,
+            loading:false,
             layoutWidth:0
         };
         //bind methods
@@ -45,10 +45,7 @@ export default class OverviewScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
-        
-        this.loadContent().then(() =>{
-            this.setState({loading:false});
-        }).catch();
+        this.loadContent();
     }
 
     componentWillUnmount(){
@@ -61,18 +58,13 @@ export default class OverviewScreen extends React.Component {
     }
 
     loadContent(){
-        return new Promise(resolve => {
-            setTimeout(()=>{
-                var dbRecords = new DbRecords();
-                this.setState({
-                    charts:dbRecords.GetListByTask(),
-                    timers:dbRecords.GetActiveTimers()
-                }, () => {
-                    this.getTimers();
-                    this.getCharts();
-                });
-                resolve();
-            }, 1);
+        var dbRecords = new DbRecords();
+        this.setState({
+            charts:dbRecords.GetListByTask(),
+            timers:dbRecords.GetActiveTimers()
+        }, () => {
+            this.getTimers();
+            this.getCharts();
         });
     }
 
@@ -174,7 +166,7 @@ export default class OverviewScreen extends React.Component {
         //get lines and dots for chart
         var curr = 1;
         var hasdots = false;
-        var cwidth = width;
+        var cwidth = width - 30;
         var height = 60;
         var days = 14;
         var record = chart.records[0];
@@ -187,7 +179,7 @@ export default class OverviewScreen extends React.Component {
                 haspoints = true;
                 if(curr == 1){
                     line1 = (
-                        <Svg width={cwidth} height={height + 20}>
+                        <Svg width={width} height={height + 20}>
                             {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine1Stroke)}
                         </Svg>
                     );
@@ -208,7 +200,7 @@ export default class OverviewScreen extends React.Component {
                     curr++;
                 }else if(curr == 2){
                     line2 = (
-                        <Svg width={cwidth} height={height + 20}>
+                        <Svg width={width} height={height + 20}>
                             {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine2Stroke)}
                         </Svg>
                     );
@@ -231,7 +223,7 @@ export default class OverviewScreen extends React.Component {
             }else if(input.type == 6 && hasdots == false){ //yes/no
                 hasdots = true;
                 dots = (
-                    <Svg width={cwidth} height={height + 20}>
+                    <Svg width={width} height={height + 20}>
                         {this.chartDots(chart, x, days, cwidth, height)}
                     </Svg>
                 );
@@ -299,7 +291,7 @@ export default class OverviewScreen extends React.Component {
         for(var x = 0; x < days; x++){
             var count = 0;
             var date = new Date();
-            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
+            date = new Date(date.setDate(date.getDate() - (days - x)));
             for(var y = 0; y < chart.records.length; y++){
                 var rec = chart.records[y];
                 if(DatesMatch(date, new Date(rec.datestart))){
@@ -314,7 +306,7 @@ export default class OverviewScreen extends React.Component {
         }
 
         //check totals for min & max
-        for(var x = 1; x < points.length; x++){
+        for(var x = 0; x < points.length; x++){
             if(points[x] < min){ min = points[x];}
             if(points[x] > max){ max = points[x];}
         }
@@ -325,8 +317,8 @@ export default class OverviewScreen extends React.Component {
     chartLine = (points, days, width, height, min, max, stroke) => {
         //draw lines
         var lines = [];
-        for(var x = 1; x < points.length; x++){
-            lines.push(Math.round((width / days) * (x)) + ',' + Math.round(height + 10 - (height / (max - min)) * (points[x] - min)));
+        for(var x = 0; x < points.length; x++){
+            lines.push(Math.round(((width / days) * (x)) + 10) + ',' + Math.round(height + 10 - (height / (max - min)) * (points[x] - min)));
         }
 
         return (
@@ -343,7 +335,7 @@ export default class OverviewScreen extends React.Component {
         var dots = [];
         for(var x = 0; x < days; x++){
             var date = new Date();
-            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
+            date = new Date(date.setDate(date.getDate() - (days - x)));
             for(var y = 0; y < chart.records.length; y++){
                 var rec = chart.records[y];
                 if(DatesMatch(date, new Date(rec.datestart))){
@@ -352,7 +344,7 @@ export default class OverviewScreen extends React.Component {
                             if(rec.inputs[index].number == 1){
                                 dots.push(
                                     <Circle key={'dot' + x}
-                                        cx={Math.round((width / days) * (x))}
+                                        cx={Math.round(((width / days) * x) + 10)}
                                         cy={height + 5}
                                         r={5}
                                         fill={AppStyles.chartDotFill}
@@ -472,7 +464,7 @@ export default class OverviewScreen extends React.Component {
         chartsContainer:{paddingBottom:70},
         chartContainer: {paddingLeft:25, paddingRight:25, paddingBottom:20, paddingTop:5, width:'100%'},
         chartArea:{height:120},
-        chart:{height:60, top:15, left:-25},
+        chart:{height:60, top:15, left:-5},
         chartName: {position:'absolute', bottom:0, fontSize:20, width:'100%', textAlign:'center'},
         chartLine1:{position:'absolute', height:'100%'},
         chartLine1MinMax:{position:'absolute', height:'100%'},

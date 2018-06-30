@@ -79,9 +79,9 @@ class DefaultScreen extends React.Component {
         var that = this;
         // Show List of Tasks to Choose From /////////////////////////////////////////////////////////////////////////////////////
         return (
-            <Body {...this.props} style={styles.body} title="Record Event" screen="Record">
-                <View style={styles.listContainer}>
-                    <Text style={styles.tasksTitle}>Select a task to record your event with.</Text>
+            <Body {...this.props} style={this.styles.body} title="Record Event" screen="Record">
+                <View style={this.styles.listContainer}>
+                    <Text style={this.styles.tasksTitle}>Select a task to record your event with.</Text>
                     {this.state.categories.map((cat) => {
                         //load list of Categories
                         var tasks = null;
@@ -101,8 +101,8 @@ class DefaultScreen extends React.Component {
                                 //load Category item
                                 <View key={cat.id}>
                                     <TouchableOpacity onPress={(event)=>{that.onSelectCategory.call(that, event, cat.id)}}>
-                                        <View style={styles.catItem}>
-                                            <Text style={styles.catText}>{cat.name}</Text>
+                                        <View style={this.styles.catItem}>
+                                            <Text style={this.styles.catText}>{cat.name}</Text>
                                         </View>
                                     </TouchableOpacity>
                                     {tasks}
@@ -128,16 +128,42 @@ class DefaultScreen extends React.Component {
         var that = this;
         return (
             <TouchableOpacity key={task.id} onPress={(event)=>{this.props.navigation.navigate('RecordTask', {task:task})}}>
-                <View style={styles.taskContainer}>
-                    {catId > 0 && <View style={styles.subTaskGutter}></View>}
-                    <View style={catId > 0 ? styles.taskSubItem : styles.taskItem}>
-                        <View style={styles.taskIcon}><IconTasks size="xsmall"></IconTasks></View>
-                        <Text style={styles.taskText}>{task.name}</Text>
+                <View style={this.styles.taskContainer}>
+                    {catId > 0 && <View style={this.styles.subTaskGutter}></View>}
+                    <View style={catId > 0 ? this.styles.taskSubItem : this.styles.taskItem}>
+                        <View style={this.styles.taskIcon}><IconTasks size="xsmall"></IconTasks></View>
+                        <Text style={this.styles.taskText}>{task.name}</Text>
                     </View>
                 </View>
             </TouchableOpacity>
         );
     }
+
+    styles = StyleSheet.create({
+        body:{backgroundColor:AppStyles.altBackgroundColor, position:'absolute', top:0, bottom:0, left:0, right:0},
+        container:{paddingVertical:30, paddingBottom:70},
+        listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
+        tasksTitle:{fontSize:17, color:AppStyles.textColor, paddingBottom:20, paddingHorizontal:15, paddingTop:30},
+    
+        //Categories & Tasks List
+        catItem:{
+            width:'100%', paddingVertical:15,  paddingHorizontal:30, 
+            borderBottomWidth:1, borderBottomColor:AppStyles.separatorColor
+        },
+        catText:{fontSize:22, color:AppStyles.textColor},
+        taskContainer:{flexDirection:'row'},
+        taskItem:{
+            width:'100%', paddingVertical:15, paddingHorizontal:30, borderBottomWidth:1,
+            borderBottomColor:AppStyles.separatorColor, flexDirection:'row'
+        },
+        taskSubItem:{
+            width:'100%', paddingVertical:15, paddingHorizontal:30, borderBottomWidth:1,
+            borderBottomColor:AppStyles.separatorColor, flexDirection:'row'
+        },
+        taskIcon:{paddingRight:10},
+        taskText:{fontSize:20},
+        subTaskGutter:{backgroundColor:AppStyles.altBackgroundColor, height:60, width:45},
+    });
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,10 +593,10 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     // TitleBar Button ////////////////////////////////////////////////////////////////////////////////////////
     TitleBarButtons = () => {
         return (
-            <View style={styles.titleBarButtons}>
+            <View style={this.styles.titleBarButtons}>
                 {this.state.edited == true && (
-                    <View key="buttonSave" style={styles.buttonSaveContainer}>
-                        <ButtonSave size="smaller" style={styles.buttonSave} onPress={this.SaveRecord} />
+                    <View key="buttonSave" style={this.styles.buttonSaveContainer}>
+                        <ButtonSave size="smaller" style={this.styles.buttonSave} onPress={this.SaveRecord} />
                     </View>
                 )}
             </View>);
@@ -581,29 +607,29 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         var that = this;
         var i = 0;
         return (
-            <Body {...this.props} style={styles.body} title="Record Event" onLayout={this.onLayoutChange} titleBarButtons={this.TitleBarButtons.call(that)}>
-                <View style={styles.taskInfo}>
-                    <View style={styles.labelContainer}>
-                        <View style={styles.labelIcon}><IconTasks size="small"></IconTasks></View>
-                        <Text style={styles.labelText}>{this.state.task.name}</Text>
+            <Body {...this.props} style={this.styles.body} title="Record Event" onLayout={this.onLayoutChange} titleBarButtons={this.TitleBarButtons.call(that)}>
+                <View style={this.styles.taskInfo}>
+                    <View style={this.styles.labelContainer}>
+                        <View style={this.styles.labelIcon}><IconTasks size="small"></IconTasks></View>
+                        <Text style={this.styles.labelText}>{this.state.task.name}</Text>
                     </View>
-                    <View style={styles.recordTimeContainer}>
-                        <View style={styles.recordTimeTitle}>
-                            <Text style={[styles.fieldTitle, {alignSelf:'flex-start'}]}>Event Date & Time</Text>
+                    <View style={this.styles.recordTimeContainer}>
+                        <View style={this.styles.recordTimeTitle}>
+                            <Text style={[this.styles.fieldTitle, {alignSelf:'flex-start'}]}>Event Date & Time</Text>
                             {this.state.stopWatch.show == false && 
-                                <View style={styles.buttonStopWatchContainer}>
-                                    <ButtonStopWatch size="small" style={styles.buttonStopWatch} onPress={this.onPressButtonStopWatch}/>
+                                <View style={this.styles.buttonStopWatchContainer}>
+                                    <ButtonStopWatch size="small" style={this.styles.buttonStopWatch} onPress={this.onPressButtonStopWatch}/>
                                 </View>
                             }
                         </View>
                         
                         {this.state.stopWatch.show == false && // Show Date & Time Pickers /////////////////////////////////////////////////
                             <View>
-                                <View style={styles.recordTimeFlex}>
-                                    <View style={styles.recordTimeLabel}>
+                                <View style={this.styles.recordTimeFlex}>
+                                    <View style={this.styles.recordTimeLabel}>
                                         <Text>Start:</Text>
                                     </View>
-                                    <View style={styles.recordTimePicker}>
+                                    <View style={this.styles.recordTimePicker}>
                                         <DateTimePicker
                                             styleTextbox={{minWidth:220}}
                                             date={this.state.record.datestart}
@@ -613,15 +639,16 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             buttonConfirmText="Select Date & Time"
                                             buttonCancelText="Cancel"
                                             onDateChange={(time, date) => {this.onRecordedDateStartChange.call(that, date)}}
+                                            iconStyle={this.styles.iconStyle}
                                         />
                                     </View>
                                 </View>
 
-                                <View style={styles.recordTimeFlex}>
-                                    <View style={styles.recordTimeLabel}>
+                                <View style={this.styles.recordTimeFlex}>
+                                    <View style={this.styles.recordTimeLabel}>
                                         <Text>End:</Text>
                                     </View>
-                                    <View style={styles.recordTimePicker}>
+                                    <View style={this.styles.recordTimePicker}>
                                         <DateTimePicker
                                             styleTextbox={{minWidth:220}}
                                             date={this.state.record.dateend}
@@ -631,18 +658,19 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             buttonConfirmText="Select Date & Time"
                                             buttonCancelText="Cancel"
                                             onDateChange={(time, date) => {this.onRecordedDateEndChange.call(that, date)}}
+                                            iconStyle={this.styles.iconStyle}
                                         />
                                     </View>
                                 </View>
                                 
-                                <Text style={styles.recordTimeLength}>
+                                <Text style={this.styles.recordTimeLength}>
                                     {TimeLength(this.state.record.datestart, this.state.record.dateend)}
                                 </Text>
                             </View>
                         }
                         {this.state.stopWatch.show == true && // Show Stop Watch Instead /////////////////////////////////////////////////
-                            <View style={styles.stopWatchContainer}>
-                                <ButtonClose style={styles.closeStopWatch} size="xxsmall" color={AppStyles.color} onPress={() => this.hideStopWatch.call(that)}></ButtonClose>
+                            <View style={this.styles.stopWatchContainer}>
+                                <ButtonClose style={this.styles.closeStopWatch} size="xxsmall" color={AppStyles.color} onPress={() => this.hideStopWatch.call(that)}></ButtonClose>
                                 <StopWatch width={(width > 500 ? 500 : width) - 120} height={(width > 500 ? 500 : width) - 120}
                                     onStart={this.onStopWatchStart} onStop={this.onStopWatchStop} dateStart={this.state.stopWatch.datestart != null ? new Date(this.state.stopWatch.datestart) : null}
                                  />
@@ -650,7 +678,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                         }
                     </View>
                 </View>
-                <View style={styles.inputsContainer}>
+                <View style={this.styles.inputsContainer}>
                     {this.state.task.inputs.map((input) => {
                         var recinputIndex = this.state.record.inputs.map(a => a.inputId).indexOf(input.id);
                         var recinput = {number:null, text:null, date:null};
@@ -667,11 +695,11 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                         switch(input.type){
                             case 0: //Number
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
                                         <Textbox 
                                             ref={ref}
-                                            style={styles.inputField}
+                                            style={this.styles.inputField}
                                             placeholder={'10'}
                                             defaultValue={(recinput.number ? recinput.number.toString() : null) || ''}
                                             keyboardType="numeric"
@@ -684,11 +712,11 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 )
                             case 1: //Text
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
                                         <Textbox 
                                             ref={ref}
-                                            style={styles.inputField}
+                                            style={this.styles.inputField}
                                             placeholder={'Text'}
                                             defaultValue={recinput.text || ''}
                                             returnKeyType={keyType} 
@@ -700,8 +728,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 )
                             case 2: //Date
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
                                         <DateTimePicker
                                             ref={ref}
                                             style={{width: 200}}
@@ -718,8 +746,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 )
                             case 3: //Time
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
                                         <DateTimePicker
                                             ref={ref}
                                             style={{width: 200}}
@@ -735,8 +763,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 )
                             case 4: //Date & Time
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
                                         <DateTimePicker
                                             ref={ref}
                                             style={{width: 200}}
@@ -752,8 +780,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 )
                             case 6: //Yes/No
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
                                         <Picker
                                             ref={ref}
                                             items={[
@@ -767,18 +795,18 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 )
                             case 7: //5 Stars
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
                                         <FiveStars ref={ref} color={AppStyles.starColor} stars={recinput.number || 0} onChange={(value) => this.onChangeFiveStars.call(that, value, input.id)}></FiveStars>
                                     </View>
                                 )
                             case 8: //Location
                                 return (
-                                    <View key={input.id} style={styles.inputFieldContainer}>
-                                        <Text style={[styles.fieldTitle, styles.padding]}>{input.name}</Text>
+                                    <View key={input.id} style={this.styles.inputFieldContainer}>
+                                        <Text style={[this.styles.fieldTitle, this.styles.padding]}>{input.name}</Text>
                                         <LocationPicker 
                                             ref={ref}
-                                            style={[styles.inputField, styles.padding]}
+                                            style={[this.styles.inputField, this.styles.padding]}
                                             mapStyle={{height:height * 0.5}}
                                             placeholder={'search'}
                                             defaultValue={recinput.text || ''}
@@ -792,11 +820,11 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                 )
                             case 9: //URL Link
                                 return (
-                                    <View key={input.id} style={[styles.inputFieldContainer, styles.padding]}>
-                                        <Text style={styles.fieldTitle} defaultValue={recinput.text || ''}>{input.name}</Text>
+                                    <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
+                                        <Text style={this.styles.fieldTitle} defaultValue={recinput.text || ''}>{input.name}</Text>
                                         <Textbox 
                                             ref={ref}
-                                            style={styles.inputField}
+                                            style={this.styles.inputField}
                                             placeholder={'URL link'}
                                             defaultValue={recinput.text || ''}
                                             returnKeyType={keyType} 
@@ -815,79 +843,56 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                     })}
                 </View>
                 {typeof this.state.record.id != 'undefined' && this.state.record.id > 0 && (
-                    <View style={styles.buttonDeleteContainer}>
+                    <View style={this.styles.buttonDeleteContainer}>
                         <Button text="Delete Event" onPress={this.DeleteRecord}/>
                     </View>
                 )}
             </Body>
         );
     }
+
+    styles = StyleSheet.create({
+        body:{backgroundColor:AppStyles.altBackgroundColor, position:'absolute', top:0, bottom:0, left:0, right:0},
+        labelContainer:{paddingBottom:15, paddingHorizontal:15, flexDirection:'row'},
+        labelIcon:{paddingRight:10},
+        labelText:{fontSize:30},
+        
+        //Task Input fields
+        taskInfo:{backgroundColor:AppStyles.backgroundColor, paddingTop:20},
+        inputsContainer:{backgroundColor:AppStyles.altBackgroundColor, paddingTop:20},
+        inputFieldContainer:{paddingBottom:15},
+        padding:{marginHorizontal:20},
+        fieldTitle: {fontSize:16, fontWeight:'bold'},
+        inputField: {fontSize:20},
+        iconStyle:{position:'relative', left:-55, top:-2},
+    
+        //Record Task title
+        recordTimeTitle:{flex:1, flexDirection:'row', width:'100%'},
+    
+        //Stop Watch Button
+        buttonStopWatchContainer:{position:'absolute', left:320, top:75},
+    
+        //Record Task form
+        recordTimeContainer:{paddingBottom:20, paddingHorizontal:20, width:'100%'},
+        recordTimeFlex:{flexDirection:'row', paddingTop:10},
+        recordTimeLabel:{alignSelf:'flex-start', width:35, paddingTop:17},
+        recordTimePicker:{alignSelf:'flex-start', paddingLeft:10, position:'relative'},
+        recordTimeLength:{paddingTop:10},
+        recordTimeField:{width:250, paddingTop:5},
+    
+        //Stop Watch UI
+        stopWatchContainer:{flex:1, flexDirection:'row', justifyContent:'center', paddingTop:15, paddingHorizontal:30},
+        closeStopWatch:{position:'absolute', right:8, top:-18},
+    
+        //title bar buttons
+        titleBarButtons:{flexDirection:'row'},
+        buttonSaveContainer: {width:75, zIndex:1001, paddingLeft:10, paddingBottom:12, backgroundColor:AppStyles.headerDarkColor},
+        buttonSave:{padding:12 },
+    
+        //delete button
+        buttonDeleteContainer:{paddingTop:30, paddingBottom:15, alignItems:'center'}
+    });
 }
-
-const styles = StyleSheet.create({
-    body:{backgroundColor:AppStyles.altBackgroundColor, position:'absolute', top:0, bottom:0, left:0, right:0},
-    container:{paddingVertical:30, paddingBottom:70},
-    listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
-    tasksTitle:{fontSize:17, color:AppStyles.textColor, paddingBottom:20, paddingHorizontal:15, paddingTop:30},
-    labelContainer:{paddingBottom:15, paddingHorizontal:15, flexDirection:'row'},
-    labelIcon:{paddingRight:10},
-    labelText:{fontSize:30},
-
-    //Categories & Tasks List
-    catItem:{
-        paddingVertical:15, 
-        paddingHorizontal:30, 
-        borderBottomWidth:1, 
-        borderBottomColor:AppStyles.separatorColor
-    },
-    catText:{fontSize:22, color:AppStyles.color},
-    taskContainer:{flexDirection:'row'},
-    taskItem:{
-        paddingVertical:15, paddingHorizontal:30, borderBottomWidth:1,
-        borderBottomColor:AppStyles.separatorColor, flexDirection:'row'
-    },
-    taskSubItem:{
-        paddingVertical:15, paddingHorizontal:30, borderBottomWidth:1,
-        borderBottomColor:AppStyles.separatorColor, flexDirection:'row'
-    },
-    taskIcon:{paddingRight:10},
-    taskText:{fontSize:20},
-    subTaskGutter:{backgroundColor:AppStyles.altBackgroundColor, height:60, width:45},
-
-    //Task Input fields
-    taskInfo:{backgroundColor:AppStyles.backgroundColor, paddingTop:20},
-    inputsContainer:{backgroundColor:AppStyles.altBackgroundColor, paddingTop:20},
-    inputFieldContainer:{paddingBottom:15},
-    padding:{marginHorizontal:20},
-    fieldTitle: {fontSize:16, fontWeight:'bold'},
-    inputField: {fontSize:20},
-
-    //Record Task title
-    recordTimeTitle:{flex:1, flexDirection:'row', width:'100%'},
-
-    //Stop Watch Button
-    buttonStopWatchContainer:{position:'absolute', left:320, top:75},
-
-    //Record Task form
-    recordTimeContainer:{paddingBottom:20, paddingHorizontal:20, width:'100%'},
-    recordTimeFlex:{flexDirection:'row', paddingTop:10},
-    recordTimeLabel:{alignSelf:'flex-start', width:35, paddingTop:17},
-    recordTimePicker:{alignSelf:'flex-start', paddingLeft:10},
-    recordTimeLength:{paddingTop:10},
-    recordTimeField:{width:250, paddingTop:5},
-
-    //Stop Watch UI
-    stopWatchContainer:{flex:1, flexDirection:'row', justifyContent:'center', paddingTop:15, paddingHorizontal:30},
-    closeStopWatch:{position:'absolute', right:8, top:-18},
-
-    //title bar buttons
-    titleBarButtons:{flexDirection:'row'},
-    buttonSaveContainer: {width:75, zIndex:1001, paddingLeft:10, paddingBottom:12, backgroundColor:AppStyles.headerDarkColor},
-    buttonSave:{padding:12 },
-
-    //delete button
-    buttonDeleteContainer:{paddingTop:30, paddingBottom:15, alignItems:'center'}
-});
 
 export default createStackNavigator(
     {

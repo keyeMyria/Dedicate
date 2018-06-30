@@ -86,7 +86,7 @@ export default class Modal extends React.Component {
         if(this.state.visible === true){
             return (
                 <View style={[styles.container]}>
-                    <View style={[styles.modalContainer, this.state.styles.modalContainer]}>
+                    <View style={[styles.modalContainer, this.state.styles.modalContainer, {backgroundColor:AppStyles.backgroundColor}]}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>{this.state.title}</Text>
                         </View>
@@ -112,5 +112,5 @@ const styles = StyleSheet.create({
     title:{fontSize:20},
     darkBackgroundContainer:{position:'absolute', top:0, right:0, bottom:0, left:0},
     darkBackground:{backgroundColor:'rgba(0,0,0,0.7)', position:'absolute', top:0, right:0, bottom:0, left:0, zIndex:5000},
-    modalContainer:{position:'absolute', zIndex:5001, backgroundColor:AppStyles.backgroundColor}
+    modalContainer:{position:'absolute', zIndex:5001}
 });

@@ -1,17 +1,27 @@
 export default DarkPurple =
 {
-    // colors ///////////////////////////////
+    // text ///////////////////////////////
     color: '#6666cc',
-    textColor: '#eee',
+    textColor: '#ccc',
     linkColor: '#6666cc',
-    numberColor: '#eee',
+    numberColor: '#ccc',
+
+    // input /////////////////////////////
+    placeholderColor: '#777',
+    underlineColor: '#777',
+    stopWatchColor: '#777',
+
+    // header ////////////////////////////
     headerColor: '#6666cc',
     headerDarkColor: '#4D4DAD',
     headerTextColor: '#fff',
+
+    // body //////////////////////////////
     backgroundColor: '#222',
-    separatorColor: '#444',
+    separatorColor: '#333',
     altBackgroundColor: '#333',
-    altSeparatorColor: '#555',
+    altSeparatorColor: '#444',
+    // buttons ///////////////////////////
     buttonColor: '#6666cc',
     buttonTextColor: '#fff',
     buttonPressedColor: '#5555bb',

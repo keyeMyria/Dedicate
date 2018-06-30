@@ -1,5 +1,6 @@
 import React from 'react';
-import { TextInput, View, StyleSheet } from 'react-native';
+import { TextInput } from 'react-native';
+import AppStyles from 'dedicate/AppStyles';
 
 export default class Textbox extends React.Component {
     constructor(props){
@@ -22,13 +23,11 @@ export default class Textbox extends React.Component {
 
     render(){
         return (
-            <View style={this.state.error === true ? styles.error : {}}>
-                <TextInput ref="input" {...this.props} />
-            </View>
+            <TextInput ref="input" {...this.props} 
+            style={[{color:AppStyles.textColor}, this.props.style]} 
+            placeholderTextColor={AppStyles.placeholderColor}
+            underlineColorAndroid={AppStyles.underlineColor} 
+            />
         );
     }
 }
-
-const styles = StyleSheet.create({
-    error:{backgroundColor:'#CB9A9A'}
-});

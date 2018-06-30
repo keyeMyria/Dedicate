@@ -1,17 +1,28 @@
 export default LightPurple =
 {
-    // colors ///////////////////////////////
+    // text ///////////////////////////////
     color: '#6666cc',
     textColor: '#444',
     linkColor: '#6666cc',
     numberColor: '#333',
+
+    // input /////////////////////////////
+    placeholderColor: '#777',
+    underlineColor: '#777',
+    stopWatchColor: '#ccc',
+
+    // header ////////////////////////////
     headerColor: '#6666cc',
     headerDarkColor: '#4D4DAD',
     headerTextColor: '#fff',
+
+    // body /////////////////////////////
     backgroundColor: '#fff',
     separatorColor: '#eee',
     altBackgroundColor: '#eee',
     altSeparatorColor: '#ccc',
+
+    // buttons //////////////////////////
     buttonColor: '#6666cc',
     buttonTextColor: '#fff',
     buttonPressedColor: '#5555bb',

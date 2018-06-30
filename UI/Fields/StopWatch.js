@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import Text from 'ui/Text';
+import AppStyles from 'dedicate/AppStyles';
 import {Svg, Path} from 'react-native-svg';
 import ButtonOutline from 'buttons/ButtonOutline';
 export default class StopWatch extends React.Component {
@@ -8,7 +9,7 @@ export default class StopWatch extends React.Component {
         super(props);
 
         this.state = {
-            color: this.props.color ? this.props.color : '#ccc',
+            color: this.props.color ? this.props.color : AppStyles.stopWatchColor,
             started:this.props.dateStart || null,
             ended:null,
             total:0,

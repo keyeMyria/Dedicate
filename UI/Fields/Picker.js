@@ -74,7 +74,7 @@ export default class Picker extends React.Component {
 
     styles = StyleSheet.create({
         selectedItem:{paddingTop:11, paddingBottom:10, paddingRight:35, paddingLeft:7},
-        selectedText:{fontSize:20, color:'#333'},
+        selectedText:{fontSize:20, color:AppStyles.textColor},
         arrowButton:{position:'absolute', right:10, top:23},
     
         //Modal styling

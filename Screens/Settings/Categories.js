@@ -26,15 +26,16 @@ export default class CategoriesScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} title="Categories" screen="Settings">
-                <View style={styles.container}>
+            <Body {...this.props} style={this.styles.body} title="Categories" screen="Settings">
+                <View style={this.styles.container}>
                     <Text>Categories used to organize Tasks</Text>
                 </View>
             </Body>
         )
     }
-}
 
-const styles = StyleSheet.create({
-    container:{padding:30} 
-});
+    styles = StyleSheet.create({
+        body:{position:'absolute', top:0, bottom:0, left:0, right:0},
+        container:{padding:30} 
+    });
+}

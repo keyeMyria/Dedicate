@@ -35,6 +35,11 @@ getStyles= () => {
         get linkColor(){ return getColor('linkColor');},
         get numberColor(){ return getColor('numberColor');},
 
+        //inputs
+        get placeholderColor(){ return getColor('placeholderColor');},
+        get underlineColor(){ return getColor('underlineColor');},
+        get stopWatchColor(){ return getColor('stopWatchColor');},
+
         //header
         get headerColor(){ return getColor('headerColor');},
         get headerDarkColor(){ return getColor('headerDarkColor');},

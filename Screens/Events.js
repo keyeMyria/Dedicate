@@ -36,7 +36,7 @@ export default class EventsScreen extends React.Component {
                 datestart:null,
                 dateend:null
             },
-            loading:true
+            loading:false
         };
 
         var filter = this.props.navigation.getParam('filter', null);
@@ -57,10 +57,8 @@ export default class EventsScreen extends React.Component {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
 
         //get initial list of events
-        setTimeout(() => {
-            this.setState({tasks:this.dbTasks.GetList()});
-            this.getEvents();
-        }, 10);
+        this.setState({tasks:this.dbTasks.GetList()});
+        this.getEvents();
     }
 
     componentWillUnmount(){
@@ -93,7 +91,7 @@ export default class EventsScreen extends React.Component {
             start: this.state.start + this.paging
         }, 
         () => {
-            this.setState({refreshing:false, loading:false});
+            this.setState({refreshing:false});
             if(typeof callback != 'undefined'){
                 callback();
             }
@@ -167,19 +165,19 @@ export default class EventsScreen extends React.Component {
         var inputIndex = 0;
         var {height} = Dimensions.get('window');
         return (
-            <Body {...this.props} style={styles.body} title="Events" screen="Events" 
+            <Body {...this.props} style={this.styles.body} title="Events" screen="Events" 
             buttonAdd={true} 
             buttonRecord={true} 
             noscroll={true} 
             bottomFade={true}
             titleBarButtons={
-                <View style={styles.titlebarButtons}>
+                <View style={this.styles.titlebarButtons}>
                     <ButtonSearch size="xsmall" onPress={() => this.toggleFilterForm.call(that)}></ButtonSearch>
                 </View>
             }>
                 <Collapsible collapsed={!this.state.filterForm}>
-                    <View style={styles.filterFormContainer}>
-                        <Text style={styles.formLabel}>Filter by Task</Text>
+                    <View style={this.styles.filterFormContainer}>
+                        <Text style={this.styles.formLabel}>Filter by Task</Text>
                         <Picker 
                             selectedValue={this.state.filter.taskId}
                             onValueChange={(value) => this.filterTasks.call(that, value)}
@@ -189,30 +187,30 @@ export default class EventsScreen extends React.Component {
                         >
                         </Picker>
                         {this.state.filterDates == true && 
-                            <View style={styles.filterDates}>
-                                <Text style={styles.formLabel}>Filter by Date Range</Text>
+                            <View style={this.styles.filterDates}>
+                                <Text style={this.styles.formLabel}>Filter by Date Range</Text>
                                 <StartEndDateTimePicker 
-                                    style={styles.filterDates}
+                                    style={this.styles.filterDates}
                                     onChange={(datestart, dateend) => {this.filterDates.call(that, datestart, dateend)}}
                                     initialStartDateTime={new Date()}
                                     initialTimeSpan={24 * 60}
                                 ></StartEndDateTimePicker>
-                                <TextLink style={styles.clearDateFilter} onPress={() => this.cancelDateFilter.call(that)}>Clear Date Range Filter</TextLink>
+                                <TextLink style={this.styles.clearDateFilter} onPress={() => this.cancelDateFilter.call(that)}>Clear Date Range Filter</TextLink>
                             </View>
                         }
                         {this.state.filterDates == false &&
-                            <View style={styles.filterDates}>
+                            <View style={this.styles.filterDates}>
                                 <TextLink onPress={() => this.toggleDateFilter.call(that)}>Filter by Date Range</TextLink>
                             </View>
                         }
                     </View>
                 </Collapsible>
 
-                {this.state.filterForm && <DropShadow style={[styles.dropshadow]} opacity={0.075} height={20}></DropShadow>}
+                {this.state.filterForm && <DropShadow style={[this.styles.dropshadow]} opacity={0.075} height={20}></DropShadow>}
                         
 
                 {this.state.loading ? 
-                    <View style={[styles.loading, {paddingTop:(height / 2) - 100, paddingBottom:(height / 2) - 19}]}><Loading></Loading></View> : 
+                    <View style={[this.styles.loading, {paddingTop:(height / 2) - 100, paddingBottom:(height / 2) - 19}]}><Loading></Loading></View> : 
                     <FlatList
                         data={this.state.events}
                         keyExtractor={item => item.id.toString()}
@@ -230,10 +228,10 @@ export default class EventsScreen extends React.Component {
                                     var d1 = DayInYear(new Date());
                                     var d2 = DayInYear(today);
                                     items.push(
-                                        <View key={'date_' + today.getMonth() + '_' + today.getDate()} style={styles.dateContainer}>
+                                        <View key={'date_' + today.getMonth() + '_' + today.getDate()} style={this.styles.dateContainer}>
                                             <View style={{opacity:0.35}}><IconEvents size="xsmall" color={AppStyles.textColor}></IconEvents></View>
-                                            <Text style={styles.dateName}>{DateSentence(today)}</Text>
-                                            <Text style={styles.dateCount}>{d1 - d2}d</Text>
+                                            <Text style={this.styles.dateName}>{DateSentence(today)}</Text>
+                                            <Text style={this.styles.dateCount}>{d1 - d2}d</Text>
                                         </View>
                                     )
                                 }
@@ -277,14 +275,14 @@ export default class EventsScreen extends React.Component {
                                     switch(input.type){
                                         case 0: case 1: case 2: case 3: case 4: case 6: case 8: case 9:
                                             inputs.push(
-                                                <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
-                                                    <Text style={styles.inputText}>{input.input.name}: {val}</Text>
+                                                <View key={'input' + inputIndex} style={[this.styles.input, extraStyles]}>
+                                                    <Text style={this.styles.inputText}>{input.input.name}: {val}</Text>
                                                 </View>
                                             );
                                             break;
                                         case 7: // 5 stars
                                             inputs.push(
-                                                <View key={'input' + inputIndex} style={[styles.input, extraStyles]}>
+                                                <View key={'input' + inputIndex} style={[this.styles.input, extraStyles]}>
                                                     <FiveStars size="xxsmall" stars={input.number} color={AppStyles.starColor} locked={true}></FiveStars>
                                                 </View>
                                             );
@@ -311,9 +309,9 @@ export default class EventsScreen extends React.Component {
                                                 });
                                             }}
                                         >
-                                            <View style={styles.eventItemContainer}>
-                                                <Text style={styles.eventName}>{item.task.name}</Text>
-                                                <View style={styles.inputs}>{inputs}</View>
+                                            <View style={this.styles.eventItemContainer}>
+                                                <Text style={this.styles.eventName}>{item.task.name}</Text>
+                                                <View style={this.styles.inputs}>{inputs}</View>
                                             </View>
                                         </TouchableHighlight>
                                     </View>
@@ -328,26 +326,26 @@ export default class EventsScreen extends React.Component {
             </Body>
         );
     }
+
+    styles = StyleSheet.create({
+        body:{position:'absolute', top:0, bottom:0, left:0, right:0},
+        titlebarButtons:{paddingTop:15, paddingRight:15},
+        dropshadow:{zIndex:10},
+        loading:{width:'100%', flexDirection:'row', justifyContent:'center'},
+    
+        filterFormContainer:{padding:20},
+        formLabel:{fontSize:15, opacity:0.75},
+        clearDateFilter:{paddingTop:5},
+        
+        dateContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', backgroundColor:AppStyles.altBackgroundColor, padding:10},
+        dateName:{fontSize:18, fontWeight:'bold', alignSelf:'center'},
+        dateCount:{alignSelf:'flex-end', opacity:0.65, fontSize:17},
+    
+        eventItemContainer:{paddingHorizontal:15, paddingTop:13, paddingBottom:10, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
+        eventName:{fontSize:22},
+        
+        inputs:{flex:1, flexDirection:'row', flexWrap:'wrap'},
+        input:{alignSelf:'flex-start', paddingRight:20, paddingVertical:3},
+        inputText:{fontSize:18, color:AppStyles.textColor, opacity:0.7}
+    });
 }
-
-const styles = StyleSheet.create({
-    body:{position:'absolute', top:0, bottom:0, left:0, right:0},
-    titlebarButtons:{paddingTop:15, paddingRight:15},
-    dropshadow:{zIndex:10},
-    loading:{width:'100%', flexDirection:'row', justifyContent:'center'},
-
-    filterFormContainer:{padding:20},
-    formLabel:{fontSize:15, opacity:0.75},
-    clearDateFilter:{paddingTop:5},
-    
-    dateContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', backgroundColor:AppStyles.altBackgroundColor, padding:10},
-    dateName:{fontSize:18, fontWeight:'bold', alignSelf:'center'},
-    dateCount:{alignSelf:'flex-end', opacity:0.65, fontSize:17},
-
-    eventItemContainer:{paddingHorizontal:15, paddingTop:10, paddingBottom:7, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
-    eventName:{fontSize:22},
-    
-    inputs:{flex:1, flexDirection:'row', flexWrap:'wrap'},
-    input:{alignSelf:'flex-start', paddingRight:20, paddingVertical:3},
-    inputText:{fontSize:17, color:AppStyles.color}
-});

@@ -57,8 +57,8 @@ export default class DateTimePicker extends React.Component {
 
     render(){
         return (
-            <View style={styles.container}>
-                <View style={styles.column_one}>
+            <View style={this.styles.container}>
+                <View style={this.styles.column_one}>
                     <DatePicker
                         ref="datepicker"
                         style={this.props.style}
@@ -76,14 +76,14 @@ export default class DateTimePicker extends React.Component {
                             datePicker: {backgroundColor:'#000' }
                         }}
                         onDateChange={this.onDateChange}
-                        iconComponent={<View style={styles.iconEvents}><IconEvents size="xsmall"></IconEvents></View>}
+                        iconComponent={<View style={[this.styles.iconEvents, this.props.iconStyle]}><IconEvents size="xsmall"></IconEvents></View>}
                         />
                 </View>
-                <View style={styles.column_two}>
+                <View>
                     <Textbox 
                         ref="textbox"
                         onFocus={this.onTextboxFocus}
-                        style={[styles.textbox, this.props.styleTextbox]} 
+                        style={[this.styles.textbox, this.props.styleTextbox]} 
                         placeholder={this.props.placeholder} 
                         value={this.state.datestring}
                     />
@@ -91,12 +91,11 @@ export default class DateTimePicker extends React.Component {
             </View>
         );
     }
-}
 
-const styles = StyleSheet.create({
-    container:{flexDirection:'row'},
-    column_one:{paddingTop:9, width:40, overflow:'hidden'},
-    column_two:{},
-    textbox:{fontSize:17, minWidth:100},
-    iconEvents:{position:'relative', left:-55, top:-2}
-});
+    styles = StyleSheet.create({
+        container:{flexDirection:'row'},
+        column_one:{paddingTop:9, width:40, overflow:'hidden'},
+        textbox:{fontSize:17, minWidth:100},
+        iconEvents:{alignSelf:'flex-start', paddingTop:5, position:'relative', left:-80}
+    });
+}
