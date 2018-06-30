@@ -2,6 +2,7 @@ import React from 'react';
 import { AppRegistry, View, TouchableOpacity} from 'react-native';
 import {G, Circle, Path} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
+import AppStyles from 'dedicate/AppStyles';
 
 export default class ButtonRecord extends React.Component {
     constructor(props){
@@ -31,7 +32,7 @@ export default class ButtonRecord extends React.Component {
                 <TouchableOpacity onPress={this.props.onPress}>
                     <SvgIcon {...this.props}>
                         <G>
-                            <Circle cx="32" cy="32" r="32" fill={this.props.fill || "#fff"}></Circle>
+                            <Circle cx="32" cy="32" r="32" fill={this.props.fill || AppStyles.backgroundColor}></Circle>
                             <Icon/>
                         </G>
                     </SvgIcon>

@@ -2,6 +2,7 @@ import React from 'react';
 import { AppRegistry, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Circle, G} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
+import AppStyles from 'dedicate/AppStyles';
 
 export default class ButtonDots extends React.Component {
     constructor(props){

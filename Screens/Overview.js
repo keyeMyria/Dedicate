@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableHighlight, Dimensions, ScrollView, BackHandler } from 'react-native';
-import AppStyles from 'dedicate/AppStyles';
+import { View, StyleSheet, TouchableHighlight, Dimensions, ScrollView, BackHandler } from 'react-native';
+import Text from 'ui/Text';
 import Body from 'ui/Body';
+import AppStyles from 'dedicate/AppStyles';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
@@ -44,6 +45,10 @@ export default class OverviewScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        
+        this.loadContent().then(() =>{
+            this.setState({loading:false});
+        }).catch();
     }
 
     componentWillUnmount(){
@@ -53,12 +58,6 @@ export default class OverviewScreen extends React.Component {
     hardwareBackPress() {
         BackHandler.exitApp();
         return true;
-    }
-
-    componentDidMount() { 
-        this.loadContent().then(() =>{
-            this.setState({loading:false});
-        }).catch();
     }
 
     loadContent(){
@@ -87,8 +86,10 @@ export default class OverviewScreen extends React.Component {
 
     scroll = (e) => {
         var y = e.nativeEvent.contentOffset.y;
+        var o = (1 / 50) * y;
+        if(o < 0){ o = 0;}
         if(y <= 50){
-            this.setState({shadowOpacity:(1 / 50) * y});
+            this.setState({shadowOpacity:o});
         }else if(this.state.shadowOpacity < 1){
             this.setState({shadowOpacity:1});
         }
@@ -105,19 +106,19 @@ export default class OverviewScreen extends React.Component {
                     <TouchableHighlight key={'timer' + timer.id} onPress={() => {
                         this.props.navigation.navigate('RecordTask', {goback:'Overview', recordId:timer.id}, { type: "Navigate", routeName: "Record", params: { }});
                     }}>
-                        <View style={styles.timerContainer}>
-                            <View style={styles.timerTask}>
-                                <View style={styles.timerTaskIcon}><IconTasks size="xsmall"></IconTasks></View>
-                                <Text style={styles.timerTaskLabel}>{timer.task.name}</Text>
+                        <View style={this.styles.timerContainer}>
+                            <View style={this.styles.timerTask}>
+                                <View style={this.styles.timerTaskIcon}><IconTasks size="xsmall"></IconTasks></View>
+                                <Text style={this.styles.timerTaskLabel}>{timer.task.name}</Text>
                             </View>
-                            <View style={styles.timerCounter}>
+                            <View style={this.styles.timerCounter}>
                                 <Timer startDate={timer.datestart} onStop={(datestart, dateend) => this.onTimerStop.call(that, datestart, dateend, timer)}></Timer>
                             </View>
                         </View>
                     </TouchableHighlight>
                 );
                 if(x < timers.length - 1){
-                    items.push(<View key={'sep' + x} style={styles.separator}></View>);
+                    items.push(<View key={'sep' + x} style={this.styles.separator}></View>);
                 }
             }
         }
@@ -149,7 +150,7 @@ export default class OverviewScreen extends React.Component {
                 if(item != null){
                     items.push(item);
                     if(x < this.state.charts.length - 1){
-                        items.push(<View key={'sep' + x} style={styles.separator}></View>);
+                        items.push(<View key={'sep' + x} style={this.styles.separator}></View>);
                     }
                 }
             }
@@ -191,14 +192,14 @@ export default class OverviewScreen extends React.Component {
                         </Svg>
                     );
                     line1Legend = (
-                        <View style={styles.legendItem}>
-                            <View style={styles.legendItemIcon}>
+                        <View style={this.styles.legendItem}>
+                            <View style={this.styles.legendItemIcon}>
                                 <Svg width="20" height="10">
                                     <Line x1="0" x2="20" y1="4" y2="4" strokeWidth="5" stroke={AppStyles.chartLine1Stroke}></Line>
                                 </Svg>
                             </View>
-                            <View style={styles.legendItemLabel}>
-                                <Text style={styles.legendItemText}>{input.input.name}</Text>
+                            <View style={this.styles.legendItemLabel}>
+                                <Text style={this.styles.legendItemText}>{input.input.name}</Text>
                             </View>
                         </View>
                     );
@@ -212,14 +213,14 @@ export default class OverviewScreen extends React.Component {
                         </Svg>
                     );
                     line2Legend = (
-                        <View style={styles.legendItem}>
-                            <View style={styles.legendItemIcon}>
+                        <View style={this.styles.legendItem}>
+                            <View style={this.styles.legendItemIcon}>
                                 <Svg width="20" height="10">
                                     <Line x1="0" x2="20" y1="4" y2="4" strokeWidth="5" stroke={AppStyles.chartLine2Stroke}></Line>
                                 </Svg>
                             </View>
-                            <View style={styles.legendItemLabel}>
-                                <Text style={styles.legendItemText}>{input.input.name}</Text>
+                            <View style={this.styles.legendItemLabel}>
+                                <Text style={this.styles.legendItemText}>{input.input.name}</Text>
                             </View>
                         </View>
                     );
@@ -235,14 +236,14 @@ export default class OverviewScreen extends React.Component {
                     </Svg>
                 );
                 dotsLegend = (
-                    <View style={styles.legendItem}>
-                        <View style={styles.legendItemIcon}>
+                    <View style={this.styles.legendItem}>
+                        <View style={this.styles.legendItemIcon}>
                             <Svg width="20" height="10">
                                 <Circle cx={10} cy={5} r={5} fill={AppStyles.chartDotFill}></Circle>
                             </Svg>
                         </View>
-                        <View style={styles.legendItemLabel}>
-                            <Text style={styles.legendItemText}>{input.input.name}</Text>
+                        <View style={this.styles.legendItemLabel}>
+                            <Text style={this.styles.legendItemText}>{input.input.name}</Text>
                         </View>
                     </View>
                 );
@@ -253,37 +254,37 @@ export default class OverviewScreen extends React.Component {
 
         return (
             <ScrollView key={chart.id} horizontal={true} pagingEnabled={true} showsHorizontalScrollIndicator={false}>
-                <View style={[styles.chartContainer, {width:width}]}>
-                    <View style={styles.chartArea}>
-                        <View style={styles.chartLine1MinMax}>
-                            <Text style={styles.chartLabel}>{line1Max}</Text>
-                            <Text style={[styles.chartLabel, styles.chartLine1Min]}>{line1Min}</Text>
+                <View style={[this.styles.chartContainer, {width:width}]}>
+                    <View style={this.styles.chartArea}>
+                        <View style={this.styles.chartLine1MinMax}>
+                            <Text style={[this.styles.chartLabel, this.styles.chartLine1Max]}>{line1Max}</Text>
+                            <Text style={[this.styles.chartLabel, this.styles.chartLine1Min]}>{line1Min}</Text>
                         </View>
-                        <View style={styles.chartLine2MinMax}>
-                            <Text style={styles.chartLabel}>{line2Max}</Text>
-                            <Text style={[styles.chartLabel, styles.chartLine2Min]}>{line2Min}</Text>
+                        <View style={this.styles.chartLine2MinMax}>
+                            <Text style={[this.styles.chartLabel, this.styles.chartLine2Max]}>{line2Max}</Text>
+                            <Text style={[this.styles.chartLabel, this.styles.chartLine2Min]}>{line2Min}</Text>
                         </View>
-                        <View style={[styles.chartLine2, styles.chart]}>
+                        <View style={[this.styles.chartLine2, this.styles.chart]}>
                             {line2}
                         </View>
-                        <View style={[styles.chartLine1, styles.chart]}>
+                        <View style={[this.styles.chartLine1, this.styles.chart]}>
                             {line1}
                         </View>
-                        <View style={[styles.chartDots, styles.chart]}>
+                        <View style={[this.styles.chartDots, this.styles.chart]}>
                             {dots}
                         </View>
-                        <Text style={styles.chartName}>{chart.name}</Text>
+                        <Text style={this.styles.chartName}>{chart.name}</Text>
                     </View>
                 </View>
-                <View style={[styles.legendContainer, {width:width}]}>
-                    <View style={styles.legendLines}>
+                <View style={[this.styles.legendContainer, {width:width}]}>
+                    <View style={this.styles.legendLines}>
                         {line1Legend}
                         {line2Legend}
                     </View>
-                    <View style={styles.legendDot}>
+                    <View style={this.styles.legendDot}>
                         {dotsLegend}
                     </View>
-                    <Text style={styles.legendName}>{chart.name}</Text>
+                    <Text style={this.styles.legendName}>{chart.name}</Text>
                 </View>
             </ScrollView>
         );
@@ -370,51 +371,51 @@ export default class OverviewScreen extends React.Component {
         var {height} = Dimensions.get('window');
         if(this.state.hasTask === true){
             return (
-                <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={styles.body}
+                <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={this.styles.body}
                     buttonAdd={true} buttonRecord={true} bottomFade={true} onLayout={this.onLayout}
                     >
-                    <View style={styles.counters}>
+                    <View style={this.styles.counters}>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
-                            <View style={styles.counterContainer}>
-                                <View style={styles.counterIcon}>
+                            <View style={this.styles.counterContainer}>
+                                <View style={this.styles.counterIcon}>
                                     <IconTasks size="small"></IconTasks>
                                 </View>
-                                <View style={styles.counterText}>
-                                    <Text style={styles.counterName}>{this.state.totalTasks}</Text>
-                                    <Text style={styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
+                                <View style={this.styles.counterText}>
+                                    <Text style={this.styles.counterName}>{this.state.totalTasks}</Text>
+                                    <Text style={this.styles.counterLabel}>{this.state.totalTasks != 1 ? 'Tasks' : 'Task'}</Text>
                                 </View>
                             </View>
                         </TouchableBox>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Events')}>
-                        <View style={styles.counterContainer}>
-                            <View style={styles.counterIcon}>
+                        <View style={this.styles.counterContainer}>
+                            <View style={this.styles.counterIcon}>
                                 <IconEvents size="small"></IconEvents>
                             </View>
-                            <View style={styles.counterText}>
-                                <Text style={styles.counterName}>{this.state.totalRecords}</Text>
-                                <Text style={styles.counterLabel}>{this.state.totalRecords != 1 ? 'Events' : 'Event'}</Text>
+                            <View style={this.styles.counterText}>
+                                <Text style={this.styles.counterName}>{this.state.totalRecords}</Text>
+                                <Text style={this.styles.counterLabel}>{this.state.totalRecords != 1 ? 'Events' : 'Event'}</Text>
                             </View>
                         </View>
                         </TouchableBox>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Databases')}>
-                        <View style={styles.counterContainer}>
-                            <View style={styles.counterIcon}>
+                        <View style={this.styles.counterContainer}>
+                            <View style={this.styles.counterIcon}>
                                 <IconDatabases size="small"></IconDatabases>
                             </View>
-                            <View style={styles.counterText}>
-                                <Text style={styles.counterName}>{global.database.name}</Text>
-                                <Text style={styles.counterLabel}>Database</Text>
+                            <View style={this.styles.counterText}>
+                                <Text style={this.styles.counterName}>{global.database.name}</Text>
+                                <Text style={this.styles.counterLabel}>Database</Text>
                             </View>
                         </View>
                         </TouchableBox>
                     </View>
-                    <DropShadow style={[styles.dropshadow]} opacity={0.075 * this.state.shadowOpacity} height={20}></DropShadow>
+                    <DropShadow style={[this.styles.dropshadow]} opacity={0.075 * this.state.shadowOpacity} height={20}></DropShadow>
                     <ScrollView onScroll={this.scroll} keyboardShouldPersistTaps="handled" scrollEventThrottle={1000 / 24.9}>
                         {this.state.loading == true ? 
-                            <View style={[styles.loading, {paddingTop:(height / 2) - 200}]}><Loading></Loading></View> : 
+                            <View style={[this.styles.loading, {paddingTop:(height / 2) - 200}]}><Loading></Loading></View> : 
                             <View>
-                                <View style={styles.timersContainer}>{this.state.timerList}</View>
-                                <View style={styles.chartsContainer}>{this.state.chartList}</View>
+                                <View style={this.styles.timersContainer}>{this.state.timerList}</View>
+                                <View style={this.styles.chartsContainer}>{this.state.chartList}</View>
                             </View>
                         }
                     </ScrollView>
@@ -423,17 +424,17 @@ export default class OverviewScreen extends React.Component {
         }else{
             // Show Message instead of Overview of tasks
             return (
-                <Body {...this.props} title="Overview" screen="Overview" style={styles.body} buttonAdd={true} onLayout={this.onLayout}
+                <Body {...this.props} title="Overview" screen="Overview" style={this.styles.body} buttonAdd={true} onLayout={this.onLayout}
                     footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
                 >
-                    <View style={[styles.container]}>
-                        <View style={styles.logo}><Logo width="200" height="38.65"></Logo></View>
-                        <View style={styles.text}>
-                            <Text style={[styles.p, styles.purple, styles.h4]}>
+                    <View style={[this.styles.container]}>
+                        <View style={this.styles.logo}><Logo width="200" height="38.65"></Logo></View>
+                        <View style={this.styles.text}>
+                            <Text style={[this.styles.p, this.styles.purple, this.styles.h4]}>
                                 "Follow your dreams and dedicate your life to all the things that you truly believe in,
                                 for if you don't believe in something, you'll eventually fall for anything."
                             </Text>
-                            <Text style={[styles.p, styles.purple, styles.h4]}>
+                            <Text style={[this.styles.p, this.styles.purple, this.styles.h4]}>
                                 - Anonymous
                             </Text>
                         </View>
@@ -443,55 +444,57 @@ export default class OverviewScreen extends React.Component {
         }
         
     }
-}
 
-const styles = StyleSheet.create({
-    container: {padding: 30 },
-    body:{position:'absolute', top:0, bottom:0, left:0, right:0},
-    logo: { marginVertical:10, flexDirection:'row', justifyContent:'center', width:'100%' },
-    text: {alignSelf:'center'},
-    h4: {fontSize:20},
-    p: { fontSize:17, paddingBottom:15, color:AppStyles.textColor },
-    purple: { color: AppStyles.color},
-    dropshadow:{zIndex:10},
-    loading:{width:'100%', flexDirection:'row', justifyContent:'center'},
+    styles = StyleSheet.create({
+        container: {padding: 30 },
+        body:{position:'absolute', top:0, bottom:0, left:0, right:0},
+        logo: { marginVertical:10, flexDirection:'row', justifyContent:'center', width:'100%' },
+        text: {alignSelf:'center'},
+        h4: {fontSize:20},
+        p: { fontSize:17, paddingBottom:15, color:AppStyles.textColor },
+        purple: { color: AppStyles.color},
+        dropshadow:{zIndex:10},
+        loading:{width:'100%', flexDirection:'row', justifyContent:'center'},
+        
+        counters:{flexDirection:'row', padding: 7, width:'100%' },
+        counterContainer:{flexDirection:"row", alignSelf:'flex-start', paddingHorizontal:10, paddingTop:13},
+        counterIcon:{paddingRight:8},
+        counterName:{fontSize:20, color:AppStyles.numberColor, position:'relative', top:-5},
+        counterLabel:{fontSize:17, position:'relative', top:-8},
     
-    counters:{flexDirection:'row', padding: 7, width:'100%' },
-    counterContainer:{flexDirection:"row", alignSelf:'flex-start', paddingHorizontal:10, paddingTop:13},
-    counterIcon:{paddingRight:8},
-    counterName:{fontSize:20, color:AppStyles.numberColor, position:'relative', top:-5},
-    counterLabel:{fontSize:17, position:'relative', top:-8},
-
-    timersContainer:{},
-    timerContainer:{flexDirection:'row', justifyContent:'space-between', width:'100%', paddingHorizontal:15, paddingTop:10, paddingBottom:20},
-    timerTask:{flexDirection:'row'},
-    timerTaskIcon:{paddingRight:10, paddingTop:6},
-    timerTaskLabel:{fontSize:20, paddingTop:6},
-    timerTaskCounter:{alignSelf:'flex-end'},
-
-    chartsContainer:{paddingBottom:70},
-    chartContainer: {paddingLeft:25, paddingRight:25, paddingBottom:20, paddingTop:5, width:'100%'},
-    chartArea:{height:120},
-    chart:{height:60, top:15, left:-25},
-    chartName: {position:'absolute', bottom:0, fontSize:20, width:'100%', textAlign:'center'},
-    chartLine1:{position:'absolute', height:'100%'},
-    chartLine1MinMax:{position:'absolute', height:'100%'},
-    chartLine1Min:{position:'absolute', bottom:0},
-    chartLine2:{position:'absolute', height:'100%'},
-    chartLine2MinMax:{position:'absolute', height:'100%', right:0, alignItems:'flex-end'},
-    chartLine2Min:{position:'absolute', bottom:0},
-    chartLabel:{fontSize:20, opacity:0.5},
-    chartTextRight:{textAlign:'right'},
-    chartDots:{position:'absolute'},
-
-    separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10},
-
-    legendContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', padding:30, height:125},
-    legendLines:{alignSelf:'flex-start'},
-    legendDot:{alignSelf:'flex-end'},
-    legendItem:{flex:1, flexDirection:'row'},
-    legendItemIcon:{paddingRight:10, paddingTop:7, height:20},
-    legendItemLabel:{},
-    legendItemText:{fontSize:17},
-    legendName:{position:'absolute', width:'100%', bottom:0, paddingLeft:55, fontSize:20, textAlign:'center', alignSelf:'center'}
-});
+        timersContainer:{},
+        timerContainer:{flexDirection:'row', justifyContent:'space-between', width:'100%', paddingHorizontal:15, paddingTop:10, paddingBottom:20},
+        timerTask:{flexDirection:'row'},
+        timerTaskIcon:{paddingRight:10, paddingTop:6},
+        timerTaskLabel:{fontSize:20, paddingTop:6},
+        timerTaskCounter:{alignSelf:'flex-end'},
+    
+        chartsContainer:{paddingBottom:70},
+        chartContainer: {paddingLeft:25, paddingRight:25, paddingBottom:20, paddingTop:5, width:'100%'},
+        chartArea:{height:120},
+        chart:{height:60, top:15, left:-25},
+        chartName: {position:'absolute', bottom:0, fontSize:20, width:'100%', textAlign:'center'},
+        chartLine1:{position:'absolute', height:'100%'},
+        chartLine1MinMax:{position:'absolute', height:'100%'},
+        chartLine1Max:{position:'absolute', top:0},
+        chartLine1Min:{position:'absolute', bottom:0},
+        chartLine2:{position:'absolute', height:'100%'},
+        chartLine2MinMax:{position:'absolute', height:'100%', right:0, alignItems:'flex-end'},
+        chartLine2Max:{position:'absolute', top:0},
+        chartLine2Min:{position:'absolute', bottom:0},
+        chartLabel:{fontSize:20, opacity:0.5},
+        chartTextRight:{textAlign:'right'},
+        chartDots:{position:'absolute'},
+    
+        separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10},
+    
+        legendContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', padding:30, height:125},
+        legendLines:{alignSelf:'flex-start'},
+        legendDot:{alignSelf:'flex-end'},
+        legendItem:{flex:1, flexDirection:'row'},
+        legendItemIcon:{paddingRight:10, paddingTop:7, height:20},
+        legendItemLabel:{},
+        legendItemText:{fontSize:17},
+        legendName:{position:'absolute', width:'100%', bottom:0, paddingLeft:55, fontSize:20, textAlign:'center', alignSelf:'center'}
+    });
+}

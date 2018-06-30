@@ -1,7 +1,7 @@
+
 import React from 'react';
 import {View, Dimensions, StyleSheet} from 'react-native';
 import { createDrawerNavigator } from 'react-navigation';
-import AppStyles from 'dedicate/AppStyles';
 import DrawerContent from 'ui/DrawerContent';
 import OverviewScreen from 'screens/Overview';
 import Screens from 'ui/Screens';
@@ -14,21 +14,32 @@ export default class App extends React.Component{
     constructor(props) {
         super(props);
 
-        //asynchronously get user config & database schema
+        this.state = {
+            reload: false
+        }
+
+        //set up global refresh
+        this.reload = this.reload.bind(this);
+        global.reload = this.reload;
+
+        //check for existing database
         getUserConfig().then(e => {
             Schema(global.config.database);
-
-            //after loading database, load UI
             this.forceUpdate();
-            setTimeout(function(){
-                SplashScreen.hide();
-            }, 0);
-
+            SplashScreen.hide();
         }).catch(err => {});
     }
 
+    reload(){
+        //reload entire app (when changing theme for example)
+        this.setState({reload:true});
+        setTimeout(()=>{
+            this.setState({reload:false});
+        }, 10);
+    }
+
     render(){
-        if(global.config){
+        if(global.config && global.config.database && this.state.reload == false){
             //show application
             return (<Navigator></Navigator>)
         }else{

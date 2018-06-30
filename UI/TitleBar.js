@@ -1,8 +1,8 @@
 import React from 'react';
 import { AppRegistry, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import AppStyles from 'dedicate/AppStyles';
 import { DrawerActions } from 'react-navigation';
 import IconMenu from 'icons/IconMenu';
+import AppStyles from 'dedicate/AppStyles';
 
 export default class TitleBar extends React.Component {
     constructor(props){

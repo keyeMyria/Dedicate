@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableHighlight, TouchableOpacity, BackHandler, Alert, PermissionsAndroid } from 'react-native';
-import AppStyles from 'dedicate/AppStyles';
+import { View, StyleSheet, ScrollView, TouchableHighlight, TouchableOpacity, BackHandler, Alert, PermissionsAndroid } from 'react-native';
+import Text from 'ui/Text';
 import Body from 'ui/Body';
+import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
 import Button from 'buttons/Button';
 import ButtonDots from 'buttons/ButtonDots';

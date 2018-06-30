@@ -1,8 +1,5 @@
 import React from 'react';
-import { 
-    AppRegistry, 
-    Text, View, StatusBar 
-} from 'react-native';
+import { View, StatusBar} from 'react-native';
 
 export default class StatusBarComponent extends React.Component {
 
@@ -18,5 +15,3 @@ export default class StatusBarComponent extends React.Component {
         );
     }
 }
-
-AppRegistry.registerComponent("StatusBarComponent", () => StatusBarComponent);

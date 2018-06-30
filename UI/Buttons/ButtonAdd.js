@@ -2,6 +2,7 @@ import React from 'react';
 import { AppRegistry, View, TouchableOpacity} from 'react-native';
 import {Circle, G, Path} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
+import AppStyles from 'dedicate/AppStyles';
 
 export default class ButtonAdd extends React.Component {
     constructor(props){
@@ -19,8 +20,8 @@ export default class ButtonAdd extends React.Component {
     }
 
     render() {
-        var fill = this.props.fill || "#6666cc";
-        var color = this.props.color || "#fff";
+        var fill = this.props.fill || AppStyles.color;
+        var color = this.props.color || AppStyles.backgroundColor;
         var offsetWidth = 0, offsetHeight = 0;
         var offsetSize = 1, offsetX = 0, offsetY = 0;
         if(this.props.outline ){

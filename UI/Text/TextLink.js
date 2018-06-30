@@ -1,5 +1,6 @@
 import React from 'react';
-import {Text, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
+import Text from 'ui/Text';
 import AppStyles from 'dedicate/AppStyles';
 
 export default class TextLink extends React.Component{

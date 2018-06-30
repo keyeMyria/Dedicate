@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Alert, 
-    Keyboard, KeyboardAvoidingView, BackHandler  } from 'react-native';
+import { View, StyleSheet, Dimensions, Alert, Keyboard, KeyboardAvoidingView, BackHandler  } from 'react-native';
+import Text from 'ui/Text';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
@@ -29,6 +29,7 @@ export default class TaskScreen extends React.Component {
                 height:250,
                 inputsOffset:0
             },
+            categoryList:[],
             styles:stylesLandscape,
             title:'New Task',
             ButtonAddShow: true,
@@ -68,6 +69,7 @@ export default class TaskScreen extends React.Component {
         }
 
         this.state.categories = this.getDbCategories();
+        this.state.categoryList = this.getCategoriesForPicker();
     }
 
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////
@@ -75,9 +77,6 @@ export default class TaskScreen extends React.Component {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
         Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
         Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
-    }
-
-    componentDidMount() { 
         this.onLayoutChange();
     }
 
@@ -113,16 +112,7 @@ export default class TaskScreen extends React.Component {
     // Database Calls ////////////////////////////////////////////////////////////////////////////////////////
     getDbCategories(){
         var dbCat = new DbCategories;
-        return dbCat.GetCategoriesList().filter((cat) => {
-            if(!cat || (cat && cat.name=='')  || (cat && cat.id && cat.id==0)){
-                global.realm.write(()=>{
-                    global.realm.delete(cat);
-                });
-                return false;
-            }
-            return true;
-            }
-        ).map((cat) => {
+        return dbCat.GetCategoriesList().map((cat) => {
             return {id:cat.id, name:cat.name}  
         });
     }
@@ -162,14 +152,12 @@ export default class TaskScreen extends React.Component {
 
     getCategoriesForPicker(){
         return this.state.categories.length > 0 ? 
-            ([{id:-1, name:'None'}, ...this.state.categories]).map((cat) => {
-                var newcat = cat;
-                newcat.key = newcat.id;
-                newcat.label = newcat.name;
-                return newcat;
+            [{id:-1, name:'None'}, ...this.state.categories].map((cat) => {
+                return {value: cat.id, label:cat.name};
             }) :
-            [{key:-1, label:'None'}];
+            [{value:-1, label:'None'}];
     }
+
     onPressAddCategory = event => {
         var that = this;
         this.setState({categoryIndex: Math.floor(Math.random() * (this.categories.length))});
@@ -177,15 +165,14 @@ export default class TaskScreen extends React.Component {
             <View style={[styles.modalContainer, {minWidth:300}]}>
                 <Text style={styles.fieldTitle}>Label</Text>
                 <Textbox 
-                    ref="tasklabel"
-                    value={that.state.newcat.name}
+                    defaultValue={this.state.newcat.name}
                     style={styles.inputField} 
-                    placeholder={that.placeholderCategoryName()}
+                    placeholder={this.categories[this.state.categoryIndex]}
                     returnKeyType={'done'}
                     onChangeText={that.onNewCategoryTitleChangeText}
                 />
                 <View style={styles.createCategoryButton}>
-                    <Button text="Create Category" onPress={() => that.onPressCreateCategory()}/>
+                    <Button text="Create Category" onPress={() => this.onPressCreateCategory.call(that)}/>
                 </View>
             </View>
         ));
@@ -196,10 +183,6 @@ export default class TaskScreen extends React.Component {
         var newcat = this.state.newcat;
         newcat.name = text;
         this.setState({newcat:newcat});
-    }
-
-    placeholderCategoryName(){
-        return this.categories[this.state.categoryIndex];
     }
 
     onPressCreateCategory(){
@@ -213,13 +196,14 @@ export default class TaskScreen extends React.Component {
         var id = dbCat.CreateCategory(this.state.newcat);
         task.category.id = id;
         task.category.name = this.state.newcat.name;
-        var catRef = this.refs['categoryPicker'];
         var cats = this.getDbCategories();
-        this.setState({newcat:{name:''}, task:task, categories:cats});
+        this.setState({newcat:{name:''}, task:task, categories:cats}, 
+        () => {
+            this.setState({categoryList:this.getCategoriesForPicker()});
+            this.validateForm();
+            global.Modal.hide();
+        });
 
-        catRef.Update(cats, 0);
-        this.validateForm();
-        global.Modal.hide();
     }
 
     onCategoryValueChange = (value, index, label) => {
@@ -274,7 +258,7 @@ export default class TaskScreen extends React.Component {
         this.validateForm();
     }
 
-    onPickerValueChange = (index, itemValue, itemIndex) => {
+    onPickerValueChange = (index, itemValue) => {
         var task = this.state.task;
         task.inputs[index - 1].type = itemValue;
         this.setState({task: task});
@@ -475,12 +459,11 @@ export default class TaskScreen extends React.Component {
                             </View>
                             <View style={styles.categoryPicker}>
                                 <Picker
-                                    ref='categoryPicker'
                                     style={styles.pickerStyle}
                                     itemStyle={styles.pickerItemStyle}
                                     selectedValue={this.state.task.category ? this.state.task.category.id : -1}
                                     onValueChange={this.onCategoryValueChange}
-                                    items={this.getCategoriesForPicker()}
+                                    items={this.state.categoryList}
                                     title="Select A Category"
                                 />
                             </View>
@@ -515,11 +498,16 @@ class TaskInputField extends React.Component{
     constructor(props){
         super(props);
         this.state = {label:props.input.name, labelKeyType:'done'};
+
+        //bind methods
+        this.onLayout = this.onLayout.bind(this);
     }
 
-    componentDidMount(){
+    onLayout(){
         if(this.props.focus() === true){
+            try{
             this.refs['inputLabel'].focus();
+            }catch(ex){}
         }
     }
 
@@ -555,7 +543,7 @@ class TaskInputField extends React.Component{
 
         }
         return (
-            <View style={styles.containerInputField}>
+            <View style={styles.containerInputField} onLayout={this.onLayout}>
                 <View style={[styles.inputFieldLabel, {width:this.props.width - 210}]}>
                     <Textbox 
                         ref={'inputLabel'} 
@@ -577,21 +565,20 @@ class TaskInputField extends React.Component{
                             itemStyle={styles.pickerItemStyle}
                             selectedValue={this.props.input.type}
                             onValueChange={this.props.onPickerValueChange}
-                            value={this.props.input.type}
                             items={
                                 [
-                                    {label:"Number", key:0},
-                                    {label:"Text", key:1},
-                                    {label:"Date", key:2},
-                                    {label:"Time", key:3},
-                                    {label:"Date & Time", key:4},
-                                    //{label:"Stop Watch", key:5},
-                                    {label:"Yes/No", key:6},
-                                    {label:"5 Stars", key:7},
-                                    {label:"Location", key:8},
-                                    {label:"URL Link", key:9},
-                                    {label:"Photo", key:10},
-                                    {label:"Video", key:11}
+                                    {label:"Number", value:0},
+                                    {label:"Text", value:1},
+                                    {label:"Date", value:2},
+                                    {label:"Time", value:3},
+                                    {label:"Date & Time", value:4},
+                                    //{label:"Stop Watch", value:5},
+                                    {label:"Yes/No", value:6},
+                                    {label:"5 Stars", value:7},
+                                    {label:"Location", value:8},
+                                    {label:"URL Link", value:9},
+                                    {label:"Photo", value:10},
+                                    {label:"Video", value:11}
                                 ]
                             }
                             title="Select A Data Type"

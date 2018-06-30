@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableHighlight, BackHandler } from 'react-native';
-import AppStyles from 'dedicate/AppStyles';
+import { View, StyleSheet, ScrollView, TouchableHighlight, BackHandler } from 'react-native';
+import Text from 'ui/Text';
 import Body from 'ui/Body';
+import AppStyles from 'dedicate/AppStyles';
 import DbTasks from 'db/DbTasks';
 import IconTasks from 'icons/IconTasks';
 

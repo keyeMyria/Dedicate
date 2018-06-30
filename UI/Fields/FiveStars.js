@@ -1,9 +1,9 @@
 import React from 'react';
 import {View, StyleSheet, PanResponder} from 'react-native';
+import AppStyles from 'dedicate/AppStyles';
 import IconStar from 'icons/IconStar';
 import IconStarHalf from 'icons/IconStarHalf';
 import IconStarEmpty from 'icons/IconStarEmpty';
-import AppStyles from 'dedicate/AppStyles';
 
 export default class FiveStars extends React.Component{
     constructor(props){

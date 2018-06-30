@@ -1,5 +1,6 @@
 import React from 'react';
-import {View, StyleSheet, Text, Alert} from 'react-native';
+import {View, StyleSheet, Alert} from 'react-native';
+import Text from 'ui/Text';
 import AppLang from 'dedicate/AppLang';
 import DateTimePicker from 'fields/DateTimePicker'
 

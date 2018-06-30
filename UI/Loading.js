@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Animated, Easing} from 'react-native';
+import {Animated, Easing} from 'react-native';
 import {Path} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
 import AppStyles from 'dedicate/AppStyles';
@@ -13,7 +13,7 @@ export default class Loading extends React.Component {
         }
     }
 
-    componentDidMount() {
+    componentWillMount() {
         this.rotateSvg();
     }
 

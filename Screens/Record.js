@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, BackHandler, Alert } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions, BackHandler, Alert } from 'react-native';
+import Text from 'ui/Text';
 import { createStackNavigator } from 'react-navigation';
-import AppLang from 'dedicate/AppLang';
-import AppStyles from 'dedicate/AppStyles';
 import Body from 'ui/Body';
+import AppStyles from 'dedicate/AppStyles';
+import AppLang from 'dedicate/AppLang';
 import Textbox from 'fields/Textbox';
 import Picker from 'fields/Picker';
 import StopWatch from 'fields/StopWatch';
@@ -756,11 +757,11 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                         <Picker
                                             ref={ref}
                                             items={[
-                                                {key:0, label:'No'},
-                                                {key:1, label:'Yes'}
+                                                {value:0, label:'No'},
+                                                {value:1, label:'Yes'}
                                             ]}
                                             selectedValue={recinput.number || 0}
-                                            onValueChange={(key) => {that.onChangeText.call(that, input.id, input.type, key)}}
+                                            onValueChange={(value) => {that.onChangeText.call(that, input.id, input.type, value)}}
                                         />
                                     </View>
                                 )

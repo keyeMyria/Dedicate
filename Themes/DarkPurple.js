@@ -1,17 +1,17 @@
-export default LightPurple =
+export default DarkPurple =
 {
     // colors ///////////////////////////////
     color: '#6666cc',
-    textColor: '#444',
+    textColor: '#eee',
     linkColor: '#6666cc',
-    numberColor: '#333',
+    numberColor: '#eee',
     headerColor: '#6666cc',
     headerDarkColor: '#4D4DAD',
     headerTextColor: '#fff',
-    backgroundColor: '#fff',
-    separatorColor: '#eee',
-    altBackgroundColor: '#eee',
-    altSeparatorColor: '#ccc',
+    backgroundColor: '#222',
+    separatorColor: '#444',
+    altBackgroundColor: '#333',
+    altSeparatorColor: '#555',
     buttonColor: '#6666cc',
     buttonTextColor: '#fff',
     buttonPressedColor: '#5555bb',
@@ -23,16 +23,16 @@ export default LightPurple =
     buttonLightColor: '#999',
 
     // list item styling /////////////////////
-    listItemSelectedColor: '#f0f0ff',
-    listItemSelectedTextColor: '#444',
-    listItemPressedColor: '#f0f0ff',
-    listItemPressedTextColor: '#444',
+    listItemSelectedColor: '#282C38',
+    listItemSelectedTextColor: '#B5B5FF',
+    listItemPressedColor: '#2F374E',
+    listItemPressedTextColor: '#B5B5FF',
 
     // star color //////////////////////////
     starColor:'#ff9900',
 
     // chart styling /////////////////////////
-    chartLine1Stroke: '#cccccc',
-    chartLine2Stroke: '#e6e6e6',
-    chartDotFill: '#b3e6ff'
+    chartLine1Stroke: '#555',
+    chartLine2Stroke: '#333',
+    chartDotFill: '#336699'
 }

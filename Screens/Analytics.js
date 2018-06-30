@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, BackHandler } from 'react-native';
+import { View, Image, StyleSheet, BackHandler } from 'react-native';
+import Text from 'ui/Text';
 import Body from 'ui/Body';
 
 

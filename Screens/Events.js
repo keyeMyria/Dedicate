@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableHighlight, BackHandler, FlatList, Picker, Dimensions } from 'react-native';
-import AppStyles from 'dedicate/AppStyles';
+import { View, StyleSheet, TouchableHighlight, BackHandler, FlatList, Dimensions } from 'react-native';
+import Text from 'ui/Text';
+import Picker from 'fields/Picker';
 import Body from 'ui/Body';
+import AppStyles from 'dedicate/AppStyles';
 import DbRecords from 'db/DbRecords';
 import DbTasks from 'db/DbTasks';
 import DateFormat from 'utility/DateFormat';
@@ -166,10 +168,10 @@ export default class EventsScreen extends React.Component {
         var {height} = Dimensions.get('window');
         return (
             <Body {...this.props} style={styles.body} title="Events" screen="Events" 
-            buttonAdd={!this.state.loading} 
-            buttonRecord={!this.state.loading} 
-            noscroll={!this.state.loading} 
-            bottomFade={!this.state.loading}
+            buttonAdd={true} 
+            buttonRecord={true} 
+            noscroll={true} 
+            bottomFade={true}
             titleBarButtons={
                 <View style={styles.titlebarButtons}>
                     <ButtonSearch size="xsmall" onPress={() => this.toggleFilterForm.call(that)}></ButtonSearch>
@@ -181,11 +183,10 @@ export default class EventsScreen extends React.Component {
                         <Picker 
                             selectedValue={this.state.filter.taskId}
                             onValueChange={(value) => this.filterTasks.call(that, value)}
-                        >
-                            <Picker.Item key="all" label="All Tasks" value={-1}></Picker.Item>
-                            {this.state.tasks.map(a => 
-                                <Picker.Item key={'item'+a.id} label={a.name} value={a.id}></Picker.Item>
+                            items={[{key:'all', value:-1, label:'All Tasks'}].concat(
+                                this.state.tasks.map(a => {return {key:'item'+a.id, label:a.name, value:a.id};})
                             )}
+                        >
                         </Picker>
                         {this.state.filterDates == true && 
                             <View style={styles.filterDates}>
@@ -211,7 +212,7 @@ export default class EventsScreen extends React.Component {
                         
 
                 {this.state.loading ? 
-                    <View style={[styles.loading, {paddingTop:(height / 2) - 100}]}><Loading></Loading></View> : 
+                    <View style={[styles.loading, {paddingTop:(height / 2) - 100, paddingBottom:(height / 2) - 19}]}><Loading></Loading></View> : 
                     <FlatList
                         data={this.state.events}
                         keyExtractor={item => item.id.toString()}

@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableHighlight } from "react-native";
+import { View, StyleSheet, TouchableHighlight } from "react-native";
+import Text from 'ui/Text';
 import AppStyles from 'dedicate/AppStyles';
 import IconOverview from 'icons/IconOverview';
 import IconTasks from 'icons/IconTasks';
@@ -16,40 +17,56 @@ export default class DrawerContent extends React.Component{
 
   render(){
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Logo width="129" height="25" color={AppStyles.backgroundColor}/>
+      <View style={[this.styles.container]}>
+        <View style={this.styles.header}>
+          <Logo width="129" height="25" color={AppStyles.headerTextColor}/>
         </View>
-        <DrawerItem {...this.props} text="Overview" screen="Overview" icon={IconOverview} />
-        <DrawerItem {...this.props} text="Tasks" screen="Tasks" icon={IconTasks} />
-        <DrawerItem {...this.props} text="Events" screen="Events" icon={IconEvents} />
-        <DrawerItem {...this.props} text="Analytics" screen="Analytics" icon={IconAnalytics} />
-        <DrawerItem {...this.props} text="Settings" screen="Settings" icon={IconSettings} />
-        <DrawerItem {...this.props} text="Databases" screen="Databases" icon={IconDatabases} />
+        <DrawerItem {...this.props} text="Overview" screen="Overview" icon={<IconOverview size="small"/>} />
+        <DrawerItem {...this.props} text="Tasks" screen="Tasks" icon={<IconTasks size="small"/>} />
+        <DrawerItem {...this.props} text="Events" screen="Events" icon={<IconEvents size="small"/>} />
+        <DrawerItem {...this.props} text="Analytics" screen="Analytics" icon={<IconAnalytics size="small"/>} />
+        <DrawerItem {...this.props} text="Settings" screen="Settings" icon={<IconSettings size="small"/>} />
+        <DrawerItem {...this.props} text="Databases" screen="Databases" icon={<IconDatabases size="small"/>} />
       </View>
     );
   }
+
+  styles = StyleSheet.create({
+    container: { flex:1, backgroundColor:AppStyles.backgroundColor },
+    header: { padding: 15, backgroundColor:AppStyles.headerColor, marginBottom:20, flexDirection:'row', justifyContent:'center', width:'100%'}
+  });
 }
 
-const DrawerItem = props => {
-  const Icon = props.icon;
-  var selectedStyle = {};
-  if(props.activeItemKey == props.text){ selectedStyle = styles.drawerItemSelected; }
-  return (
-    <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} onPress={() => props.navigation.navigate(props.screen)}>
-    <View style={[styles.drawerItem, selectedStyle]}>
-      <View style={styles.drawerItemIcon}><Icon size="small" /></View>
-        <Text style={styles.drawerItemText}>{props.text}</Text>
-    </View>
-    </TouchableHighlight>
-  );
-};
+class DrawerItem extends React.Component {
+  constructor(props){
+    super(props);
+  }
 
-const styles = StyleSheet.create({
-  container: { flex:1 },
-  header: { padding: 15, backgroundColor:'#6666cc', marginBottom:20, flexDirection:'row', justifyContent:'center', width:'100%'},
-  drawerItem: {flexDirection:'row', flexWrap:'wrap', paddingVertical: 15, paddingHorizontal:20},
-  drawerItemSelected: { backgroundColor:AppStyles.listItemHoverColor},
-  drawerItemIcon:{paddingRight:20},
-  drawerItemText: {fontSize:17, fontWeight:'bold', paddingTop:7, color: AppStyles.textColor}
-});
+  render(){
+    var selectedStyle = {};
+    var selectedTextStyle = {};
+    if(this.props.activeItemKey == this.props.text){ 
+      selectedStyle = this.styles.drawerItemSelected; 
+      selectedTextStyle = this.styles.drawerItemSelectedText;
+    }
+
+    return (
+      <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} 
+      onPress={() => this.props.navigation.navigate(this.props.screen)}
+      >
+      <View style={[this.styles.drawerItem, selectedStyle]}>
+        <View style={this.styles.drawerItemIcon}>{this.props.icon}</View>
+          <Text style={[this.styles.drawerItemText, selectedTextStyle]}>{this.props.text}</Text>
+      </View>
+      </TouchableHighlight>
+    );
+  }
+    
+  styles = StyleSheet.create({
+    drawerItem: {flexDirection:'row', flexWrap:'wrap', paddingVertical: 15, paddingHorizontal:20, backgroundColor:AppStyles.backgroundColor},
+    drawerItemSelected: { backgroundColor:AppStyles.listItemSelectedColor},
+    drawerItemSelectedText: {color:AppStyles.listItemSelectedTextColor},
+    drawerItemIcon:{paddingRight:20},
+    drawerItemText: {fontSize:17, fontWeight:'bold', paddingTop:7, color: AppStyles.textColor}
+  });
+};
