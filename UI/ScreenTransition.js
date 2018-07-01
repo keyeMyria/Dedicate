@@ -1,26 +1,25 @@
 import { Easing, Animated } from 'react-native';
 
-export default ScreenTransition = () => ({
-    transitionSpec: {
-        duration: 250,
-        easing: Easin.out(Easing.poly(4)),
+export default ScreenTransition = () => {
+    return {
+      transitionSpec: {
+        duration: 750,
+        easing: Easing.out(Easing.poly(4)),
         timing: Animated.timing,
-    },
-    screenInterpolator: sceneProps => {
+        useNativeDriver: true,
+      },
+      screenInterpolator: sceneProps => {      
         const { layout, position, scene } = sceneProps
-        const { index } = scene
-
-        const height = layout.initHeight
-        const translateY = position.interpolate({
-            inputRange: [index - 1, index, index + 1],
-            outputRange: [height, 0, 0],
+  
+        const thisSceneIndex = scene.index
+        const width = layout.initWidth
+  
+        const translateX = position.interpolate({
+          inputRange: [thisSceneIndex - 1, thisSceneIndex],
+          outputRange: [width, 0],
         })
-
-        const opacity = position.interpolate({
-            inputRange: [index - 1, index - 0.99, index],
-            outputRange: [0, 1, 1],
-        })
-
-        return { opacity, transform: [{ translateY }] }
+  
+        return { transform: [ { translateX } ] }
+      },
     }
-});
+  }

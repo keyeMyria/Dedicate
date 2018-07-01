@@ -5,6 +5,7 @@ import { createDrawerNavigator } from 'react-navigation';
 import DrawerContent from 'ui/DrawerContent';
 import OverviewScreen from 'screens/Overview';
 import Screens from 'ui/Screens';
+import ScreenTransition from 'ui/ScreenTransition';
 import Schema from 'db/Schema';
 import {getUserConfig} from 'dedicate/UserConfig';
 import Logo from 'ui/Logo';

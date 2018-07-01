@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import Text from 'ui/Text';
 import Header from 'ui/Header';
 import Modal from 'ui/Modal';
 import ButtonAdd from 'buttons/ButtonAdd';
 import ButtonRecord from 'buttons/ButtonRecord';
 import DbTasks from 'db/DbTasks';
+import DbRecords from 'db/DbRecords';
 import {Svg, Rect, Defs, LinearGradient, Stop} from 'react-native-svg';
+import ToolTip from 'tooltip/Left';
+import ToolTipBottom from 'tooltip/BottomRight';
 
 
 export default class Body extends React.Component {
@@ -19,6 +21,10 @@ export default class Body extends React.Component {
         if(this.props.buttonRecord == true){
             var dbTasks = new DbTasks();
             this.state.hasTasks = dbTasks.HasTasks();
+            if(this.state.hasTasks == true){
+                var dbRecords = new DbRecords();
+                this.state.hasRecords = dbRecords.hasRecords();
+            }
         }
     }
 
@@ -47,18 +53,23 @@ export default class Body extends React.Component {
                             </Svg>
                         </View>
                     }
-                    {this.props.buttonRecord == true && this.state.hasTasks ?
-                        <ButtonRecord {...this.props} style={this.styles.buttonRecord} buttonType="rec" size="large"
+                    {this.props.buttonRecord == true && this.state.hasTasks ? [
+                        (this.state.hasRecords != true && 
+                            <View key="tooltip" style={this.styles.recordTooltip}>
+                                <ToolTipBottom text="Finally, record an event using the task that you have just created."/>
+                            </View>
+                        ),
+                        <ButtonRecord key="btnrec" {...this.props} style={this.styles.buttonRecord} buttonType="rec" size="large"
                             onPress={() => {
                                 this.props.navigation.navigate('RecordDefault', {goback:this.props.screen}, { type: "Navigate", routeName: "Record", params: { }});
                             }}
                         />
-                        : <View></View>
+                        ] : <View></View>
                     }
                     {this.props.footerMessage != null && this.props.footerMessage != '' && !this.state.hasTasks && 
                         (
                             <View style={this.styles.footerMessageContainer}>
-                                <Text style={this.styles.footerMessage}>{this.props.footerMessage}</Text>
+                                <ToolTip text={this.props.footerMessage}/>
                             </View>
                         )
                     }
@@ -79,10 +90,11 @@ export default class Body extends React.Component {
 
     styles = StyleSheet.create({
         container:{backgroundColor:AppStyles.backgroundColor},
+        recordTooltip:{position:'absolute', bottom:90, right:26},
         buttonRecord:{alignSelf:'flex-end', bottom:10, right:20, position:'absolute', zIndex:100},
         buttonAdd:{alignSelf:'flex-start', bottom:20, left:20, position:'absolute', zIndex:100},
         footerStyle:{position:'relative'},
-        footerMessageContainer:{position:'absolute', bottom:5, left:60, height:60, maxWidth:270},
+        footerMessageContainer:{position:'absolute', bottom:18, left:80},
         footerMessage:{paddingLeft:30, textAlign:'left', fontSize:16},
         bottomFade:{position:'absolute', left:0, bottom:-1, height:110}
     });

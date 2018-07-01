@@ -12,6 +12,7 @@ import ButtonPlus from 'buttons/ButtonPlus';
 import Button from 'buttons/Button';
 import DbTasks from 'db/DbTasks';
 import DbCategories from 'db/DbCategories';
+import ToolTip from 'tooltip/Top';
 
 export default class TaskScreen extends React.Component {
     constructor(props) {
@@ -37,7 +38,7 @@ export default class TaskScreen extends React.Component {
             focusIndex:null,
             visibleHeight:0,
             contentOffset:0,
-            nameIndex: Math.floor(Math.random() * (this.names.length)),
+            nameIndex: Math.floor(Math.random() * (this.placeHolderNames.length)),
             categoryIndex: Math.floor(Math.random() * (this.categories.length)),
             edited: false,
             newcat: {name:''}
@@ -162,16 +163,16 @@ export default class TaskScreen extends React.Component {
         var that = this;
         this.setState({categoryIndex: Math.floor(Math.random() * (this.categories.length))});
         global.Modal.setContent('Add A New Category',(
-            <View style={[styles.modalContainer, {minWidth:300}]}>
-                <Text style={styles.fieldTitle}>Label</Text>
+            <View style={[this.styles.modalContainer, {minWidth:300}]}>
+                <Text style={this.styles.fieldTitle}>Label</Text>
                 <Textbox 
                     defaultValue={this.state.newcat.name}
-                    style={styles.inputField} 
+                    style={this.styles.inputField} 
                     placeholder={this.categories[this.state.categoryIndex]}
                     returnKeyType={'done'}
                     onChangeText={that.onNewCategoryTitleChangeText}
                 />
-                <View style={styles.createCategoryButton}>
+                <View style={this.styles.createCategoryButton}>
                     <Button text="Create Category" onPress={() => this.onPressCreateCategory.call(that)}/>
                 </View>
             </View>
@@ -342,29 +343,38 @@ export default class TaskScreen extends React.Component {
     }
 
     // Placeholder Task Names
-    names = [
+    placeHolderNames = [
         "Pushups", "Exercise", "Jogging", "Cook food", "Read a book", "Watch a movie",
-        "Go Swimming", "Ride bike", "Go camping", "Go hiking", "Brush teeth"
+        "Go Swimming", "Ride bike", "Go camping", "Go hiking"
+    ];
+
+    placeHolderInputs = [
+        "Count", "Sets", "Miles", "Recipe", "Pages", "Minutes",
+        "Laps", "Miles", "Miles", "Miles"
     ];
 
     placeholderTaskName() {
-        return this.names[this.state.nameIndex];
+        return this.placeHolderNames[this.state.nameIndex];
+    }
+
+    placeholderInputName() {
+        return this.placeHolderInputs[this.state.nameIndex];
     }
 
     // TitleBar Button ////////////////////////////////////////////////////////////////////////////////////////
     TitleBarButtons = () => {
         var that = this;
         return (
-            <View style={styles.titleBarButtons}>
+            <View style={this.styles.titleBarButtons}>
                 {this.state.ButtonInTitleBar && (
-                    <View key="buttonAdd" style={styles.titleBarButtonAddInput}>
+                    <View key="buttonAdd" style={this.styles.titleBarButtonAddInput}>
                         <ButtonAdd onPress={this.onPressAddInput}
                         />
                     </View>
                 )}
                 {this.state.edited == true && (
-                    <View key="buttonSave" style={styles.buttonSaveContainer}>
-                        <ButtonSave size="smaller" style={styles.buttonSave} onPress={this.onPressButtonSave} />
+                    <View key="buttonSave" style={this.styles.buttonSaveContainer}>
+                        <ButtonSave size="smaller" style={this.styles.buttonSave} onPress={this.onPressButtonSave} />
                     </View>
                 )}
             </View>);
@@ -395,6 +405,7 @@ export default class TaskScreen extends React.Component {
                     keytype={keytype} 
                     width={width} 
                     task={this.state.task} 
+                    placeholder={this.placeholderInputName()}
                     focus={() => {return this.shouldFocusInputField.call(that, e)}}
                     onFocus={(event) => {this.onFocusInputField.call(that, event, e)}}
                     onChangeText={(text) => {this.onInputLabelChangeText.call(that, e, text)}}
@@ -407,10 +418,8 @@ export default class TaskScreen extends React.Component {
         }else{
             // show description about Input Fields //////////////////
             inputFields = (
-                <View style={styles.containerDescription}>
-                    <Text style={[styles.inputsDescription, this.state.styles.inputsDescription]}>
-                        Your can record data about your task by adding one or more input fields above. 
-                    </Text>
+                <View style={this.styles.containerDescription}>
+                    <ToolTip text="You can record data about your task by adding one or more input fields above."/>
                 </View>
             );
         }
@@ -428,12 +437,12 @@ export default class TaskScreen extends React.Component {
                     titleBarButtons={this.TitleBarButtons.call(that)} onScroll={this.onScrollView}
                 >
                     <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={-500}>
-                    <View style={styles.container} onLayout={(event) => this.measureTaskForm(event)} >
-                        <Text style={styles.fieldTitle}>Label</Text>
+                    <View style={this.styles.container} onLayout={(event) => this.measureTaskForm(event)} >
+                        <Text style={this.styles.fieldTitle}>Label</Text>
                         <Textbox 
                             ref="tasklabel"
                             value={this.state.task.name}
-                            style={styles.inputField} 
+                            style={this.styles.inputField} 
                             placeholder={this.placeholderTaskName()}
                             returnKeyType={labelKeyType} 
                             onFocus={(e)=>{return this.onFocusTaskLabel.call(that, e)}}
@@ -448,19 +457,19 @@ export default class TaskScreen extends React.Component {
                                 }
                              }}
                         />
-                        <View style={styles.categoryContainer}>
-                            <View style={styles.categoryColumnOne}>
-                                <Text style={[styles.fieldTitle, styles.fieldCategory]}>Category</Text>
+                        <View style={this.styles.categoryContainer}>
+                            <View style={this.styles.categoryColumnOne}>
+                                <Text style={[this.styles.fieldTitle, this.styles.fieldCategory]}>Category</Text>
                             </View>
-                            <View style={styles.categoryColumnTwo}>
-                                <ButtonPlus style={styles.buttonAddCategory} color={AppStyles.color} size="xsmall"
+                            <View style={this.styles.categoryColumnTwo}>
+                                <ButtonPlus style={this.styles.buttonAddCategory} color={AppStyles.color} size="xsmall"
                                     onPress={this.onPressAddCategory}
                                 />
                             </View>
-                            <View style={styles.categoryPicker}>
+                            <View style={this.styles.categoryPicker}>
                                 <Picker
-                                    style={styles.pickerStyle}
-                                    itemStyle={styles.pickerItemStyle}
+                                    style={this.styles.pickerStyle}
+                                    itemStyle={this.styles.pickerItemStyle}
                                     selectedValue={this.state.task.category ? this.state.task.category.id : -1}
                                     onValueChange={this.onCategoryValueChange}
                                     items={this.state.categoryList}
@@ -469,11 +478,11 @@ export default class TaskScreen extends React.Component {
                             </View>
                         </View>
                     </View>
-                    <View style={[styles.containerInputs, {minHeight:height - this.state.taskForm.height, paddingBottom:this.state.taskForm.inputsOffset}]}>
+                    <View style={[this.styles.containerInputs, {minHeight:height - this.state.taskForm.height, paddingBottom:this.state.taskForm.inputsOffset}]}>
                         <View>
-                            <Text style={styles.inputsTitle}>Input Fields</Text>
+                            <Text style={this.styles.inputsTitle}>Input Fields</Text>
                             {this.state.ButtonAddShow && this.state.ButtonInTitleBar == false &&
-                                <ButtonAdd size="small" style={[styles.buttonAddInput]}
+                                <ButtonAdd size="small" style={[this.styles.buttonAddInput]}
                                     outline={AppStyles.altBackgroundColor}
                                     onPress={this.onPressAddInput}
                                 />
@@ -482,7 +491,7 @@ export default class TaskScreen extends React.Component {
                         {inputFields}
 
                         {this.state.task.id != null && (
-                            <View style={styles.buttonDeleteContainer}>
+                            <View style={this.styles.buttonDeleteContainer}>
                                 <Button text="Delete Task" onPress={this.onDeleteTask}/>
                             </View>
                         )}
@@ -491,6 +500,44 @@ export default class TaskScreen extends React.Component {
                 </Body>
         );
     }
+
+    styles = StyleSheet.create({
+        //task form
+        container: {padding:30, backgroundColor:AppStyles.backgroundColor},
+        keyboardavoidingview:{},
+        fieldTitle: {fontSize:16, fontWeight:'bold'},
+    
+        //category field
+        categoryContainer:{width:'100%', paddingTop:20},
+        categoryColumnOne:{paddingTop:5, height:25},
+        categoryColumnTwo:{position:'absolute', right:-10, top:24},
+        categoryPicker:{paddingTop:5},
+    
+        // create category modal
+        createCategoryButton:{paddingTop:20, alignSelf:'center'},
+    
+        // inputs form
+        containerInputs: {minHeight:100, paddingTop:15, paddingBottom:70, backgroundColor:AppStyles.altBackgroundColor},
+        inputsTitle: {fontSize:24, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
+        containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
+        inputsDescription: { fontSize:16, paddingHorizontal:10, position:'relative', color: AppStyles.color },
+        buttonAddInput:{position:'absolute', right:12, zIndex:1},
+        pickerItemStyle:{fontSize:20},
+        pickerStyle:{width:140},
+        inputField: {fontSize:20},
+    
+        //title bar buttons
+        titleBarButtons:{flexDirection:'row'},
+        titleBarButtonAddInput:{paddingTop:3, zIndex:1002},
+        buttonSaveContainer: {width:75, zIndex:1001, paddingLeft:10, paddingBottom:12, backgroundColor:AppStyles.headerDarkColor},
+        buttonSave:{padding:12 },
+    
+        //delete button
+        buttonDeleteContainer:{paddingTop:30, paddingBottom:15, alignItems:'center'},
+    
+        //new category modal window
+        modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30}
+    });
 }
 
 // Input Field /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -535,7 +582,7 @@ class TaskInputField extends React.Component{
             case 4: typeLabel = 'Date & Time'; break;
             //case 5: typeLabel = 'Stop Watch'; break;
             case 6: typeLabel = 'Yes/No'; break;
-            case 7: typeLabel = '5 Stars'; break;
+            case 7: typeLabel = 'Rating'; break;
             case 8: typeLabel = 'Location'; break;
             case 9: typeLabel = 'URL Link'; break;
             case 10: typeLabel = 'Photo'; break;
@@ -543,12 +590,12 @@ class TaskInputField extends React.Component{
 
         }
         return (
-            <View style={styles.containerInputField} onLayout={this.onLayout}>
-                <View style={[styles.inputFieldLabel, {width:this.props.width - 210}]}>
+            <View style={this.styles.containerInputField} onLayout={this.onLayout}>
+                <View style={[this.styles.inputFieldLabel, {width:this.props.width - 210}]}>
                     <Textbox 
                         ref={'inputLabel'} 
-                        style={styles.inputField} 
-                        placeholder="How many?" 
+                        style={this.styles.inputField} 
+                        placeholder={this.props.placeholder} 
                         returnKeyType={labelKeyType} 
                         onChangeText={(text) => this.onChangeText.call(that, text)}
                         onFocus={this.props.onFocus}
@@ -557,12 +604,12 @@ class TaskInputField extends React.Component{
                         value={this.state.label}
                     />
                 </View>
-                <View style={styles.inputFieldType}>
+                <View style={this.styles.inputFieldType}>
                     {this.props.input.isnewkey == true ?
                         <Picker
                             ref={'inputType'}
-                            style={styles.pickerStyle}
-                            itemStyle={styles.pickerItemStyle}
+                            style={this.styles.pickerStyle}
+                            itemStyle={this.styles.pickerItemStyle}
                             selectedValue={this.props.input.type}
                             onValueChange={this.props.onPickerValueChange}
                             items={
@@ -574,7 +621,7 @@ class TaskInputField extends React.Component{
                                     {label:"Date & Time", value:4},
                                     //{label:"Stop Watch", value:5},
                                     {label:"Yes/No", value:6},
-                                    {label:"5 Stars", value:7},
+                                    {label:"Rating", value:7},
                                     {label:"Location", value:8},
                                     {label:"URL Link", value:9},
                                     {label:"Photo", value:10},
@@ -584,67 +631,31 @@ class TaskInputField extends React.Component{
                             title="Select A Data Type"
                         />
                     :
-                        <Text style={styles.typeLabel}>{typeLabel}</Text>
+                        <Text style={this.styles.typeLabel}>{typeLabel}</Text>
                     }
                 </View>
-                <View style={styles.buttonRemoveContainer}>
-                    <ButtonClose size="xxsmall" color={AppStyles.color} style={styles.buttonRemoveInput}
+                <View style={this.styles.buttonRemoveContainer}>
+                    <ButtonClose size="xxsmall" color={AppStyles.color} style={this.styles.buttonRemoveInput}
                         onPress={this.props.onRemoveInputField}
                     />
                 </View>
             </View>
         );
     }
+
+    styles = StyleSheet.create({
+        //input field
+        containerInputField: {width:'100%', flexDirection:'row', paddingHorizontal:30, paddingBottom:20, marginBottom:10, borderBottomColor: AppStyles.altSeparatorColor, borderBottomWidth:1},
+        inputField: {fontSize:20},
+        inputFieldTitle:{},
+        inputFieldType:{},
+        pickerStyle:{width:140},
+        pickerItemStyle:{fontSize:20},
+        buttonRemoveContainer:{position:'absolute', right:12},
+        buttonRemoveInput:{paddingVertical:15, paddingHorizontal:10},
+        typeLabel:{ fontSize:20, paddingTop:10, paddingLeft:10}
+    });
 }
-
-
-// StyleSheet ////////////////////////////////////////////////////////////////////////////////////////////////
-
-const styles = StyleSheet.create({
-    //task form
-    container: {padding:30, backgroundColor:AppStyles.backgroundColor},
-    keyboardavoidingview:{},
-    fieldTitle: {fontSize:16, fontWeight:'bold'},
-
-    //category field
-    categoryContainer:{width:'100%', paddingTop:20},
-    categoryColumnOne:{paddingTop:5, height:25},
-    categoryColumnTwo:{position:'absolute', right:-10, top:24},
-    categoryPicker:{paddingTop:5},
-
-    // create category modal
-    createCategoryButton:{paddingTop:20, alignSelf:'center'},
-
-    // inputs form
-    containerInputs: {minHeight:100, paddingTop:15, paddingBottom:70, backgroundColor:AppStyles.altBackgroundColor},
-    inputsTitle: {fontSize:24, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
-    containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
-    inputsDescription: { fontSize:16, paddingHorizontal:10, position:'relative', color: AppStyles.color },
-    buttonAddInput:{position:'absolute', right:12, zIndex:1},
-
-    //input field
-    containerInputField: {width:'100%', flexDirection:'row', paddingHorizontal:30, paddingBottom:20, marginBottom:10, borderBottomColor: AppStyles.altSeparatorColor, borderBottomWidth:1},
-    inputField: {fontSize:20},
-    inputFieldTitle:{},
-    inputFieldType:{},
-    pickerStyle:{width:140},
-    pickerItemStyle:{fontSize:20},
-    buttonRemoveContainer:{position:'absolute', right:12},
-    buttonRemoveInput:{paddingVertical:15, paddingHorizontal:10},
-    typeLabel:{ fontSize:20, paddingTop:10, paddingLeft:10},
-
-    //title bar buttons
-    titleBarButtons:{flexDirection:'row'},
-    titleBarButtonAddInput:{paddingTop:3, zIndex:1002},
-    buttonSaveContainer: {width:75, zIndex:1001, paddingLeft:10, paddingBottom:12, backgroundColor:AppStyles.headerDarkColor},
-    buttonSave:{padding:12 },
-
-    //delete button
-    buttonDeleteContainer:{paddingTop:30, paddingBottom:15, alignItems:'center'},
-
-    //new category modal window
-    modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30}
-});
 
 const stylesLandscape = StyleSheet.create({
     inputsDescription: {top:'-20%', maxWidth:'90%'}

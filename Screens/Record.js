@@ -20,6 +20,8 @@ import DbCategories from 'db/DbCategories';
 import DbRecords from 'db/DbRecords';
 import TimeLength from 'utility/TimeLength';
 import IconTasks from 'icons/IconTasks';
+import IconEvents from 'icons/IconEvents';
+import ToolTipBottom from 'tooltip/Bottom';
 
 class DefaultScreen extends React.Component {
     constructor(props) {
@@ -49,8 +51,9 @@ class DefaultScreen extends React.Component {
         var dbCategories = new DbCategories();
         this.state.categories = dbCategories.GetCategoriesList();
 
-        //bind events
+        //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.onTitleBarEventsPress = this.onTitleBarEventsPress.bind(this);
     }
 
     componentWillMount() {
@@ -74,14 +77,28 @@ class DefaultScreen extends React.Component {
             tasks: dbTasks.GetList({filtered:['category.id=$0', id]})
         }});
     }
+
+    onTitleBarEventsPress(){
+        this.props.navigation.navigate('Events');
+    }
     
     render() {
         var that = this;
         // Show List of Tasks to Choose From /////////////////////////////////////////////////////////////////////////////////////
         return (
-            <Body {...this.props} style={this.styles.body} title="Record Event" screen="Record">
+            <Body {...this.props} style={this.styles.body} title="Record Event" screen="Record"
+                titleBarButtons={
+                <View style={this.styles.titleBarEvents}>
+                    <TouchableOpacity onPress={this.onTitleBarEventsPress}>
+                    <IconEvents color={AppStyles.headerTextColor} size="xsmall"/>
+                    </TouchableOpacity>
+                </View>
+                }
+            >
                 <View style={this.styles.listContainer}>
-                    <Text style={this.styles.tasksTitle}>Select a task to record your event with.</Text>
+                    <View style={this.styles.tasksTitle}>
+                        <ToolTipBottom text="Select a task to record your event with."/>
+                    </View>
                     {this.state.categories.map((cat) => {
                         //load list of Categories
                         var tasks = null;
@@ -143,7 +160,8 @@ class DefaultScreen extends React.Component {
         body:{backgroundColor:AppStyles.altBackgroundColor, position:'absolute', top:0, bottom:0, left:0, right:0},
         container:{paddingVertical:30, paddingBottom:70},
         listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
-        tasksTitle:{fontSize:17, color:AppStyles.textColor, paddingBottom:20, paddingHorizontal:15, paddingTop:30},
+        tasksTitle:{flexDirection:'row', justifyContent:'center', width:'100%', paddingTop:20},
+        titleBarEvents:{paddingTop:15, paddingRight:15},
     
         //Categories & Tasks List
         catItem:{
@@ -790,6 +808,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                                             ]}
                                             selectedValue={recinput.number || 0}
                                             onValueChange={(value) => {that.onChangeText.call(that, input.id, input.type, value)}}
+                                            title={input.name}
                                         />
                                     </View>
                                 )

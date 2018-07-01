@@ -69,12 +69,12 @@ export default class DatabaseScreen extends React.Component {
                                     this.props.navigation.navigate('Overview');}
                                 }
                             >
-                                <View style={styles.databaseItemContainer}>
-                                    <View style={styles.databaseLabel}>
-                                        <View style={styles.databaseIcon}><IconDatabases size="xsmall"></IconDatabases></View>
-                                        <Text style={styles.databaseName}>{file.name.replace('.realm', '')}</Text>
+                                <View style={this.styles.databaseItemContainer}>
+                                    <View style={this.styles.databaseLabel}>
+                                        <View style={this.styles.databaseIcon}><IconDatabases size="xsmall"></IconDatabases></View>
+                                        <Text style={this.styles.databaseName}>{file.name.replace('.realm', '')}</Text>
                                     </View>
-                                    <ButtonDots style={styles.btnDots} size="small" fill={AppStyles.buttonLightColor} onPress={() => {that.showDatabaseMenu.call(that, name)}}></ButtonDots>
+                                    <ButtonDots style={this.styles.btnDots} size="small" fill={AppStyles.buttonLightColor} onPress={() => {that.showDatabaseMenu.call(that, name)}}></ButtonDots>
                                 </View>
                             </TouchableHighlight>
                         );
@@ -92,16 +92,16 @@ export default class DatabaseScreen extends React.Component {
         var that = this;
         var i = 0;
         var items = [
-            {label:'Import', click: this.showImportDatabase}
+            {label:'Import Database', click: this.showImportDatabase}
         ]
         global.Modal.setContent("Database Options", (
-            <View style={styles.modalMenuContainer}>
+            <View style={this.styles.modalMenuContainer}>
                 {items.map((item) => {
                     i++;
                     return (
                         <TouchableOpacity key={i} onPress={() => {global.Modal.hide(); item.click.call(that);}}>
-                        <View style={styles.modalItemContainer}>
-                            <Text style={styles.modalItemText}>{item.label}</Text>
+                        <View style={this.styles.modalItemContainer}>
+                            <Text style={this.styles.modalItemText}>{item.label}</Text>
                         </View>
                         </TouchableOpacity>
                     );
@@ -116,17 +116,18 @@ export default class DatabaseScreen extends React.Component {
         var i = 0;
         var items = [
             {label:'Rename', click: this.showRenameDatabase},
-            {label:'Export', click: this.exportDatabase},
+            {label:'Export Database', click: this.exportDatabase},
+            {label:'Export JSON', click: this.exportJson},
             {label:'Delete', click: this.showDeleteDatabaseAlert}
         ]
         global.Modal.setContent(name, (
-            <View style={styles.modalMenuContainer}>
+            <View style={this.styles.modalMenuContainer}>
                 {items.map((item) => {
                     i++;
                     return (
                         <TouchableOpacity key={i} onPress={() => {global.Modal.hide(); item.click.call(that, name);}}>
-                        <View style={styles.modalItemContainer}>
-                            <Text style={styles.modalItemText}>{item.label}</Text>
+                        <View style={this.styles.modalItemContainer}>
+                            <Text style={this.styles.modalItemText}>{item.label}</Text>
                         </View>
                         </TouchableOpacity>
                     );
@@ -149,16 +150,16 @@ export default class DatabaseScreen extends React.Component {
     showAddDatabase = () => {
         var that = this;
         global.Modal.setContent('New Database', (
-            <View style={[styles.modalContainer, {minWidth:300}]}>
-                <Text style={styles.fieldTitle}>Database Name</Text>
+            <View style={[this.styles.modalContainer, {minWidth:300}]}>
+                <Text style={this.styles.fieldTitle}>Database Name</Text>
                 <Textbox
                     defaultValue={that.state.newDatabase}
-                    style={styles.inputField} 
+                    style={this.styles.inputField} 
                     placeholder="MyData"
                     returnKeyType={'done'}
                     onChangeText={that.onAddDatabaseTextChange}
                 />
-                <View style={styles.createDatabaseButton}>
+                <View style={this.styles.createDatabaseButton}>
                     <Button text="Create Database" onPress={() => that.onPressCreateDatabase()}/>
                 </View>
             </View>
@@ -190,16 +191,16 @@ export default class DatabaseScreen extends React.Component {
         var that = this;
         this.setState({newDatabase:name});
         global.Modal.setContent('Rename Database "' + name + '"', (
-            <View style={[styles.modalContainer, {minWidth:300}]}>
-                <Text style={styles.fieldTitle}>Database Name</Text>
+            <View style={[this.styles.modalContainer, {minWidth:300}]}>
+                <Text style={this.styles.fieldTitle}>Database Name</Text>
                 <Textbox
                     defaultValue={this.state.newDatabase}
-                    style={styles.inputField} 
+                    style={this.styles.inputField} 
                     placeholder="MyData"
                     returnKeyType={'done'}
                     onChangeText={this.onRenameDatabaseTextChange}
                 />
-                <View style={styles.createDatabaseButton}>
+                <View style={this.styles.createDatabaseButton}>
                     <Button text="Rename Database" onPress={() => that.onPressRenameDatabase.call(that, name)}/>
                 </View>
             </View>
@@ -264,6 +265,7 @@ export default class DatabaseScreen extends React.Component {
                     try{ Files.unlink(path + name + '.realm.lock').catch((err) => {}); }catch(ex){}
                     try{ Files.unlink(path + name + '.realm.note').catch((err) => {}); }catch(ex){}
                     this.getFiles();
+                    Alert.alert('Database Deleted', 'The database "' + name + '" has been succcessfully deleted');
                   }
               }}
             ],
@@ -311,7 +313,7 @@ export default class DatabaseScreen extends React.Component {
                         //finally, delete temporary folder
                         Files.unlink(exportPath);
                         global.Modal.hide();
-                        Alert.alert('Export Database', 'Database "' + name + '" successfully exported to "' + finalPath + '"');
+                        Alert.alert('Export Success', 'Database "' + name + '" successfully exported to "' + finalPath + '"');
                     }).catch(() => {that.errorExporting('Could not compress database into a zip file');});
                 }).catch(() => {that.errorExporting(copyerr);});
             }
@@ -322,7 +324,69 @@ export default class DatabaseScreen extends React.Component {
 
     updateExportModal = (content) => {
         global.Modal.setContent("Export Database", (
-            <View style={styles.modalMenuContainer}>
+            <View style={this.styles.modalMenuContainer}>
+                {content}
+            </View>
+        ));
+    }
+
+    errorExporting(msg){
+        global.Modal.hide();
+        Alert.alert("Error!", "An error ocurred while exporting the database! " + msg);
+    }
+
+    // Export JSON //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    exportJson = (name) => {
+        var download = FileUtils.DownloadsDirectoryPath + '/';
+        var exportFile = download + 'Dedicate_' + name.replace(/\s/g, '_') + '.json';
+
+        requestFilePermission((access) => {
+            if(access == true){
+                this.updateExportModal(<View><Text>Generating JSON file...</Text></View>);
+
+                //make sure export directory exists
+                Files.mkdir(download);
+
+                //generate JSON file
+                try{
+                    var json = JSON.stringify({
+                        tasks: global.realm.objects('Task'),
+                        categories: global.realm.objects('Category'),
+                        records: global.realm.objects('Record').map(a => {return {
+                            //strip records of redundant information by specifying selective properties
+                            id:a.id,
+                            taskId:a.taskId,
+                            datestart:a.datestart,
+                            dateend:a.dateend,
+                            time:a.time,
+                            timer:a.timer,
+                            inputs:a.inputs.map(b =>{ return {
+                                number:b.number,
+                                text:b.text,
+                                date:b.date,
+                                type:b.type,
+                                inputId:b.inputId
+                            };})
+                        };})
+                    }, null, 4);
+    
+                    Files.writeFile(exportFile, json);
+                    global.Modal.hide();
+                    Alert.alert('Export Success', 'The database "' + name + '" has been exported in JSON format to ' + exportFile);
+                }catch(ex){
+                    Alert.alert('Export Error', 'An error ocurred while trying to generate the exported JSON file');
+                    console.error(ex);
+                }
+            }
+        });
+        
+        
+    }
+
+    updateExportModal = (content) => {
+        global.Modal.setContent("Export Database", (
+            <View style={this.styles.modalMenuContainer}>
                 {content}
             </View>
         ));
@@ -354,16 +418,16 @@ export default class DatabaseScreen extends React.Component {
                 }
 
                 global.Modal.setContent('Import Database', (
-                    <View style={[styles.modalContainer, {minWidth:300}]}>
-                        <Text style={styles.fieldTitle}>Database Name</Text>
+                    <View style={[this.styles.modalContainer, {minWidth:300}]}>
+                        <Text style={this.styles.fieldTitle}>Database Name</Text>
                         <Textbox 
                             defaultValue={name}
-                            style={styles.inputField} 
+                            style={this.styles.inputField} 
                             placeholder="MyData"
                             returnKeyType={'done'}
                             onChangeText={(value) => that.onImportDatabaseTextChange.call(that, value)}
                         />
-                        <View style={styles.createDatabaseButton}>
+                        <View style={this.styles.createDatabaseButton}>
                             <Button text="Import Database" onPress={() => that.onPressImportDatabase.call(that, file)}/>
                         </View>
                     </View>
@@ -417,9 +481,7 @@ export default class DatabaseScreen extends React.Component {
         
                         //reload database list
                         that.getFiles();
-    
-                        Alert.alert('Database Import', 'Database "' + name + '" was imported successfully');
-        
+                        Alert.alert('Import Success', 'The database "' + name + '" was imported successfully');
                     }).catch(() => {Alert.alert('Import Error', 'Could not move unzipped database files');});
         
                 }).catch((ex) => { console.error(ex); Alert.alert('Import Error', 'Could not unzip database file');}); 
@@ -432,8 +494,8 @@ export default class DatabaseScreen extends React.Component {
     render() {
         var that = this;
         return (
-            <Body {...this.props} style={styles.body} title="Available Databases" screen="Databases" buttonAdd={true} buttonRecord={false} onAdd={this.showAddDatabase}
-                titleBarButtons={<ButtonDots style={styles.titlebarOptions} size="small" fill={AppStyles.headerTextColor} onPress={() => this.onPressOptions.call(that)}/>}
+            <Body {...this.props} style={this.styles.body} title="Available Databases" screen="Databases" buttonAdd={true} buttonRecord={false} onAdd={this.showAddDatabase}
+                titleBarButtons={<ButtonDots style={this.styles.titlebarOptions} size="small" fill={AppStyles.headerTextColor} onPress={() => this.onPressOptions.call(that)}/>}
             >
                 <ScrollView>
                     {this.state.fileList}
@@ -441,27 +503,27 @@ export default class DatabaseScreen extends React.Component {
             </Body>
         );
     }
+
+    styles = StyleSheet.create({
+        body:{position:'absolute', top:0, bottom:0, left:0, right:0},
+        titlebarOptions:{paddingTop:13, paddingRight:15},
+        databaseListContainer:{top:0, bottom:0, left:0, right:0},
+        databaseItemContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', paddingHorizontal:15, paddingVertical:15, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
+        databaseLabel:{flexDirection:'row', justifyContent:'flex-start'},
+        databaseIcon:{paddingRight:10, paddingTop:2},
+        databaseName:{fontSize:20},
+        btnDots:{alignSelf:'flex-end'},
+    
+        inputField: {fontSize:20},
+        fieldTitle: {fontSize:16, fontWeight:'bold'},
+    
+        //new database modal window
+        modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30},
+        modalMenuContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%'},
+        modalItemContainer:{paddingVertical:15, paddingHorizontal:30, borderBottomColor: AppStyles.separatorColor, borderBottomWidth:1},
+        modalItemText:{fontSize:17}
+    });
 }
-
-const styles = StyleSheet.create({
-    body:{position:'absolute', top:0, bottom:0, left:0, right:0},
-    titlebarOptions:{paddingTop:13, paddingRight:15},
-    databaseListContainer:{top:0, bottom:0, left:0, right:0},
-    databaseItemContainer:{flex:1, flexDirection:'row', justifyContent:'space-between', paddingHorizontal:15, paddingVertical:15, borderBottomWidth:1, borderBottomColor:AppStyles.altBackgroundColor},
-    databaseLabel:{flexDirection:'row', justifyContent:'flex-start'},
-    databaseIcon:{paddingRight:10, paddingTop:2},
-    databaseName:{fontSize:20},
-    btnDots:{alignSelf:'flex-end'},
-
-    inputField: {fontSize:20},
-    fieldTitle: {fontSize:16, fontWeight:'bold'},
-
-    //new database modal window
-    modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30},
-    modalMenuContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%'},
-    modalItemContainer:{paddingVertical:15, paddingHorizontal:30, borderBottomColor: AppStyles.separatorColor, borderBottomWidth:1},
-    modalItemText:{fontSize:17}
-});
 
 
 async function requestFilePermission(callback) {

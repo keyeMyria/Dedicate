@@ -138,12 +138,15 @@ export default class OverviewScreen extends React.Component {
         for(var x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
             var chart = this.state.charts[x];
             if(chart.name != ''){
-                var item = this.chartItem(chart, width);
-                if(item != null){
-                    items.push(item);
-                    if(x < this.state.charts.length - 1){
-                        items.push(<View key={'sep' + x} style={this.styles.separator}></View>);
+                try{
+                    var item = this.chartItem(chart, width);
+                    if(item != null){
+                        items.push(item);
+                        if(x < this.state.charts.length - 1){
+                            items.push(<View key={'sep' + x} style={this.styles.separator}></View>);
+                        }
                     }
+                }catch(ex){
                 }
             }
         }
@@ -173,7 +176,7 @@ export default class OverviewScreen extends React.Component {
         var haspoints = false;
         for(var x = 0; x < record.inputs.length; x++){
             var input = record.inputs[x];
-            if(input.type === 0){ //number
+            if(input.type === 0 || input.type == 7){ //number
                 var info = this.chartPoints(chart, x, days);
                 if(info.points.length == 0){ continue; }
                 haspoints = true;
@@ -291,7 +294,7 @@ export default class OverviewScreen extends React.Component {
         for(var x = 0; x < days; x++){
             var count = 0;
             var date = new Date();
-            date = new Date(date.setDate(date.getDate() - (days - x)));
+            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
             for(var y = 0; y < chart.records.length; y++){
                 var rec = chart.records[y];
                 if(DatesMatch(date, new Date(rec.datestart))){
@@ -310,6 +313,8 @@ export default class OverviewScreen extends React.Component {
             if(points[x] < min){ min = points[x];}
             if(points[x] > max){ max = points[x];}
         }
+
+        if(max == 0){max = 1;}
 
         return {points:points, min:min, max:max};
     }
@@ -335,7 +340,7 @@ export default class OverviewScreen extends React.Component {
         var dots = [];
         for(var x = 0; x < days; x++){
             var date = new Date();
-            date = new Date(date.setDate(date.getDate() - (days - x)));
+            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
             for(var y = 0; y < chart.records.length; y++){
                 var rec = chart.records[y];
                 if(DatesMatch(date, new Date(rec.datestart))){
@@ -423,7 +428,7 @@ export default class OverviewScreen extends React.Component {
                         <View style={this.styles.logo}><Logo width="200" height="38.65"></Logo></View>
                         <View style={this.styles.text}>
                             <Text style={[this.styles.p, this.styles.purple, this.styles.h4]}>
-                                "Follow your dreams and dedicate your life to all the things that you truly believe in,
+                                "Follow your dreams and dedicate your life to what you truly believe in,
                                 for if you don't believe in something, you'll eventually fall for anything."
                             </Text>
                             <Text style={[this.styles.p, this.styles.purple, this.styles.h4]}>
@@ -440,7 +445,7 @@ export default class OverviewScreen extends React.Component {
     styles = StyleSheet.create({
         container: {padding: 30 },
         body:{position:'absolute', top:0, bottom:0, left:0, right:0},
-        logo: { marginVertical:10, flexDirection:'row', justifyContent:'center', width:'100%' },
+        logo: { paddingTop:30, paddingBottom:50, flexDirection:'row', justifyContent:'center', width:'100%' },
         text: {alignSelf:'center'},
         h4: {fontSize:20},
         p: { fontSize:17, paddingBottom:15, color:AppStyles.textColor },

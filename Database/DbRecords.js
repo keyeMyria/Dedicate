@@ -86,7 +86,7 @@ export default class DbRecords extends Db{
         return record;
     }
 
-    HasRecords(){
+    hasRecords(){
         return global.realm.objects('Record').length > 0;
     }
 

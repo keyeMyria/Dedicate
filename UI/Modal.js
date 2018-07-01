@@ -49,7 +49,7 @@ export default class Modal extends React.Component {
 
     onOrientationChange(){
         //realign modal window
-        var {width, height} = Dimensions.get('window');
+        var {width, height} = Dimensions.get('screen');
         var styles = this.state.styles;
         var modalContainer = this.state.modalContainer;
         styles.darkBackgroundContainer = {height:height};
@@ -67,7 +67,9 @@ export default class Modal extends React.Component {
     show = () => {
         Keyboard.dismiss();
         TextInput.State.blurTextInput();
-        this.setState({visible:true});
+        this.setState({visible:true, win:{width:0, height:0}}, () =>{
+            this.onOrientationChange();
+        });
     }
 
     hide = () => {
