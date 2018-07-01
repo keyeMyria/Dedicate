@@ -44,9 +44,14 @@ export default class EventsScreen extends React.Component {
             this.state.filter = filter;
         }
 
-        //bind events
+        //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
-
+        this.filterTasks = this.filterTasks.bind(this);
+        this.toggleFilterForm = this.toggleFilterForm.bind(this);
+        this.filterDates = this.filterDates.bind(this);
+        this.cancelDateFilter = this.cancelDateFilter.bind(this);
+        this.toggleDateFilter = this.toggleDateFilter.bind(this);
+        this.onEndReached = this.onEndReached.bind(this);
     }
     
     dbRecords = new DbRecords();
@@ -159,7 +164,6 @@ export default class EventsScreen extends React.Component {
     }
 
     render() {
-        var that = this;
         var today = new Date();
         today.setDate(today.getDate() + 10);
         var inputIndex = 0;
@@ -172,7 +176,7 @@ export default class EventsScreen extends React.Component {
             bottomFade={true}
             titleBarButtons={
                 <View style={this.styles.titlebarButtons}>
-                    <ButtonSearch size="xsmall" onPress={() => this.toggleFilterForm.call(that)}></ButtonSearch>
+                    <ButtonSearch size="xsmall" onPress={() => this.toggleFilterForm()}></ButtonSearch>
                 </View>
             }>
                 <Collapsible collapsed={!this.state.filterForm}>
@@ -180,7 +184,7 @@ export default class EventsScreen extends React.Component {
                         <Text style={this.styles.formLabel}>Filter by Task</Text>
                         <Picker 
                             selectedValue={this.state.filter.taskId}
-                            onValueChange={(value) => this.filterTasks.call(that, value)}
+                            onValueChange={(value) => this.filterTasks(value)}
                             items={[{key:'all', value:-1, label:'All Tasks'}].concat(
                                 this.state.tasks.map(a => {return {key:'item'+a.id, label:a.name, value:a.id};})
                             )}
@@ -191,16 +195,16 @@ export default class EventsScreen extends React.Component {
                                 <Text style={this.styles.formLabel}>Filter by Date Range</Text>
                                 <StartEndDateTimePicker 
                                     style={this.styles.filterDates}
-                                    onChange={(datestart, dateend) => {this.filterDates.call(that, datestart, dateend)}}
+                                    onChange={(datestart, dateend) => {this.filterDates(datestart, dateend)}}
                                     initialStartDateTime={new Date()}
                                     initialTimeSpan={24 * 60}
                                 ></StartEndDateTimePicker>
-                                <TextLink style={this.styles.clearDateFilter} onPress={() => this.cancelDateFilter.call(that)}>Clear Date Range Filter</TextLink>
+                                <TextLink style={this.styles.clearDateFilter} onPress={() => this.cancelDateFilter()}>Clear Date Range Filter</TextLink>
                             </View>
                         }
                         {this.state.filterDates == false &&
                             <View style={this.styles.filterDates}>
-                                <TextLink onPress={() => this.toggleDateFilter.call(that)}>Filter by Date Range</TextLink>
+                                <TextLink onPress={() => this.toggleDateFilter()}>Filter by Date Range</TextLink>
                             </View>
                         }
                     </View>
@@ -214,7 +218,7 @@ export default class EventsScreen extends React.Component {
                     <FlatList
                         data={this.state.events}
                         keyExtractor={item => item.id.toString()}
-                        onEndReached={() => this.onEndReached.call(that)}
+                        onEndReached={() => this.onEndReached()}
                         onEndReachedThreshold={0.5}
                         ListFooterComponent={<View style={{height:90}}></View>}
                         extraData={this.state.refresh}

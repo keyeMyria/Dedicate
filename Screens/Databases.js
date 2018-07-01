@@ -24,8 +24,23 @@ export default class DatabaseScreen extends React.Component {
             newDatabase:''
         };
 
-        //bind events
+        //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.openDatabase = this.openDatabase.bind(this);
+        this.showDatabaseMenu = this.showDatabaseMenu.bind(this);
+        this.showImportDatabase = this.showImportDatabase.bind(this);
+        this.showRenameDatabase = this.showRenameDatabase.bind(this);
+        this.exportDatabase = this.exportDatabase.bind(this);
+        this.exportJson = this.exportJson.bind(this);
+        this.showDeleteDatabaseAlert = this.showDeleteDatabaseAlert.bind(this);
+        this.onPressCreateDatabase = this.onPressCreateDatabase.bind(this);
+        this.onPressRenameDatabase = this.onPressRenameDatabase.bind(this);
+        this.updateExportModal = this.updateExportModal.bind(this);
+        this.errorExporting = this.errorExporting.bind(this);
+        this.onImportDatabaseTextChange = this.onImportDatabaseTextChange.bind(this);
+        this.onPressImportDatabase = this.onPressImportDatabase.bind(this);
+        this.getFiles = this.getFiles.bind(this);
+        this.onPressOptions = this.onPressOptions.bind(this);
     }
     
     componentWillMount() {
@@ -46,26 +61,25 @@ export default class DatabaseScreen extends React.Component {
     }
 
     Path = () => {
-        var path = Realm.defaultPath;
+        const path = Realm.defaultPath;
         return path.substring(0, path.lastIndexOf('/') + 1);
     }
 
     getFiles = () => {
-        var that = this;
-        var path = this.Path();
+        let path = this.Path();
         Files.readDir(path)
         .then((result) => {
             if(result != null){
-                var filelist = [];
-                var files = [];
+                let filelist = [];
+                let files = [];
                 if(this.state.files != null){
                     files = result.filter(a => a.isFile() == true && a.name.split('.').length == 2 && a.name.split('.')[1] =='realm');
                     filelist = files.map((file) => {
-                        var name = file.name.replace('.realm', '');
+                        const name = file.name.replace('.realm', '');
                         return (
                             <TouchableHighlight key={file.name} underlayColor={AppStyles.listItemPressedColor} 
                                 onPress={() => {
-                                    that.openDatabase.call(that, name); 
+                                    this.openDatabase(name); 
                                     this.props.navigation.navigate('Overview');}
                                 }
                             >
@@ -74,7 +88,7 @@ export default class DatabaseScreen extends React.Component {
                                         <View style={this.styles.databaseIcon}><IconDatabases size="xsmall"></IconDatabases></View>
                                         <Text style={this.styles.databaseName}>{file.name.replace('.realm', '')}</Text>
                                     </View>
-                                    <ButtonDots style={this.styles.btnDots} size="small" fill={AppStyles.buttonLightColor} onPress={() => {that.showDatabaseMenu.call(that, name)}}></ButtonDots>
+                                    <ButtonDots style={this.styles.btnDots} size="small" fill={AppStyles.buttonLightColor} onPress={() => {this.showDatabaseMenu(name)}}></ButtonDots>
                                 </View>
                             </TouchableHighlight>
                         );
@@ -82,16 +96,15 @@ export default class DatabaseScreen extends React.Component {
                 }else{
                     filelist = (<View></View>);
                 }
-                that.setState({files:files, fileList:filelist});
+                this.setState({files:files, fileList:filelist});
             }
         });
     }
     
     // Menus //////////////////////////////////////////////////////////////////////////////////////////////////////
     onPressOptions(){
-        var that = this;
-        var i = 0;
-        var items = [
+        let i = 0;
+        let items = [
             {label:'Import Database', click: this.showImportDatabase}
         ]
         global.Modal.setContent("Database Options", (
@@ -99,7 +112,7 @@ export default class DatabaseScreen extends React.Component {
                 {items.map((item) => {
                     i++;
                     return (
-                        <TouchableOpacity key={i} onPress={() => {global.Modal.hide(); item.click.call(that);}}>
+                        <TouchableOpacity key={i} onPress={() => {global.Modal.hide(); item.click();}}>
                         <View style={this.styles.modalItemContainer}>
                             <Text style={this.styles.modalItemText}>{item.label}</Text>
                         </View>
@@ -112,9 +125,8 @@ export default class DatabaseScreen extends React.Component {
     }
 
     showDatabaseMenu = (name) => {
-        var that = this;
-        var i = 0;
-        var items = [
+        let i = 0;
+        let items = [
             {label:'Rename', click: this.showRenameDatabase},
             {label:'Export Database', click: this.exportDatabase},
             {label:'Export JSON', click: this.exportJson},
@@ -125,7 +137,7 @@ export default class DatabaseScreen extends React.Component {
                 {items.map((item) => {
                     i++;
                     return (
-                        <TouchableOpacity key={i} onPress={() => {global.Modal.hide(); item.click.call(that, name);}}>
+                        <TouchableOpacity key={i} onPress={() => {global.Modal.hide(); item.click(name);}}>
                         <View style={this.styles.modalItemContainer}>
                             <Text style={this.styles.modalItemText}>{item.label}</Text>
                         </View>
@@ -140,7 +152,7 @@ export default class DatabaseScreen extends React.Component {
     // Open Database //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     openDatabase = (name) => {
-        var config = new UserConfig();
+        let config = new UserConfig();
         config.setDefaultDatabase(name);
         Schema(name);
     }
@@ -148,19 +160,18 @@ export default class DatabaseScreen extends React.Component {
     // Create Database //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     showAddDatabase = () => {
-        var that = this;
         global.Modal.setContent('New Database', (
             <View style={[this.styles.modalContainer, {minWidth:300}]}>
                 <Text style={this.styles.fieldTitle}>Database Name</Text>
                 <Textbox
-                    defaultValue={that.state.newDatabase}
+                    defaultValue={this.state.newDatabase}
                     style={this.styles.inputField} 
                     placeholder="MyData"
                     returnKeyType={'done'}
-                    onChangeText={that.onAddDatabaseTextChange}
+                    onChangeText={this.onAddDatabaseTextChange}
                 />
                 <View style={this.styles.createDatabaseButton}>
-                    <Button text="Create Database" onPress={() => that.onPressCreateDatabase()}/>
+                    <Button text="Create Database" onPress={() => this.onPressCreateDatabase()}/>
                 </View>
             </View>
         ));
@@ -188,7 +199,6 @@ export default class DatabaseScreen extends React.Component {
     // Rename Database //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     showRenameDatabase = (name) => {
-        var that = this;
         this.setState({newDatabase:name});
         global.Modal.setContent('Rename Database "' + name + '"', (
             <View style={[this.styles.modalContainer, {minWidth:300}]}>
@@ -201,7 +211,7 @@ export default class DatabaseScreen extends React.Component {
                     onChangeText={this.onRenameDatabaseTextChange}
                 />
                 <View style={this.styles.createDatabaseButton}>
-                    <Button text="Rename Database" onPress={() => that.onPressRenameDatabase.call(that, name)}/>
+                    <Button text="Rename Database" onPress={() => this.onPressRenameDatabase(name)}/>
                 </View>
             </View>
         ));
@@ -226,8 +236,8 @@ export default class DatabaseScreen extends React.Component {
             //close active database to rename files
             global.realm = null;
         }
-        var path = this.Path();
-        var newname = this.state.newDatabase;
+        let path = this.Path();
+        let newname = this.state.newDatabase;
         try{ Files.moveFile(path + name + '.realm', path + newname + '.realm').catch((err) => {}); }catch(ex){}
         try{ Files.moveFile(path + name + '.realm.management', path + newname + '.realm.management').catch((err) => {}); }catch(ex){}
         try{ Files.moveFile(path + name + '.realm.lock', path + newname + '.realm.lock').catch((err) => {}); }catch(ex){}
@@ -239,7 +249,7 @@ export default class DatabaseScreen extends React.Component {
             Schema(newname);
 
             if(name == global.config.database){
-                var config = new UserConfig();
+                let config = new UserConfig();
                 config.setDefaultDatabase(newname);
             }
         }
@@ -251,7 +261,7 @@ export default class DatabaseScreen extends React.Component {
     showDeleteDatabaseAlert = (name) => {
         Alert.alert(
             'Delete Database',
-            'Do you really want to permanently delete the database "' + name + '"?. This cannot be undone!',
+            'Do you really want to permanently delete the database "' + name + '"? This cannot be undone!',
             [
               {text: 'Cancel', onPress: () => {}, style: 'cancel'},
               {text: 'Delete', onPress: () => {
@@ -259,7 +269,7 @@ export default class DatabaseScreen extends React.Component {
                       Alert.alert('Delete Database', 'Cannot delete currently loaded database. Switch to another database before deleting this one.');
                   }else{
                     //permanently delete database files
-                    var path = this.Path();
+                    let path = this.Path();
                     try{ Files.unlink(path + name + '.realm').catch((err) => {}); }catch(ex){}
                     try{ Files.unlink(path + name + '.realm.management').catch((err) => {}); }catch(ex){}
                     try{ Files.unlink(path + name + '.realm.lock').catch((err) => {}); }catch(ex){}
@@ -276,12 +286,11 @@ export default class DatabaseScreen extends React.Component {
     // Export Database //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     exportDatabase = (name) => {
-        var that = this;
-        var path = this.Path();
-        var download = FileUtils.DownloadsDirectoryPath + '/';
-        var exportFile = download + 'Dedicate_' + name.replace(/\s/g, '_') + '.zip';
-        var exportPath = path + 'export/';
-        var copyerr = 'Could not copy all required files';
+        let path = this.Path();
+        let download = FileUtils.DownloadsDirectoryPath + '/';
+        let exportFile = download + 'Dedicate_' + name.replace(/\s/g, '_') + '.zip';
+        let exportPath = path + 'export/';
+        let copyerr = 'Could not copy all required files';
 
         requestFilePermission((access) => {
             if(access == true){
@@ -307,15 +316,15 @@ export default class DatabaseScreen extends React.Component {
                 Promise.all(tasks).then(() => {
                     
                     //zip temporary export folder and save to device Download folder
-                    that.updateExportModal(<View><Text>Creating zip file...</Text></View>);
+                    this.updateExportModal(<View><Text>Creating zip file...</Text></View>);
                     zip(path + 'export', exportFile)
                     .then((finalPath) => {
                         //finally, delete temporary folder
                         Files.unlink(exportPath);
                         global.Modal.hide();
                         Alert.alert('Export Success', 'Database "' + name + '" successfully exported to "' + finalPath + '"');
-                    }).catch(() => {that.errorExporting('Could not compress database into a zip file');});
-                }).catch(() => {that.errorExporting(copyerr);});
+                    }).catch(() => {this.errorExporting('Could not compress database into a zip file');});
+                }).catch(() => {this.errorExporting(copyerr);});
             }
         });
         
@@ -338,8 +347,8 @@ export default class DatabaseScreen extends React.Component {
     // Export JSON //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     exportJson = (name) => {
-        var download = FileUtils.DownloadsDirectoryPath + '/';
-        var exportFile = download + 'Dedicate_' + name.replace(/\s/g, '_') + '.json';
+        let download = FileUtils.DownloadsDirectoryPath + '/';
+        let exportFile = download + 'Dedicate_' + name.replace(/\s/g, '_') + '.json';
 
         requestFilePermission((access) => {
             if(access == true){
@@ -350,7 +359,7 @@ export default class DatabaseScreen extends React.Component {
 
                 //generate JSON file
                 try{
-                    var json = JSON.stringify({
+                    let json = JSON.stringify({
                         tasks: global.realm.objects('Task'),
                         categories: global.realm.objects('Category'),
                         records: global.realm.objects('Record').map(a => {return {
@@ -400,7 +409,6 @@ export default class DatabaseScreen extends React.Component {
     // Import Database //////////////////////////////////////////////////////////////////////////////////////////////////////
     
     showImportDatabase(){
-        var that = this;
         DocumentPicker.show({
             filetype: [DocumentPickerUtil.allFiles()],
           },(error,file) => {
@@ -412,7 +420,7 @@ export default class DatabaseScreen extends React.Component {
                 }
 
                 //show modal so user can specify a name for their newly imported database
-                var name = '';
+                let name = '';
                 if(file.fileName.indexOf('Dedicate_') == 0){
                     name = file.fileName.replace('Dedicate_', '').replace('.zip', '');
                 }
@@ -425,10 +433,10 @@ export default class DatabaseScreen extends React.Component {
                             style={this.styles.inputField} 
                             placeholder="MyData"
                             returnKeyType={'done'}
-                            onChangeText={(value) => that.onImportDatabaseTextChange.call(that, value)}
+                            onChangeText={(value) => this.onImportDatabaseTextChange(value)}
                         />
                         <View style={this.styles.createDatabaseButton}>
-                            <Button text="Import Database" onPress={() => that.onPressImportDatabase.call(that, file)}/>
+                            <Button text="Import Database" onPress={() => this.onPressImportDatabase(file)}/>
                         </View>
                     </View>
                 ));
@@ -443,9 +451,8 @@ export default class DatabaseScreen extends React.Component {
 
     onPressImportDatabase(file){
         global.Modal.hide();
-        var that = this;
-        var path = this.Path();
-        var name = this.importName.toString().replace(/\s/g, '');
+        let path = this.Path();
+        let name = this.importName.toString().replace(/\s/g, '');
         //TODO: Check name for special characters
         delete this.importName;
         if(this.state.files.filter(a => a.name.replace('.realm' , '').toLowerCase() == name.toLowerCase()).length > 0){
@@ -457,7 +464,7 @@ export default class DatabaseScreen extends React.Component {
 
         //unzip database and try to import
         FileUtils.getPathFromURI(file.uri).then(f => {
-            var importPath = path + 'import/';
+            let importPath = path + 'import/';
             
             //make temp import folder
             Files.mkdir(importPath).then(() => {
@@ -480,7 +487,7 @@ export default class DatabaseScreen extends React.Component {
                         Files.unlink(importPath);
         
                         //reload database list
-                        that.getFiles();
+                        this.getFiles();
                         Alert.alert('Import Success', 'The database "' + name + '" was imported successfully');
                     }).catch(() => {Alert.alert('Import Error', 'Could not move unzipped database files');});
         
@@ -492,10 +499,9 @@ export default class DatabaseScreen extends React.Component {
     }
 
     render() {
-        var that = this;
         return (
             <Body {...this.props} style={this.styles.body} title="Available Databases" screen="Databases" buttonAdd={true} buttonRecord={false} onAdd={this.showAddDatabase}
-                titleBarButtons={<ButtonDots style={this.styles.titlebarOptions} size="small" fill={AppStyles.headerTextColor} onPress={() => this.onPressOptions.call(that)}/>}
+                titleBarButtons={<ButtonDots style={this.styles.titlebarOptions} size="small" fill={AppStyles.headerTextColor} onPress={() => this.onPressOptions()}/>}
             >
                 <ScrollView>
                     {this.state.fileList}

@@ -125,6 +125,7 @@ export default class LocationPicker extends React.Component {
                             }
                             this.onChangeText.call(that, text);
                         }}
+                        maxLength={64}
                     ></Textbox>
                 </View>
                 <View style={[styles.mapContainer, this.props.mapStyle || {}]}>

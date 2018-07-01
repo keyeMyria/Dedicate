@@ -35,20 +35,17 @@ export default class TasksScreen extends React.Component {
     }
 
     render() {
-        var tasklist = this.state.tasks.map((task) => {
-            return (
-                <TouchableHighlight key={task.id} underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.props.navigation.navigate('Task', {taskId:task.id})}}>
-                    <View style={this.styles.taskItemContainer}>
-                        <View style={this.styles.taskIcon}><IconTasks size="xsmall"></IconTasks></View>
-                        <Text style={this.styles.taskName}>{task.name}</Text>
-                    </View>
-                </TouchableHighlight>
-            );
-        });
         return (
             <Body {...this.props} style={this.styles.body} title="Tasks" screen="Tasks" buttonAdd={true} buttonRecord={true}>
                 <ScrollView>
-                    {tasklist}
+                    {this.state.tasks.map((task) => 
+                        <TouchableHighlight key={task.id} underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.props.navigation.navigate('Task', {taskId:task.id})}}>
+                            <View style={this.styles.taskItemContainer}>
+                                <View style={this.styles.taskIcon}><IconTasks size="xsmall"></IconTasks></View>
+                                <Text style={this.styles.taskName}>{task.name}</Text>
+                            </View>
+                        </TouchableHighlight>
+                    )}
                 </ScrollView>
             </Body>
         );
