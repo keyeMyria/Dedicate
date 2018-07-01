@@ -10,7 +10,7 @@ export default class DbRecords extends Db{
             exists = true;
         } else {
             if(global.realm.objects('Record').length > 0){
-                id = (global.realm.objects('Record').sorted('id', true).slice(0,1)[0].id) + 1;
+                id = (global.realm.objects('Record').sorted('id', true)[0].id) + 1;
             }
             record.id = id;
         }

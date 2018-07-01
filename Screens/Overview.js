@@ -20,8 +20,8 @@ export default class OverviewScreen extends React.Component {
     constructor(props) {
         super(props);
 
-        var dbTasks = new DbTasks();
-        var dbRecords = new DbRecords();
+        let dbTasks = new DbTasks();
+        let dbRecords = new DbRecords();
 
         this.state = {
             styles: null,
@@ -41,6 +41,7 @@ export default class OverviewScreen extends React.Component {
         this.getTimers = this.getTimers.bind(this);
         this.getCharts = this.getCharts.bind(this);
         this.onLayout = this.onLayout.bind(this);
+        this.onTimerPress = this.onTimerPress.bind(this);
     }
 
     componentWillMount() {
@@ -58,7 +59,7 @@ export default class OverviewScreen extends React.Component {
     }
 
     loadContent(){
-        var dbRecords = new DbRecords();
+        let dbRecords = new DbRecords();
         this.setState({
             charts:dbRecords.GetListByTask(),
             timers:dbRecords.GetActiveTimers()
@@ -77,8 +78,8 @@ export default class OverviewScreen extends React.Component {
     }
 
     scroll = (e) => {
-        var y = e.nativeEvent.contentOffset.y;
-        var o = (1 / 50) * y;
+        const y = e.nativeEvent.contentOffset.y;
+        let o = (1 / 50) * y;
         if(o < 0){ o = 0;}
         if(y <= 50){
             this.setState({shadowOpacity:o});
@@ -89,15 +90,13 @@ export default class OverviewScreen extends React.Component {
 
     getTimers() {
         var that = this;
-        var timers = this.state.timers;
-        var items = [];
+        let timers = this.state.timers;
+        let items = [];
         if(timers.length > 0){
-            for(var x = 0; x < timers.length; x++){
-                var timer = timers[x];
+            for(let x = 0; x < timers.length; x++){
+                let timer = timers[x];
                 items.push(
-                    <TouchableHighlight key={'timer' + timer.id} onPress={() => {
-                        this.props.navigation.navigate('RecordTask', {goback:'Overview', recordId:timer.id}, { type: "Navigate", routeName: "Record", params: { }});
-                    }}>
+                    <TouchableHighlight key={'timer' + timer.id} onPress={() => { this.onTimerPress(timer.id); }}>
                         <View style={this.styles.timerContainer}>
                             <View style={this.styles.timerTask}>
                                 <View style={this.styles.timerTaskIcon}><IconTasks size="xsmall"></IconTasks></View>
@@ -117,6 +116,10 @@ export default class OverviewScreen extends React.Component {
         this.setState({timerList:items});
     }
 
+    onTimerPress = (id) => {
+        this.props.navigation.navigate('RecordTask', {goback:'Overview', recordId:id}, { type: "Navigate", routeName: "Record", params: { }});
+    }
+
     onTimerStop = (datestart, dateend, record) => {
         global.realm.write(() => {
             record.dateend = dateend;
@@ -132,14 +135,14 @@ export default class OverviewScreen extends React.Component {
     }
 
     getCharts() {
-        var items = [];
-        var {width} = Dimensions.get('window');
-        var maxCharts = 6;
-        for(var x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
-            var chart = this.state.charts[x];
+        let items = [];
+        const {width} = Dimensions.get('window');
+        let maxCharts = 6;
+        for(let x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
+            let chart = this.state.charts[x];
             if(chart.name != ''){
                 try{
-                    var item = this.chartItem(chart, width);
+                    let item = this.chartItem(chart, width);
                     if(item != null){
                         items.push(item);
                         if(x < this.state.charts.length - 1){
@@ -155,29 +158,29 @@ export default class OverviewScreen extends React.Component {
 
     //render 14 day chart
     chartItem = (chart, width) => {
-        var line1 = (<View></View>);
-        var line1Min = "";
-        var line1Max = "";
-        var line1Legend = (<View></View>);
-        var line2 = (<View></View>);
-        var line2Min = "";
-        var line2Max = "";
-        var line2Legend = (<View></View>);
-        var dots = (<View></View>);
-        var dotsLegend = (<View></View>);
+        let line1 = (<View></View>);
+        let line1Min = "";
+        let line1Max = "";
+        let line1Legend = (<View></View>);
+        let line2 = (<View></View>);
+        let line2Min = "";
+        let line2Max = "";
+        let line2Legend = (<View></View>);
+        let dots = (<View></View>);
+        let dotsLegend = (<View></View>);
 
         //get lines and dots for chart
-        var curr = 1;
-        var hasdots = false;
-        var cwidth = width - 30;
-        var height = 60;
-        var days = 14;
-        var record = chart.records[0];
-        var haspoints = false;
-        for(var x = 0; x < record.inputs.length; x++){
-            var input = record.inputs[x];
+        let curr = 1;
+        let hasdots = false;
+        let haspoints = false;
+        const cwidth = width - 30;
+        const height = 60;
+        const days = 14;
+        const record = chart.records[0];
+        for(let x = 0; x < record.inputs.length; x++){
+            let input = record.inputs[x];
             if(input.type === 0 || input.type == 7){ //number
-                var info = this.chartPoints(chart, x, days);
+                const info = this.chartPoints(chart, x, days);
                 if(info.points.length == 0){ continue; }
                 haspoints = true;
                 if(curr == 1){
@@ -286,14 +289,14 @@ export default class OverviewScreen extends React.Component {
     }
 
     chartPoints = (chart, index, days) => {
-        var min = 999999;
-        var max = 0;
-        var points = [];
+        let min = 999999;
+        let max = 0;
+        let points = [];
 
         //get totals for each day
-        for(var x = 0; x < days; x++){
-            var count = 0;
-            var date = new Date();
+        for(let x = 0; x < days; x++){
+            let count = 0;
+            let date = new Date();
             date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
             for(var y = 0; y < chart.records.length; y++){
                 var rec = chart.records[y];
@@ -309,7 +312,7 @@ export default class OverviewScreen extends React.Component {
         }
 
         //check totals for min & max
-        for(var x = 0; x < points.length; x++){
+        for(let x = 0; x < points.length; x++){
             if(points[x] < min){ min = points[x];}
             if(points[x] > max){ max = points[x];}
         }
@@ -321,13 +324,13 @@ export default class OverviewScreen extends React.Component {
 
     chartLine = (points, days, width, height, min, max, stroke) => {
         //draw lines
-        var lines = [];
-        for(var x = 0; x < points.length; x++){
-            lines.push(Math.round(((width / days) * (x)) + 10) + ',' + Math.round(height + 10 - (height / (max - min)) * (points[x] - min)));
+        let lines = [];
+        for(let x = 0; x < points.length; x++){
+            lines.push(Math.round(((width / days) * x) + 10) + ',' + Math.round(height + 10 - (height / (max - min)) * (points[x] - min)));
         }
 
         return (
-            <Polyline key={'line' + x}
+            <Polyline key={'line'}
                 stroke={stroke}
                 strokeWidth="5"
                 fill="none"
@@ -337,12 +340,12 @@ export default class OverviewScreen extends React.Component {
     }
 
     chartDots = (chart, index, days, width, height) => {
-        var dots = [];
-        for(var x = 0; x < days; x++){
-            var date = new Date();
+        let dots = [];
+        for(let x = 0; x < days; x++){
+            let date = new Date();
             date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
-            for(var y = 0; y < chart.records.length; y++){
-                var rec = chart.records[y];
+            for(let y = 0; y < chart.records.length; y++){
+                const rec = chart.records[y];
                 if(DatesMatch(date, new Date(rec.datestart))){
                     if(rec.inputs.length > index){
                         if(rec.inputs[index].number != null){
@@ -365,7 +368,7 @@ export default class OverviewScreen extends React.Component {
     }
 
     render() {
-        var {height} = Dimensions.get('window');
+        const {height} = Dimensions.get('window');
         if(this.state.hasTask === true){
             return (
                 <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={this.styles.body}

@@ -206,7 +206,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         
         if(props.navigation.state.params){
             if(typeof props.navigation.state.params.recordId != 'undefined'){
-                var db = new DbRecords();
+                let db = new DbRecords();
                 var record = db.GetRecord(props.navigation.state.params.recordId)
                 if(record != null){
                     this.state.record = record;
@@ -217,12 +217,12 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                 }
 
                 //check all task inputs and create missing inputs for record
-                for(var x = 0; x < this.state.task.inputs.length; x++){
-                    var input = this.state.task.inputs[x];
-                    var i = record.inputs.map(a => a.inputId).indexOf(input.id);
+                for(let x = 0; x < this.state.task.inputs.length; x++){
+                    let input = this.state.task.inputs[x];
+                    let i = record.inputs.map(a => a.inputId).indexOf(input.id);
                     if(i >= 0){continue;}
-                    var number = null;
-                    var date = null;
+                    let number = null;
+                    let date = null;
                     switch(input.type){
                         case 2: case 3: case 4: date = new Date(); break;
                         case 6: number = 0; break;
@@ -249,13 +249,13 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             }
 
             if(this.state.task.inputs.length > 0 && this.state.record.inputs.length == 0){
-                for(var x = 0; x < this.state.task.inputs.length; x++){
-                    var input = this.state.task.inputs[x];
+                for(let x = 0; x < this.state.task.inputs.length; x++){
+                    let input = this.state.task.inputs[x];
                     
                     //set default value for input
-                    var number = null;
-                    var text = null;
-                    var date = null;
+                    let number = null;
+                    let text = null;
+                    let date = null;
 
                     switch(input.type){
                         case 2: case 3: case 4: date = new Date(); break;
@@ -309,8 +309,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     hardwareBackPress() {
-        var goback = this.props.navigation.getParam('goback', 'RecordDefault');
-        var params = this.props.navigation.getParam('gobackParams', null);
+        let goback = this.props.navigation.getParam('goback', 'RecordDefault');
+        let params = this.props.navigation.getParam('gobackParams', null);
         this.props.navigation.navigate(goback, params);
         return true;
     }
@@ -321,15 +321,15 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
 
     //validate form
     validateForm = () => {
-        var show = true;
-        var inputs = this.state.task.inputs;
+        let show = true;
+        let inputs = this.state.task.inputs;
         if(typeof inputs != 'undefined' && inputs != null && inputs.length > 0){
-            for(x = 0; x < inputs.length; x++){
-                var i = this.state.record.inputs.map(a => a.inputId).indexOf(inputs[x].id);
+            for(let x = 0; x < inputs.length; x++){
+                let i = this.state.record.inputs.map(a => a.inputId).indexOf(inputs[x].id);
                 if(i < 0){continue;} //record doesn't contain input
-                var input = this.state.record.inputs[i];
+                let input = this.state.record.inputs[i];
                 if(typeof input != 'undefined'){
-                    var dtype = this.getInputDataType(input.type);
+                    let dtype = this.getInputDataType(input.type);
                     if(dtype == 1){ // Number data type
                         if(input.number == null){show = false;}
                         if(isNaN(input.number)){ show = false;}
@@ -341,7 +341,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                     else if(dtype == 3){ // Date data type
                         if(input.date == null){show = false;}
                         try{
-                            var d = Date(input.date); 
+                            let d = Date(input.date); 
                         }catch(ex){
                             show = false;
                         }
@@ -555,10 +555,12 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
 
     hideStopWatch = () => {
         var stopWatch = this.state.stopWatch;
+        var record = this.state.record;
         stopWatch.show = false;
-        this.setState({
-            stopWatch:stopWatch
+        global.realm.write(() => {
+            record.timer = false;
         });
+        this.setState({stopWatch:stopWatch, record:record});
     }
 
     // 5 Stars ////////////////////////////////////////////////////////////////////////////////////////////////
