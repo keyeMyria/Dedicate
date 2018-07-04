@@ -1,16 +1,19 @@
 import React from 'react';
-import { View, StyleSheet, BackHandler } from 'react-native';
+import { View, StyleSheet, BackHandler, TouchableOpacity } from 'react-native';
 import Text from 'ui/Text';
 import Form, {FormHeader, FormBody} from 'ui/Form';
 import Textbox from 'fields/Textbox';
 import Picker from 'fields/Picker';
 import CheckBox from 'fields/CheckBox';
 import ToolTip from 'tooltip/Top';
+import DbTasks from '../Database/DbTasks';
 
 
 export default class ChartScreen extends React.Component {
     constructor(props) {
         super(props);
+
+        let dbTasks = new DbTasks();
 
         this.state = {
             chart:{
@@ -21,6 +24,7 @@ export default class ChartScreen extends React.Component {
                 index:0,
                 sources:[]
             },
+            tasks:dbTasks.GetList(),
             taskForm:{
                 height:250,
                 inputsOffset:0
@@ -47,6 +51,7 @@ export default class ChartScreen extends React.Component {
         this.onFeaturedChange = this.onFeaturedChange.bind(this);
         this.onPressAddInput = this.onPressAddInput.bind(this);
         this.onPressButtonSave = this.onPressButtonSave.bind(this);
+        this.selectDataSource = this.selectDataSource.bind(this);
     }
 
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////
@@ -102,11 +107,33 @@ export default class ChartScreen extends React.Component {
         this.setState({chart:chart});
     }
 
-    // Button Press ///////////////////////////////////////////////////////////////////////////////////////////
+    // Select Data Source ///////////////////////////////////////////////////////////////////////////////////
 
     onPressAddInput(){
-        
+        let i  =0;
+        global.Modal.setContent('Select Data Source', (
+            <View style={this.styles.modalMenuContainer}>
+                {this.state.tasks.map((task) => {
+                    i++;
+                    return (
+                        <TouchableOpacity key={i} onPress={() => {this.selectDataSource(task);}}>
+                        <View style={this.styles.modalItemContainer}>
+                            <Text style={this.styles.modalItemText}>{task.name}</Text>
+                        </View>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        ));
+        global.Modal.show();
     }
+
+    selectDataSource(task){
+        global.Modal.hide();
+
+    }
+
+    // Save Chart ///////////////////////////////////////////////////////////////////////////////////////////
 
     onPressButtonSave(){
 
@@ -181,5 +208,10 @@ export default class ChartScreen extends React.Component {
         pickerItemStyle:{fontSize:20},
         containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
 
+        //modal window
+        modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30},
+        modalMenuContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%'},
+        modalItemContainer:{paddingVertical:15, paddingHorizontal:30, borderBottomColor: AppStyles.separatorColor, borderBottomWidth:1},
+        
     });
 }

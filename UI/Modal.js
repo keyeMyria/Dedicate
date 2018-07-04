@@ -55,7 +55,7 @@ export default class Modal extends React.Component {
         styles.darkBackgroundContainer = {height:height};
         styles.darkBackground = {height:height};
         styles.modalContainer = {
-            top:Math.round((height - modalContainer.height) / 2), 
+            top:Math.round((height - modalContainer.height) / 2) - 25, 
             left:Math.round((width - modalContainer.width) / 2),
             maxHeight:height - 60,
             maxWidth:width - 60,
@@ -88,7 +88,7 @@ export default class Modal extends React.Component {
         if(this.state.visible === true){
             return (
                 <View style={[styles.container]}>
-                    <View style={[styles.modalContainer, this.state.styles.modalContainer, {backgroundColor:AppStyles.backgroundColor}]}>
+                    <View elevation={10} style={[styles.modalContainer, this.state.styles.modalContainer, {backgroundColor:AppStyles.backgroundColor}]}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>{this.state.title}</Text>
                         </View>
@@ -110,9 +110,9 @@ export default class Modal extends React.Component {
 
 const styles = StyleSheet.create({
     container:{position:'absolute', top:0, right:0, bottom:0, left:0},
-    titleContainer:{paddingTop:15, paddingHorizontal:15},
+    titleContainer:{paddingTop:5, paddingHorizontal:15},
     title:{fontSize:20},
     darkBackgroundContainer:{position:'absolute', top:0, right:0, bottom:0, left:0},
     darkBackground:{backgroundColor:'rgba(0,0,0,0.7)', position:'absolute', top:0, right:0, bottom:0, left:0, zIndex:5000},
-    modalContainer:{position:'absolute', zIndex:5001}
+    modalContainer:{position:'absolute', zIndex:5001, borderRadius:7, overflow:'hidden'}
 });

@@ -493,8 +493,8 @@ class TaskInputField extends React.Component{
             case 7: typeLabel = 'Rating'; break;
             case 8: typeLabel = 'Location'; break;
             case 9: typeLabel = 'URL Link'; break;
-            case 10: typeLabel = 'Photo'; break;
-            case 11: typeLabel = 'Video'; break;
+            //case 10: typeLabel = 'Photo'; break;
+            //case 11: typeLabel = 'Video'; break;
 
         }
         return (
@@ -533,8 +533,8 @@ class TaskInputField extends React.Component{
                                     {label:"Rating", value:7},
                                     {label:"Location", value:8},
                                     {label:"URL Link", value:9},
-                                    {label:"Photo", value:10},
-                                    {label:"Video", value:11}
+                                    //{label:"Photo", value:10},
+                                    //{label:"Video", value:11}
                                 ]
                             }
                             title="Select A Data Type"
