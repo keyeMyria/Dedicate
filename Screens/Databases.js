@@ -502,6 +502,7 @@ export default class DatabaseScreen extends React.Component {
         return (
             <Body {...this.props} style={this.styles.body} title="Available Databases" screen="Databases" buttonAdd={true} buttonRecord={false} onAdd={this.showAddDatabase}
                 titleBarButtons={<ButtonDots style={this.styles.titlebarOptions} size="small" fill={AppStyles.headerTextColor} onPress={() => this.onPressOptions()}/>}
+                footerMessage={this.state.fileList.length <= 3 ? "Create a new database and start recording a separate experiment" : ''}
             >
                 <ScrollView>
                     {this.state.fileList}
@@ -527,7 +528,8 @@ export default class DatabaseScreen extends React.Component {
         modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30},
         modalMenuContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%'},
         modalItemContainer:{paddingVertical:15, paddingHorizontal:30, borderBottomColor: AppStyles.separatorColor, borderBottomWidth:1},
-        modalItemText:{fontSize:17}
+        modalItemText:{fontSize:17},
+        createDatabaseButton:{paddingTop:10}
     });
 }
 

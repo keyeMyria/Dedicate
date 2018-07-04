@@ -7,6 +7,7 @@ import AppStyles from 'dedicate/AppStyles';
 import AppLang from 'dedicate/AppLang';
 import Textbox from 'fields/Textbox';
 import Picker from 'fields/Picker';
+import CheckBox from 'fields/CheckBox';
 import StopWatch from 'fields/StopWatch';
 import LocationPicker from 'fields/LocationPicker';
 import DateTimePicker from 'fields/DateTimePicker'
@@ -813,16 +814,8 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
                             case 6: //Yes/No
                                 return (
                                     <View key={input.id} style={[this.styles.inputFieldContainer, this.styles.padding]}>
-                                        <Text style={this.styles.fieldTitle}>{input.name}</Text>
-                                        <Picker
-                                            ref={ref}
-                                            items={[
-                                                {value:0, label:'No'},
-                                                {value:1, label:'Yes'}
-                                            ]}
-                                            selectedValue={recinput.number || 0}
-                                            onValueChange={(value) => {this.onChangeText(input.id, input.type, value)}}
-                                            title={input.name}
+                                        <CheckBox text={input.name} defaultValue={recinput.number == 1}
+                                            onChange={(checked) => this.onChangeText(input.id, input.type, checked ? 1 : 0)}
                                         />
                                     </View>
                                 )

@@ -66,7 +66,7 @@ export default class Body extends React.Component {
                         />
                         ] : <View></View>
                     }
-                    {this.props.footerMessage != null && this.props.footerMessage != '' && !this.state.hasTasks && 
+                    {this.props.footerMessage != null && this.props.footerMessage != '' && 
                         (
                             <View style={this.styles.footerMessageContainer}>
                                 <ToolTip text={this.props.footerMessage}/>

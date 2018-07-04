@@ -5,8 +5,8 @@ import Realm from 'realm'
     path = path.substring(0, path.lastIndexOf('/') + 1) + name + '.realm';
     global.realm = new Realm({
         path: path,
-        schema: [Task, Input, Category, Record, RecordInput],
-        schemaVersion: 8, //update version when schema changes dramatically
+        schema: [Task, Input, Category, Record, RecordInput, Chart, DataSource],
+        schemaVersion: 10, //update version when schema changes dramatically
         migration: function(oldRealm, newRealm) {
             //newRealm.deleteAll();
         }
@@ -105,3 +105,36 @@ import Realm from 'realm'
         input: {type: 'Input'}
      }
  }
+
+ class Chart {}; /////////////////////////////////////////////////////
+ Chart.schema = {
+     name: 'Chart',
+     primaryKey: 'id',
+     properties:{
+        id: 'int',
+        name:'string',
+        type: {type: 'int', default: 1}, //1 = line chart, 2 = time graph, 3 = pie chart
+        featured: 'bool',
+        index: 'int',
+        sources: {type: 'list', objectType: 'DataSource'}
+     }
+ }
+
+ class DataSource {}; /////////////////////////////////////////////////////
+ DataSource.schema = {
+     name: 'DataSource',
+     primaryKey: 'id',
+     properties:{
+        id: 'int',
+        style: {type:'int', default:1}, //1 = solid thick, 2 = solid thin, 3 = dotted line (for line chart)
+        taskId: 'int',
+        task:{type:'Task'},
+        inputId:{type: 'int', optional:true},
+        input:{type:'Input', optional:true},
+        dayoffset:{type:'int', optional:true},
+        monthoffset:{type:'int', optional:true},
+        filter:{type:'string', optional:true}
+     }
+ }
+
+ 

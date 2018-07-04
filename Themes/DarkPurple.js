@@ -19,8 +19,9 @@ export default DarkPurple =
     // body //////////////////////////////
     backgroundColor: '#222',
     separatorColor: '#333',
-    altBackgroundColor: '#333',
+    altBackgroundColor: '#292929',
     altSeparatorColor: '#444',
+
     // buttons ///////////////////////////
     buttonColor: '#6666cc',
     buttonTextColor: '#fff',

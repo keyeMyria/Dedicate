@@ -16,6 +16,7 @@ import DropShadow from 'ui/DropShadow';
 import StartEndDateTimePicker from 'fields/StartEndDateTimePicker';
 import TextLink from 'text/TextLink';
 import IconEvents from 'icons/IconEvents';
+import CheckBox from 'fields/CheckBox';
 import FiveStars from 'fields/FiveStars';
 import Loading from 'ui/Loading';
 
@@ -277,10 +278,17 @@ export default class EventsScreen extends React.Component {
 
                                     //render input
                                     switch(input.type){
-                                        case 0: case 1: case 2: case 3: case 4: case 6: case 8: case 9:
+                                        case 0: case 1: case 2: case 3: case 4: case 8: case 9:
                                             inputs.push(
                                                 <View key={'input' + inputIndex} style={[this.styles.input, extraStyles]}>
                                                     <Text style={this.styles.inputText}>{input.input.name}: {val}</Text>
+                                                </View>
+                                            );
+                                            break;
+                                        case 6: //Yes/No
+                                            inputs.push(
+                                                <View key={'input' + inputIndex} style={[this.styles.input, extraStyles]}>
+                                                    <CheckBox text={input.input.name} nonchecked={true} size="small" offsetTop={5} defaultValue={input.number == 1}/>
                                                 </View>
                                             );
                                             break;

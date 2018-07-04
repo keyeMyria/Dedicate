@@ -27,7 +27,7 @@ export default class OverviewScreen extends React.Component {
             styles: null,
             totalTasks:dbTasks.TotalTasks(),
             totalRecords:dbRecords.TotalRecords(),
-            hasTask:dbTasks.HasTasks(),
+            hasTasks:dbTasks.HasTasks(),
             charts:[],
             timers:[],
             chartList:[],
@@ -369,7 +369,7 @@ export default class OverviewScreen extends React.Component {
 
     render() {
         const {height} = Dimensions.get('window');
-        if(this.state.hasTask === true){
+        if(this.state.hasTasks === true){
             return (
                 <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={this.styles.body}
                     buttonAdd={true} buttonRecord={true} bottomFade={true} onLayout={this.onLayout}

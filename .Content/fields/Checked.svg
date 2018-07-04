@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none" width="64" height="64">
+	<defs>
+		<path fill="#FFF" d="M49 32l-4.05 4.05v6.35q0 2.55-2.55 2.55H19.6q-2.55 0-2.55-2.55v-8.5L13 29.25V42.4q0 6.6 6.6 6.6h22.8q6.6 0 6.6-6.6V32m-6.6-14.95h.5l3.3-3.25q-1.505-.8-3.8-.8H19.6Q13 13 13 19.6V28l4.05-4.05V19.6q0-2.55 2.55-2.55h22.8z" id="a" />
+		<path fill="#66F" d="M55.35 19.65L51.1 15.4 32 34.5l-9.2-9.2-4.25 4.25 13.5 13.4 23.3-23.3z" id="b" />
+	</defs>
+	<use xlink:href="#a" />
+	<use xlink:href="#b" />
+</svg>
