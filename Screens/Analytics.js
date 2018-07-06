@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Image, StyleSheet, BackHandler } from 'react-native';
+import { View, StyleSheet, BackHandler, Dimensions } from 'react-native';
 import Text from 'text/Text';
 import Body from 'ui/Body';
-import DbCharts from 'db/DbCharts';
 import IconAnalytics from '../UI/Icons/IconAnalytics';
+import DbCharts from 'db/DbCharts';
+import LineChart from 'charts/LineChart';
 
 
 export default class AnalyticsScreen extends React.Component {
@@ -40,6 +41,7 @@ export default class AnalyticsScreen extends React.Component {
     }
 
     render() {
+        let {width} = Dimensions.get('window');
         return (
             <Body {...this.props} style={this.styles.body} title="Analytics" screen="Analytics" buttonAdd={true} onAdd={this.showCreateChart}
                 footerMessage={this.state.charts.length == 0 ? "Create your first chart and track what is most important to you" : ''}
@@ -57,7 +59,20 @@ export default class AnalyticsScreen extends React.Component {
                     </View>
                 :
                     <View>
-
+                        {this.state.charts.map( chart => {
+                            return (
+                                <View key={chart.name}>
+                                    <LineChart
+                                    chart={chart}
+                                    days={14}
+                                    width={width}
+                                    height={120}
+                                    update={Math.round(999 * Math.random())}
+                                    />
+                                    <View key={'sep' + chart.name} style={this.styles.separator}></View>
+                                </View>
+                            )
+                        })}
                     </View>
                 }
             </Body>
@@ -68,6 +83,7 @@ export default class AnalyticsScreen extends React.Component {
         body:{position:'absolute', top:0, bottom:0, left:0, right:0},
         introContainer:{width:380, alignSelf:'center', paddingBottom:110},
         largeIcon:{paddingTop:30, width:'100%', flexDirection:'row', justifyContent:'center'},
-        introText:{paddingTop:20, fontSize:20, color:AppStyles.textColor, textAlign:'justify'}
+        introText:{paddingTop:20, fontSize:20, color:AppStyles.textColor, textAlign:'justify'},
+        separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10},
     });
 }

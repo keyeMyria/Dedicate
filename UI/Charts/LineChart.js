@@ -3,13 +3,16 @@ import {View, ScrollView, StyleSheet} from 'react-native';
 import Text from 'text/Text';
 import AppStyles from 'dedicate/AppStyles';
 import {Svg, Line, Polyline, Circle} from 'react-native-svg';
+import DbRecords from '../../Database/DbRecords';
 
 export default class LineChart extends React.Component{
     constructor(props){
         super(props);
 
+        let date = new Date();
+
         this.state = {
-            datestart: this.props.dateStart || (new Date()).setDate((new Date()).getDate() - 14),
+            datestart: this.props.dateStart || date.setDate(date.getDate() - 14),
             days: this.props.days || 14,
             chart:this.props.chart || {name:'Unknown'},
             records:this.props.records || [],
@@ -35,7 +38,21 @@ export default class LineChart extends React.Component{
     }
 
     componentWillMount(){
-        this.getChart();
+        if(this.state.records.length == 0){
+            //get records for chart
+            var dbRecords = new DbRecords();
+            var chart = this.state.chart;
+            var records = [];
+            for(var x = 0; x < chart.sources.length; x++){
+                let source = chart.sources[x];
+                records.push(dbRecords.GetList({taskId:source.taskId, startDate:this.state.datestart}));
+            }
+            this.setState({records:records}, () => {
+                this.getChart();
+            });
+        }else{
+            this.getChart();
+        }
     }
 
     componentDidUpdate(){
@@ -190,7 +207,7 @@ export default class LineChart extends React.Component{
 
     getLegendLine(name, color){
         return (
-            <View style={this.styles.legendItem} key={name}>
+            <View style={[this.styles.legendItem, this.state.showLegendTaskNames ? {flexDirection:'column'} : {}]} key={name}>
                 <View style={this.styles.legendItemIcon}>
                     <Svg width="20" height="10">
                         <Line x1="0" x2="20" y1="4" y2="4" strokeWidth="5" stroke={color}></Line>
@@ -205,7 +222,7 @@ export default class LineChart extends React.Component{
 
     getLegendDot(name, color){
         return (
-            <View style={this.styles.legendItem} key={name}>
+            <View style={[this.styles.legendItem, this.state.showLegendTaskNames ? {flexDirection:'column'} : {}]} key={name}>
                 <View style={this.styles.legendItemIcon}>
                     <Svg width="20" height="10">
                         <Circle cx={10} cy={5} r={5} fill={color}></Circle>
@@ -277,13 +294,10 @@ export default class LineChart extends React.Component{
         chartLine2MinMax:{position:'absolute', height:'100%', right:20, alignItems:'flex-end'},
         chartLabel:{fontSize:20, opacity:0.5},
         chartLabelEnd:{textAlign:'right'},
-        chartTextRight:{textAlign:'right'},
         chartDots:{position:'absolute'},
 
-        legendContainer:{flex:1, flexDirection:'row', justifyContent:'space-between'},
-        legendLines:{alignSelf:'flex-start'},
-        legendDot:{alignSelf:'flex-end'},
-        legendItem:{flex:1, flexDirection:'row'},
+        legendContainer:{flexDirection:'row', flexWrap:'wrap'},
+        legendItem:{flex:1, alignSelf:'flex-start', flexDirection:'row'},
         legendItemIcon:{paddingRight:10, paddingTop:7, height:20},
         legendItemLabel:{},
         legendItemText:{fontSize:17},

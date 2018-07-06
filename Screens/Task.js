@@ -242,15 +242,6 @@ export default class TaskScreen extends React.Component {
         this.validateForm();
     }
 
-    // Save Task ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    onPressButtonSave = () => {
-        const dbTasks = new DbTasks();
-        let task = Object.assign({},this.state.task);
-        task = dbTasks.CreateTask(task);
-        this.props.navigation.navigate('Tasks')
-    }
-
     // Delete Task ////////////////////////////////////////////////////////////////////////////////////////////////
 
     onDeleteTask = () => {
@@ -283,6 +274,15 @@ export default class TaskScreen extends React.Component {
         if(this.state.edited != show){
             this.setState({edited:show});
         }
+    }
+
+    // Save Task ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    onPressButtonSave = () => {
+        const dbTasks = new DbTasks();
+        let task = Object.assign({},this.state.task);
+        task = dbTasks.CreateTask(task);
+        this.props.navigation.navigate('Tasks')
     }
 
     // Placehold Random Names ////////////////////////////////////////////////////////////////////////////////////////////////

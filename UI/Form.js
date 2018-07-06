@@ -54,7 +54,7 @@ export default class Form extends React.Component {
     }
 
     componentDidUpdate(prevProps){
-        if(this.props.edited != prevProps.edited) {
+        if(this.props.edited != prevProps.edited || this.props.onPressAddInput != prevProps.onPressAddInput) {
             this.TitleBarButtons();
         }
     }
@@ -158,10 +158,10 @@ export default class Form extends React.Component {
                     {header}
                 </View>
                 <View style={[this.styles.bodyContainer, {paddingBottom:this.state.keyboardHeight + 20}]}>
-                    {this.props.bodyTitle && this.props.onPressAddInput &&
+                    {this.props.bodyTitle &&
                         <View>
                             <Text style={this.styles.bodyTitle}>{this.props.bodyTitle}</Text>
-                            {this.state.ButtonAddShow && this.state.ButtonInTitleBar == false &&
+                            {this.state.ButtonAddShow && this.props.onPressAddInput != null && this.state.ButtonInTitleBar == false &&
                                 <ButtonAdd size="small" style={[this.styles.buttonAddInput]}
                                     outline={AppStyles.altBackgroundColor}
                                     onPress={this.onPressAddInput}

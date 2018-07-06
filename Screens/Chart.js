@@ -11,6 +11,7 @@ import IconArrowRight from 'icons/IconArrowRight';
 import ToolTip from 'tooltip/Top';
 import DbTasks from '../Database/DbTasks';
 import DbRecords from '../Database/DbRecords';
+import DbCharts from '../Database/DbCharts';
 import LineChart from 'charts/LineChart';
 
 
@@ -42,6 +43,7 @@ export default class ChartScreen extends React.Component {
             ButtonInTitleBar: false,
             visibleHeight:0,
             contentOffset:0,
+            edited:true
         }
 
         this.chartType = [
@@ -134,6 +136,7 @@ export default class ChartScreen extends React.Component {
             input:null,
             dayoffset:null,
             monthoffset:null,
+            isnewkey:true,
             filter:''
         });
         this.setState({chart:chart}, () => {
@@ -288,7 +291,6 @@ export default class ChartScreen extends React.Component {
             days={14}
             width={width}
             height={120}
-            showLegendTaskNames={true}
             update={Math.round(999 * Math.random())}
             />
         )});
@@ -297,7 +299,9 @@ export default class ChartScreen extends React.Component {
     // Save Chart ///////////////////////////////////////////////////////////////////////////////////////////
 
     onPressButtonSave(){
-
+        var dbCharts = new DbCharts();
+        dbCharts.CreateChart(this.state.chart);
+        this.props.navigation.navigate('Analytics')
     }
 
     render() {
@@ -313,7 +317,7 @@ export default class ChartScreen extends React.Component {
         }
         return (
             <Form {...this.props} title={this.state.title} screen="Chart" bodyTitle="Data Sources"
-            edited={this.state.edited} onPressAddInput={this.onPressAddInput} onPressSave={this.onPressButtonSave}>
+            edited={this.state.edited} onPressAddInput={this.state.chart.sources.length >= 8 ? null : this.onPressAddInput} onPressSave={this.onPressButtonSave}>
                 <FormHeader>
                     <View style={this.styles.chartContainer}>
                         {this.state.chartItem}

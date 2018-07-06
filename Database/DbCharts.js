@@ -34,11 +34,13 @@ export default class DbCharts extends Db{
                         source = {
                             id:sourceid,
                             taskId:source.taskId,
+                            style:source.style,
+                            color:source.color,
                             input:global.realm.objects('Chart').filtered('id = $0', source.taskId),
                             inputId:source.inputId || null,
                             input:source.inputId != null ? global.realm.objects('DataSource').filtered('id = $0', source.inputId) : null,
-                            datestart:source.datestart,
-                            dateend:source.dateend,
+                            dayoffset:source.dayoffset,
+                            monthoffset:source.monthoffset,
                             filter:source.filter
                         };
                         global.realm.write(() => {
@@ -49,19 +51,18 @@ export default class DbCharts extends Db{
                         sourceid++;
                     }else{
                         //update existing data source info
-                        source = global.realm.objects('DataSource').filtered('id = $0', source.key)[0];
-                        source = {
-                            id:sourceid,
-                            
-                        };
+                        let existing = global.realm.objects('DataSource').filtered('id = $0', source.key)[0];
+
                         global.realm.write(() => {
-                            source.taskId = source.taskId;
-                            source.input = global.realm.objects('Chart').filtered('id = $0', source.taskId);
-                            source.inputId = source.inputId || null;
-                            source.input = source.inputId != null ? global.realm.objects('DataSource').filtered('id = $0', source.inputId) : null;
-                            source.datestart = source.datestart;
-                            source.dateend = source.dateend;
-                            source.filter = source.filter;
+                            existing.taskId = source.taskId;
+                            existing.style = source.style,
+                            existing.color = source.color,
+                            existing.inputId = source.inputId || null;
+                            existing.input = global.realm.objects('Chart').filtered('id = $0', source.taskId);
+                            existing.input = source.inputId != null ? global.realm.objects('Input').filtered('id = $0', source.inputId) : null;
+                            existing.dayoffset = source.dayoffset;
+                            existing.monthoffset = source.monthoffset;
+                            existing.filter = source.filter;
                         });
                     }
                 }
@@ -97,11 +98,13 @@ export default class DbCharts extends Db{
                     source = {
                         id:sourceid,
                         taskId:source.taskId,
+                        style:source.style,
+                        color:source.color,
                         input:global.realm.objects('Chart').filtered('id = $0', source.taskId),
                         inputId:source.inputId || null,
-                        input:source.inputId != null ? global.realm.objects('DataSource').filtered('id = $0', source.inputId) : null,
-                        datestart:source.datestart,
-                        dateend:source.dateend,
+                        input:source.input != null ? source.input : null,
+                        dayoffset:source.dayoffset,
+                        monthoffset:source.monthoffset,
                         filter:source.filter
                     };
                     chart.sources[x] = source;
@@ -118,7 +121,7 @@ export default class DbCharts extends Db{
                     id:id, 
                     name: chart.name, 
                     type:chart.type, 
-                    featured:chart.featured || 0,
+                    featured:chart.featured || false,
                     index: chart.index || 0,
                     sources: chart.sources || []
                 });
