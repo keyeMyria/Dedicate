@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, StyleSheet, BackHandler } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import Body from 'ui/Body';
 import DbCharts from 'db/DbCharts';
 import IconAnalytics from '../UI/Icons/IconAnalytics';

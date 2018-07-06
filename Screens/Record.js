@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions, BackHandler, Alert } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import { createStackNavigator } from 'react-navigation';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';

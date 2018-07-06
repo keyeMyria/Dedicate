@@ -1,13 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, TouchableHighlight, Dimensions, ScrollView, BackHandler } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
-import {Svg, Line, Polyline, Circle} from 'react-native-svg';
-import DatesMatch from 'utility/DatesMatch';
 import DropShadow from 'ui/DropShadow';
 import IconTasks from 'icons/IconTasks';
 import IconEvents from 'icons/IconEvents';
@@ -15,6 +13,7 @@ import IconDatabases from 'icons/IconDatabases';
 import Timer from 'fields/Timer';
 import Logo from 'ui/Logo';
 import Loading from 'ui/Loading';
+import LineChart from 'charts/LineChart';
 
 export default class OverviewScreen extends React.Component {
     constructor(props) {
@@ -69,6 +68,8 @@ export default class OverviewScreen extends React.Component {
         });
     }
 
+    // Layout Changes ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     onLayout(){
         const {width} = Dimensions.get('window');
         if(this.state.layoutWidth != width){
@@ -87,6 +88,8 @@ export default class OverviewScreen extends React.Component {
             this.setState({shadowOpacity:1});
         }
     }
+
+    // Timers ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     getTimers() {
         var that = this;
@@ -126,245 +129,75 @@ export default class OverviewScreen extends React.Component {
             record.time = (dateend - record.datestart) / 1000;
             record.timer = false;
         });
-        
-        //var dbRecords = new DbRecords();
-        //this.setState({timers:dbRecords.GetActiveTimers()},
-        //() =>{
-        //    this.getTimers();
-        //});
     }
+
+    // Charts ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     getCharts() {
-        let items = [];
         const {width} = Dimensions.get('window');
-        let maxCharts = 6;
-        for(let x = 0; x < (this.state.charts.length < maxCharts ? this.state.charts.length : maxCharts); x++){
-            let chart = this.state.charts[x];
-            if(chart.name != ''){
-                try{
-                    let item = this.chartItem(chart, width);
-                    if(item != null){
-                        items.push(item);
-                        if(x < this.state.charts.length - 1){
-                            items.push(<View key={'sep' + x} style={this.styles.separator}></View>);
+        let charts = [];
+        for(let x = 0; x < this.state.charts.length; x++){
+            //get data sources for chart
+            let task = this.state.charts[x];
+            let sources = [];
+            let records = [];
+            let line = 1;
+            let dots = false;
+            if(task.records && task.records.length > 0){
+                for(let y = 0; y < task.records[0].inputs.length; y++){
+                    let input = task.records[0].inputs[y];
+                    let found = false;
+                    let isline = false;
+                    if(input.input.type == 0 || input.input.type == 7){
+                        if(line <= 2){
+                            found = true;
+                            isline = true;
+                            line++;
                         }
-                    }
-                }catch(ex){
-                }
-            }
-        }
-        this.setState({chartList:items});
-    }
-
-    //render 14 day chart
-    chartItem = (chart, width) => {
-        let line1 = (<View></View>);
-        let line1Min = "";
-        let line1Max = "";
-        let line1Legend = (<View></View>);
-        let line2 = (<View></View>);
-        let line2Min = "";
-        let line2Max = "";
-        let line2Legend = (<View></View>);
-        let dots = (<View></View>);
-        let dotsLegend = (<View></View>);
-
-        //get lines and dots for chart
-        let curr = 1;
-        let hasdots = false;
-        let haspoints = false;
-        const cwidth = width - 30;
-        const height = 60;
-        const days = 14;
-        const record = chart.records[0];
-        for(let x = 0; x < record.inputs.length; x++){
-            let input = record.inputs[x];
-            if(input.type === 0 || input.type == 7){ //number
-                const info = this.chartPoints(chart, x, days);
-                if(info.points.length == 0){ continue; }
-                haspoints = true;
-                if(curr == 1){
-                    line1 = (
-                        <Svg width={width} height={height + 20}>
-                            {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine1Stroke)}
-                        </Svg>
-                    );
-                    line1Legend = (
-                        <View style={this.styles.legendItem}>
-                            <View style={this.styles.legendItemIcon}>
-                                <Svg width="20" height="10">
-                                    <Line x1="0" x2="20" y1="4" y2="4" strokeWidth="5" stroke={AppStyles.chartLine1Stroke}></Line>
-                                </Svg>
-                            </View>
-                            <View style={this.styles.legendItemLabel}>
-                                <Text style={this.styles.legendItemText}>{input.input.name}</Text>
-                            </View>
-                        </View>
-                    );
-                    line1Min = info.min;
-                    line1Max = info.max;
-                    curr++;
-                }else if(curr == 2){
-                    line2 = (
-                        <Svg width={width} height={height + 20}>
-                            {this.chartLine(info.points, days, cwidth, height, info.min, info.max, AppStyles.chartLine2Stroke)}
-                        </Svg>
-                    );
-                    line2Legend = (
-                        <View style={this.styles.legendItem}>
-                            <View style={this.styles.legendItemIcon}>
-                                <Svg width="20" height="10">
-                                    <Line x1="0" x2="20" y1="4" y2="4" strokeWidth="5" stroke={AppStyles.chartLine2Stroke}></Line>
-                                </Svg>
-                            </View>
-                            <View style={this.styles.legendItemLabel}>
-                                <Text style={this.styles.legendItemText}>{input.input.name}</Text>
-                            </View>
-                        </View>
-                    );
-                    line2Min = info.min;
-                    line2Max = info.max;
-                    curr++;
-                }
-            }else if(input.type == 6 && hasdots == false){ //yes/no
-                hasdots = true;
-                dots = (
-                    <Svg width={width} height={height + 20}>
-                        {this.chartDots(chart, x, days, cwidth, height)}
-                    </Svg>
-                );
-                dotsLegend = (
-                    <View style={this.styles.legendItem}>
-                        <View style={this.styles.legendItemIcon}>
-                            <Svg width="20" height="10">
-                                <Circle cx={10} cy={5} r={5} fill={AppStyles.chartDotFill}></Circle>
-                            </Svg>
-                        </View>
-                        <View style={this.styles.legendItemLabel}>
-                            <Text style={this.styles.legendItemText}>{input.input.name}</Text>
-                        </View>
-                    </View>
-                );
-            }
-        }
-
-        if(haspoints == false && hasdots == false){return null;}
-
-        return (
-            <ScrollView key={chart.id} horizontal={true} pagingEnabled={true} showsHorizontalScrollIndicator={false}>
-                <View style={[this.styles.chartContainer, {width:width}]}>
-                    <View style={this.styles.chartArea}>
-                        <View style={this.styles.chartLine1MinMax}>
-                            <Text style={[this.styles.chartLabel, this.styles.chartLine1Max]}>{line1Max}</Text>
-                            <Text style={[this.styles.chartLabel, this.styles.chartLine1Min]}>{line1Min}</Text>
-                        </View>
-                        <View style={this.styles.chartLine2MinMax}>
-                            <Text style={[this.styles.chartLabel, this.styles.chartLine2Max]}>{line2Max}</Text>
-                            <Text style={[this.styles.chartLabel, this.styles.chartLine2Min]}>{line2Min}</Text>
-                        </View>
-                        <View style={[this.styles.chartLine2, this.styles.chart]}>
-                            {line2}
-                        </View>
-                        <View style={[this.styles.chartLine1, this.styles.chart]}>
-                            {line1}
-                        </View>
-                        <View style={[this.styles.chartDots, this.styles.chart]}>
-                            {dots}
-                        </View>
-                        <Text style={this.styles.chartName}>{chart.name}</Text>
-                    </View>
-                </View>
-                <View style={[this.styles.legendContainer, {width:width}]}>
-                    <View style={this.styles.legendLines}>
-                        {line1Legend}
-                        {line2Legend}
-                    </View>
-                    <View style={this.styles.legendDot}>
-                        {dotsLegend}
-                    </View>
-                    <Text style={this.styles.legendName}>{chart.name}</Text>
-                </View>
-            </ScrollView>
-        );
-    }
-
-    chartPoints = (chart, index, days) => {
-        let min = 999999;
-        let max = 0;
-        let points = [];
-
-        //get totals for each day
-        for(let x = 0; x < days; x++){
-            let count = 0;
-            let date = new Date();
-            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
-            for(var y = 0; y < chart.records.length; y++){
-                var rec = chart.records[y];
-                if(DatesMatch(date, new Date(rec.datestart))){
-                    if(rec.inputs.length > index){
-                        if(rec.inputs[index].number != null){
-                            count += rec.inputs[index].number;
-                        }
+                    }else if(input.input.type == 6 && dots == false){
+                        found = true;
+                        dots = true;
+                    }else if(line > 2 && dots == true){break;}
+                    if(found == true){
+                        sources.push({
+                            id:0,
+                            style:1,
+                            color:isline ? line - 1 : 1,
+                            taskId: task.id,
+                            task:task.task,
+                            inputId:input.inputId,
+                            input:input.input,
+                            dayoffset:0,
+                            monthoffset:0,
+                            filter:''
+                        });
+                        records.push(task.records);
                     }
                 }
-            }
-            points.push(count);
-        }
-
-        //check totals for min & max
-        for(let x = 0; x < points.length; x++){
-            if(points[x] < min){ min = points[x];}
-            if(points[x] > max){ max = points[x];}
-        }
-
-        if(max == 0){max = 1;}
-
-        return {points:points, min:min, max:max};
-    }
-
-    chartLine = (points, days, width, height, min, max, stroke) => {
-        //draw lines
-        let lines = [];
-        for(let x = 0; x < points.length; x++){
-            lines.push(Math.round(((width / days) * x) + 10) + ',' + Math.round(height + 10 - (height / (max - min)) * (points[x] - min)));
-        }
-
-        return (
-            <Polyline key={'line'}
-                stroke={stroke}
-                strokeWidth="5"
-                fill="none"
-                points={lines.join(' ')}
-            ></Polyline>
-        );
-    }
-
-    chartDots = (chart, index, days, width, height) => {
-        let dots = [];
-        for(let x = 0; x < days; x++){
-            let date = new Date();
-            date = new Date(date.setDate(date.getDate() - (days - 1 - x)));
-            for(let y = 0; y < chart.records.length; y++){
-                const rec = chart.records[y];
-                if(DatesMatch(date, new Date(rec.datestart))){
-                    if(rec.inputs.length > index){
-                        if(rec.inputs[index].number != null){
-                            if(rec.inputs[index].number == 1){
-                                dots.push(
-                                    <Circle key={'dot' + x}
-                                        cx={Math.round(((width / days) * x) + 10)}
-                                        cy={height + 5}
-                                        r={5}
-                                        fill={AppStyles.chartDotFill}
-                                    ></Circle>
-                                )
-                            }
-                        }
-                    }
+    
+                //build chart info
+                if(records.length > 0){
+                    charts.push(
+                        <LineChart key={'chart' + x}
+                        chart={{
+                            id:0,
+                            name:task.name,
+                            type:1,
+                            featured:true,
+                            index:0,
+                            sources:sources
+                        }}
+                        records={records}
+                        days={14}
+                        width={width}
+                        height={120}
+                        />
+                    );
+                    charts.push(<View key={'sep' + x} style={this.styles.separator}></View>);
                 }
             }
         }
-        return dots;
+        this.setState({chartList:charts});
     }
 
     render() {

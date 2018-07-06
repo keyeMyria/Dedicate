@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, BackHandler } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import Body from 'ui/Body';
 
 export default class CategoriesScreen extends React.Component {

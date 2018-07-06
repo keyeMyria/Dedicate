@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions, Alert, BackHandler  } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import Form, {FormHeader, FormBody} from 'ui/Form';
 import AppStyles from 'dedicate/AppStyles';
 import Textbox from 'fields/Textbox';
@@ -163,6 +163,8 @@ export default class TaskScreen extends React.Component {
         this.validateForm();
     }
 
+    // Add Input ////////////////////////////////////////////////////////////////////////////////////////////////
+
     onPressAddInput = () => {
         const inputs = this.state.task.inputs;
         let show = true;
@@ -180,6 +182,8 @@ export default class TaskScreen extends React.Component {
         });
         
     }
+
+    // Input Changes ////////////////////////////////////////////////////////////////////////////////////////////////
 
     onLabelChangeText = text => {
         let task = this.state.task;
@@ -211,36 +215,6 @@ export default class TaskScreen extends React.Component {
         this.validateForm();
     }
 
-    onRemoveInputField = (index) => {
-        let task = this.state.task;
-        task.inputs.splice(index - 1, 1);
-        this.setState({task:task, ButtonAddShow:true});
-        this.validateForm();
-    }
-
-    onPressButtonSave = () => {
-        const dbTasks = new DbTasks();
-        let task = Object.assign({},this.state.task);
-        task = dbTasks.CreateTask(task);
-        this.props.navigation.navigate('Tasks')
-    }
-
-    onDeleteTask = () => {
-        Alert.alert(
-        'Delete Task?',
-        'Do you really want to delete this task? All data recorded about this task will also be permanently deleted as well.',
-        [
-            {text: 'Cancel', style: 'cancel'},
-            {text: 'Delete Task', onPress: () => {
-                const db = new DbTasks();
-                db.DeleteTask(this.state.task.id);
-                this.props.navigation.navigate('Tasks')
-            }}
-        ],
-        { cancelable: true }
-        )
-    }
-
     shouldFocusInputField = (index) => {
         let task = this.state.task;
         if(task.inputs[index-1].isnew === true){
@@ -259,6 +233,42 @@ export default class TaskScreen extends React.Component {
 
     onFocusTaskLabel(){}
 
+    // Remove Input ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    onRemoveInputField = (index) => {
+        let task = this.state.task;
+        task.inputs.splice(index - 1, 1);
+        this.setState({task:task, ButtonAddShow:true});
+        this.validateForm();
+    }
+
+    // Save Task ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    onPressButtonSave = () => {
+        const dbTasks = new DbTasks();
+        let task = Object.assign({},this.state.task);
+        task = dbTasks.CreateTask(task);
+        this.props.navigation.navigate('Tasks')
+    }
+
+    // Delete Task ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    onDeleteTask = () => {
+        Alert.alert(
+        'Delete Task?',
+        'Do you really want to delete this task? All data recorded about this task will also be permanently deleted as well.',
+        [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Delete Task', onPress: () => {
+                const db = new DbTasks();
+                db.DeleteTask(this.state.task.id);
+                this.props.navigation.navigate('Tasks')
+            }}
+        ],
+        { cancelable: true }
+        )
+    }
+
     // Form Validation ////////////////////////////////////////////////////////////////////////////////////////
 
     validateForm = () => {
@@ -275,7 +285,8 @@ export default class TaskScreen extends React.Component {
         }
     }
 
-    // Placeholder Task Names
+    // Placehold Random Names ////////////////////////////////////////////////////////////////////////////////////////////////
+
     placeHolderNames = [
         "Pushups", "Exercise", "Jogging", "Cook food", "Read a book", "Watch a movie",
         "Go Swimming", "Ride bike", "Go camping", "Go hiking"
@@ -354,44 +365,46 @@ export default class TaskScreen extends React.Component {
             onPressSave={this.onPressButtonSave}
             >
                 <FormHeader>
-                    <Text style={this.styles.fieldTitle}>Label</Text>
-                    <Textbox 
-                        ref="tasklabel"
-                        value={this.state.task.name}
-                        style={this.styles.inputField} 
-                        placeholder={this.placeholderTaskName()}
-                        returnKeyType={labelKeyType} 
-                        onFocus={(e)=>{return this.onFocusTaskLabel(e)}}
-                        blurOnSubmit={false}
-                        onChangeText={this.onLabelChangeText}
-                        onSubmitEditing={(event) => { 
-                            let ref = this.refs['taskInput1'];
-                            if(ref){
-                                ref.refs['inputLabel'].focus();
-                            }else{
-                                this.refs['tasklabel'].blur();
-                            }
-                            }}
-                            maxLength={24}
-                    />
-                    <View style={this.styles.categoryContainer}>
-                        <View style={this.styles.categoryColumnOne}>
-                            <Text style={[this.styles.fieldTitle, this.styles.fieldCategory]}>Category</Text>
-                        </View>
-                        <View style={this.styles.categoryColumnTwo}>
-                            <ButtonPlus style={this.styles.buttonAddCategory} color={AppStyles.color} size="xsmall"
-                                onPress={this.onPressAddCategory}
-                            />
-                        </View>
-                        <View style={this.styles.categoryPicker}>
-                            <Picker
-                                style={this.styles.pickerStyle}
-                                itemStyle={this.styles.pickerItemStyle}
-                                selectedValue={this.state.task.category ? this.state.task.category.id : -1}
-                                onValueChange={this.onCategoryValueChange}
-                                items={this.state.categoryList}
-                                title="Select A Category"
-                            />
+                    <View style={this.styles.headerContainer}>
+                        <Text style={this.styles.fieldTitle}>Label</Text>
+                        <Textbox 
+                            ref="tasklabel"
+                            value={this.state.task.name}
+                            style={this.styles.inputField} 
+                            placeholder={this.placeholderTaskName()}
+                            returnKeyType={labelKeyType} 
+                            onFocus={(e)=>{return this.onFocusTaskLabel(e)}}
+                            blurOnSubmit={false}
+                            onChangeText={this.onLabelChangeText}
+                            onSubmitEditing={(event) => { 
+                                let ref = this.refs['taskInput1'];
+                                if(ref){
+                                    ref.refs['inputLabel'].focus();
+                                }else{
+                                    this.refs['tasklabel'].blur();
+                                }
+                                }}
+                                maxLength={24}
+                        />
+                        <View style={this.styles.categoryContainer}>
+                            <View style={this.styles.categoryColumnOne}>
+                                <Text style={[this.styles.fieldTitle, this.styles.fieldCategory]}>Category</Text>
+                            </View>
+                            <View style={this.styles.categoryColumnTwo}>
+                                <ButtonPlus style={this.styles.buttonAddCategory} color={AppStyles.color} size="xsmall"
+                                    onPress={this.onPressAddCategory}
+                                />
+                            </View>
+                            <View style={this.styles.categoryPicker}>
+                                <Picker
+                                    style={this.styles.pickerStyle}
+                                    itemStyle={this.styles.pickerItemStyle}
+                                    selectedValue={this.state.task.category ? this.state.task.category.id : -1}
+                                    onValueChange={this.onCategoryValueChange}
+                                    items={this.state.categoryList}
+                                    title="Select A Category"
+                                />
+                            </View>
                         </View>
                     </View>
                 </FormHeader>
@@ -411,7 +424,7 @@ export default class TaskScreen extends React.Component {
     styles = StyleSheet.create({
         body:{backgroundColor:AppStyles.altBackgroundColor},
         //task form
-        container: {padding:30, backgroundColor:AppStyles.backgroundColor},
+        headerContainer: {padding:20},
         keyboardavoidingview:{},
         fieldTitle: {fontSize:16, fontWeight:'bold'},
     

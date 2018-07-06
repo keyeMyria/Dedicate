@@ -6,7 +6,7 @@ import Realm from 'realm'
     global.realm = new Realm({
         path: path,
         schema: [Task, Input, Category, Record, RecordInput, Chart, DataSource],
-        schemaVersion: 10, //update version when schema changes dramatically
+        schemaVersion: 11, //update version when schema changes dramatically
         migration: function(oldRealm, newRealm) {
             //newRealm.deleteAll();
         }
@@ -127,6 +127,7 @@ import Realm from 'realm'
      properties:{
         id: 'int',
         style: {type:'int', default:1}, //1 = solid thick, 2 = solid thin, 3 = dotted line (for line chart)
+        color: {type:'int', default:1}, //1 thru 8 colors {1:color #1, 2:faded #1, 3:color #2, 4:faded #2, etc...)
         taskId: 'int',
         task:{type:'Task'},
         inputId:{type: 'int', optional:true},

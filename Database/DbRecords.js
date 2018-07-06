@@ -155,6 +155,7 @@ export default class DbRecords extends Db{
                 tasks.push({
                     name:rec.task.name,
                     id:rec.taskId,
+                    task:rec.task,
                     records: []
                 });
             }

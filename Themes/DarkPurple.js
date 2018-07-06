@@ -45,5 +45,11 @@ export default DarkPurple =
     // chart styling /////////////////////////
     chartLine1Stroke: '#555',
     chartLine2Stroke: '#333',
+    chartLine3Stroke: '#6666CC',
+    chartLine4Stroke: '#353554',
+    chartLine5Stroke: '#3366FF',
+    chartLine6Stroke: '#263563',
+    chartLine7Stroke: '#009933',
+    chartLine8Stroke: '#174526',
     chartDotFill: '#336699'
 }

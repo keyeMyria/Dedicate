@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import Picker from 'fields/Picker';
 import { createStackNavigator } from 'react-navigation';
 import Body from 'ui/Body';

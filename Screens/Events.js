@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableHighlight, BackHandler, FlatList, Dimensions } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import Picker from 'fields/Picker';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';

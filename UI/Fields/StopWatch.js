@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import AppStyles from 'dedicate/AppStyles';
 import {Svg, Path} from 'react-native-svg';
 import ButtonOutline from 'buttons/ButtonOutline';

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, TouchableHighlight } from "react-native";
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import AppStyles from 'dedicate/AppStyles';
 import IconOverview from 'icons/IconOverview';
 import IconTasks from 'icons/IconTasks';

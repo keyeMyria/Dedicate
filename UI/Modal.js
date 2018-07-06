@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions, TouchableWithoutFeedback, TextInput, ScrollView, Keyboard  } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import AppStyles from 'dedicate/AppStyles';
 
 export default class Modal extends React.Component {

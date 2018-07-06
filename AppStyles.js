@@ -74,6 +74,12 @@ getStyles= () => {
         // chart styling /////////////////////////
         get chartLine1Stroke(){ return getColor('chartLine1Stroke');},
         get chartLine2Stroke(){ return getColor('chartLine2Stroke');},
+        get chartLine3Stroke(){ return getColor('chartLine3Stroke');},
+        get chartLine4Stroke(){ return getColor('chartLine4Stroke');},
+        get chartLine5Stroke(){ return getColor('chartLine5Stroke');},
+        get chartLine6Stroke(){ return getColor('chartLine6Stroke');},
+        get chartLine7Stroke(){ return getColor('chartLine7Stroke');},
+        get chartLine8Stroke(){ return getColor('chartLine8Stroke');},
         get chartDotFill(){ return getColor('chartDotFill');}
     }
     global.styles = styles;

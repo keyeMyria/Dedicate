@@ -1,6 +1,6 @@
 import React from 'react';
 import {View} from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import {Svg, Path} from 'react-native-svg';
 import AppStyles from 'dedicate/AppStyles';
 

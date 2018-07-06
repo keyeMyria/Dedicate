@@ -1,12 +1,17 @@
 import React from 'react';
-import { View, StyleSheet, BackHandler, TouchableOpacity } from 'react-native';
-import Text from 'ui/Text';
+import { View, StyleSheet, BackHandler, Dimensions, TouchableOpacity } from 'react-native';
+import Text from 'text/Text';
+import TextLink from 'text/TextLink';
 import Form, {FormHeader, FormBody} from 'ui/Form';
 import Textbox from 'fields/Textbox';
 import Picker from 'fields/Picker';
 import CheckBox from 'fields/CheckBox';
+import ButtonClose from 'buttons/ButtonClose';
+import IconArrowRight from 'icons/IconArrowRight';
 import ToolTip from 'tooltip/Top';
 import DbTasks from '../Database/DbTasks';
+import DbRecords from '../Database/DbRecords';
+import LineChart from 'charts/LineChart';
 
 
 export default class ChartScreen extends React.Component {
@@ -24,12 +29,13 @@ export default class ChartScreen extends React.Component {
                 index:0,
                 sources:[]
             },
+            chartItem:[], //rendered chart
+            sourcesList:[], //rendered
             tasks:dbTasks.GetList(),
             taskForm:{
                 height:250,
                 inputsOffset:0
             },
-            islive:false,
             title:'New Chart',
             screenTitle:'',
             ButtonAddShow: true,
@@ -52,6 +58,11 @@ export default class ChartScreen extends React.Component {
         this.onPressAddInput = this.onPressAddInput.bind(this);
         this.onPressButtonSave = this.onPressButtonSave.bind(this);
         this.selectDataSource = this.selectDataSource.bind(this);
+        this.renderSources = this.renderSources.bind(this);
+        this.removeSource = this.removeSource.bind(this);
+        this.onChangeSourceInput = this.onChangeSourceInput.bind(this);
+        this.onChangeSourceColor = this.onChangeSourceColor.bind(this);
+        this.onShowColorModal = this.onShowColorModal.bind(this);
     }
 
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////
@@ -73,37 +84,19 @@ export default class ChartScreen extends React.Component {
 
     onChartNameChange(value){
         let chart = this.state.chart;
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                chart.name = value;
-            });
-        }else{
-            chart.name = value;
-        }
+        chart.name = value;
         this.setState({chart:chart});
     }
 
     onChartTypeChange(value){
         let chart = this.state.chart;
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                chart.type = value;
-            });
-        }else{
-            chart.type = value;
-        }
+        chart.type = value;
         this.setState({chart:chart});
     }
 
     onFeaturedChange(checked){
         let chart = this.state.chart;
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                chart.featured = checked;
-            });
-        }else{
-            chart.featured = checked;
-        }
+        chart.featured = checked;
         this.setState({chart:chart});
     }
 
@@ -130,7 +123,175 @@ export default class ChartScreen extends React.Component {
 
     selectDataSource(task){
         global.Modal.hide();
+        var chart = this.state.chart;
+        chart.sources.push({
+            id: null,
+            style: 1,
+            color: (chart.sources.length + 1) % 8 || 8,
+            taskId: task.id,
+            task:task,
+            inputId:null,
+            input:null,
+            dayoffset:null,
+            monthoffset:null,
+            filter:''
+        });
+        this.setState({chart:chart}, () => {
+            this.renderSources();
+        });
+    }
 
+    // Render Sources List /////////////////////////////////////////////////////////////////////////////////
+
+    renderSources(){
+        let {width} = Dimensions.get('window');
+        let list = this.state.chart.sources.map(source => {return (
+            <View key={'src' + source.task.name} style={this.styles.sourceContainer}>
+                <View style={this.styles.iconArrow}><IconArrowRight size="xsmall"/></View>
+                <View style={this.styles.sourceHeader}>
+                    <Text style={this.styles.sourceTitle}>{source.task.name}</Text>
+                    <ButtonClose size="xxsmall" color={AppStyles.color} style={this.styles.sourceClose} onPress={() => {this.removeSource(source);}}/>
+                </View>
+                <View style={this.styles.sourceBody}>
+                    <View style={[this.styles.sourceInput,{width:width - 80}]}>
+                        <Picker onValueChange={(value) => {this.onChangeSourceInput(source, value)}}
+                            items={[{label:'No Input', value:null}].concat(source.task.inputs.map(input => ({label:input.name, value:input.id})))}
+                            defaultValue={null}
+                            selectedValue={source.inputId}
+                        />
+                    </View>
+                    {source.input != null && source.input.type != 6 && //Yes/No dot only, no color selection available
+                        <View style={this.styles.colorBoxContainer}>
+                            <TouchableOpacity onPress={() => this.onShowColorModal(source)}>
+                                <View style={[this.styles.colorBoxSmall, {backgroundColor:
+                                    source.color == 1 ? AppStyles.chartLine1Stroke : 
+                                    source.color == 2 ? AppStyles.chartLine2Stroke : 
+                                    source.color == 3 ? AppStyles.chartLine3Stroke : 
+                                    source.color == 4 ? AppStyles.chartLine4Stroke : 
+                                    source.color == 5 ? AppStyles.chartLine5Stroke : 
+                                    source.color == 6 ? AppStyles.chartLine6Stroke : 
+                                    source.color == 7 ? AppStyles.chartLine7Stroke : 
+                                    source.color == 8 ? AppStyles.chartLine8Stroke :
+                                    AppStyles.chartLine1Stroke
+                                }]}></View>
+                            </TouchableOpacity>
+                        </View>
+                    }
+                </View>
+            </View>
+        );});
+
+        this.setState({sourcesList: list}, () => {
+            this.renderChart();
+        });
+    }
+
+    // Change Data Source Input ////////////////////////////////////////////////////////////////////////////
+
+    onChangeSourceInput(source, inputId){
+        var chart = this.state.chart;
+        var i = chart.sources.indexOf(source);
+        source.inputId = inputId;
+        source.input = source.task.inputs.filter(a => a.id == inputId)[0];
+        chart.sources[i] = source;
+        this.setState({chart:chart}, () => {
+            this.renderSources();
+        });
+    }
+
+    // Change Data Source Color ////////////////////////////////////////////////////////////////////////////
+
+    onShowColorModal(source){
+        global.Modal.setContent('Select Color for Data Source', (
+            <View style={[this.styles.modalMenuContainer, this.styles.colorBoxes]}>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 1)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine1Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 2)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine2Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 3)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine3Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 4)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine4Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 5)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine5Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 6)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine6Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 7)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine7Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+                <View style={this.styles.colorBoxContainer}>
+                    <TouchableOpacity onPress={() => this.onChangeSourceColor(source, 8)}>
+                        <View style={[this.styles.colorBox, {backgroundColor:AppStyles.chartLine8Stroke}]}></View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        ));
+        global.Modal.show();
+    }
+
+    onChangeSourceColor(source, color){
+        global.Modal.hide();
+        var chart = this.state.chart;
+        var i = chart.sources.indexOf(source);
+        source.color = color;
+        chart.sources[i] = source;
+        this.setState({chart:chart}, () => {
+            this.renderSources();
+        });
+    }
+
+    // Remove Data Source ////////////////////////////////////////////////////////////////////////////////////////
+    
+    removeSource(source){
+        var chart = this.state.chart;
+        chart.sources = chart.sources.filter(a => a != source);
+        this.setState({chart:chart}, () => {
+            this.renderSources();
+        });
+    }
+
+    // Render Chart /////////////////////////////////////////////////////////////////////////////////////////
+    renderChart(){
+        let {width} = Dimensions.get('window');
+        let records = [];
+        let chart = this.state.chart;
+        let dbRecords = new DbRecords();
+        let date = new Date();
+        for(var x = 0; x < chart.sources.length; x++){
+            let source = chart.sources[x];
+            records.push(dbRecords.GetList({taskId:source.taskId, startDate:new Date(date.setDate(date.getDate() - 14))}));
+        }
+        this.setState({chartItem:(
+            <LineChart key={'chart' + x}
+            chart={chart}
+            records={records}
+            days={14}
+            width={width}
+            height={120}
+            showLegendTaskNames={true}
+            update={Math.round(999 * Math.random())}
+            />
+        )});
     }
 
     // Save Chart ///////////////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +303,7 @@ export default class ChartScreen extends React.Component {
     render() {
         let sources = [];
         if(this.state.chart.sources.length > 0){
-
+            sources = this.state.sourcesList;
         }else{
             sources = (
                 <View style={this.styles.containerDescription}>
@@ -151,43 +312,38 @@ export default class ChartScreen extends React.Component {
             );
         }
         return (
-            <Form {...this.props} 
-            title={this.state.title} screen="Chart"
-            bodyTitle="Data Sources"
-            edited={this.state.edited}
-            onPressAddInput={this.onPressAddInput}
-            onPressSave={this.onPressButtonSave}
-            >
+            <Form {...this.props} title={this.state.title} screen="Chart" bodyTitle="Data Sources"
+            edited={this.state.edited} onPressAddInput={this.onPressAddInput} onPressSave={this.onPressButtonSave}>
                 <FormHeader>
                     <View style={this.styles.chartContainer}>
-                        {this.state.chart.sources.length == 0 && 
-                            <Text style={this.styles.noChart}>Empty Chart</Text>
-                        }
+                        {this.state.chartItem}
                     </View>
-                    <View style={this.styles.input}>
-                        <Text style={this.styles.fieldTitle}>Chart Name</Text>
-                        <Textbox
-                            value={this.state.chart.name}
-                            style={this.styles.inputField} 
-                            placeholder="My Chart"
-                            returnKeyType={'done'}
-                            blurOnSubmit={false}
-                            onChangeText={this.onChartNameChange}
-                            maxLength={24}
-                        />
+                    <View style={this.styles.headerContainer}>
+                        <View style={this.styles.input}>
+                            <Text style={this.styles.fieldTitle}>Chart Name</Text>
+                            <Textbox
+                                value={this.state.chart.name}
+                                style={this.styles.inputField} 
+                                placeholder="My Chart"
+                                returnKeyType={'done'}
+                                blurOnSubmit={false}
+                                onChangeText={this.onChartNameChange}
+                                maxLength={24}
+                            />
+                        </View>
+                        <View style={this.styles.input}>
+                            <Text style={this.styles.fieldTitle}>Chart Type</Text>
+                            <Picker
+                                style={this.styles.pickerStyle}
+                                itemStyle={this.styles.pickerItemStyle}
+                                selectedValue={this.state.chart.type}
+                                onValueChange={this.onChartTypeChange}
+                                items={this.chartType}
+                                title="Select A Chart Type"
+                            />
+                        </View>
+                        <CheckBox text="Featured on the Overview Screen" onChange={this.onFeaturedChange}/>
                     </View>
-                    <View style={this.styles.input}>
-                        <Text style={this.styles.fieldTitle}>Chart Type</Text>
-                        <Picker
-                            style={this.styles.pickerStyle}
-                            itemStyle={this.styles.pickerItemStyle}
-                            selectedValue={this.state.chart.type}
-                            onValueChange={this.onChartTypeChange}
-                            items={this.chartType}
-                            title="Select A Chart Type"
-                        />
-                    </View>
-                    <CheckBox text="Featured on the Overview Screen" onChange={this.onFeaturedChange}/>
                 </FormHeader>
                 <FormBody>
                     {sources}
@@ -198,8 +354,10 @@ export default class ChartScreen extends React.Component {
 
     styles = StyleSheet.create({
         body:{position:'absolute', top:0, bottom:0, left:0, right:0, backgroundColor:AppStyles.altBackgroundColor},
-        chartContainer:{padding:20, minHeight:80, backgroundColor:AppStyles.backgroundColor},
+        headerContainer:{paddingHorizontal:20, paddingBottom:20},
+        chartContainer:{minHeight:80, paddingTop:20},
 
+        //Chart Information
         noChart:{fontSize:20, paddingTop:20, opacity:0.3, alignSelf:'center'},
         input:{paddingBottom:20},
         fieldTitle: {fontSize:16, fontWeight:'bold'},
@@ -208,10 +366,25 @@ export default class ChartScreen extends React.Component {
         pickerItemStyle:{fontSize:20},
         containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
 
+        //Sources
+        iconArrow:{position:'absolute', left:0, paddingTop:13},
+        sourceContainer:{paddingVertical:10, paddingHorizontal:20, borderBottomColor:AppStyles.altSeparatorColor, borderBottomWidth:1},
+        sourceHeader:{flex:1, flexDirection:'row', justifyContent:'space-between', paddingBottom:20},
+        sourceBody:{flexDirection:'row', justifyContent:'space-between'},
+        sourceInput:{},
+        sourceTitle:{fontSize:24},
+        sourceClose:{alignSelf:'flex-end'},
+
         //modal window
         modalContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%', padding:30},
         modalMenuContainer:{backgroundColor:AppStyles.backgroundColor, minWidth:'50%'},
         modalItemContainer:{paddingVertical:15, paddingHorizontal:30, borderBottomColor: AppStyles.separatorColor, borderBottomWidth:1},
         
+
+        //Color Picker
+        colorBoxes:{flex:1, flexDirection:'row', justifyContent:'space-between', flexWrap:'wrap', width:300, padding:10},
+        colorBoxContainer:{padding:10},
+        colorBox:{width:48, height:48},
+        colorBoxSmall:{width:32, height:32},
     });
 }

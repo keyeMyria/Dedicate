@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Keyboard, Dimensions } from 'react-native';
-import Text from 'ui/Text';
+import Text from 'text/Text';
 import Textbox from 'fields/Textbox';
 import Picker from 'fields/Picker';
 import CheckBox from 'fields/CheckBox';
@@ -178,9 +178,9 @@ export default class Form extends React.Component {
 
     styles = StyleSheet.create({
         body:{position:'absolute', top:0, bottom:0, left:0, right:0, backgroundColor:AppStyles.altBackgroundColor},
-        headerContainer:{padding:20, minHeight:200, backgroundColor:AppStyles.backgroundColor},
+        headerContainer:{minHeight:200, backgroundColor:AppStyles.backgroundColor},
         bodyContainer:{minHeight:100, paddingTop:15},
-        bodyTitle: {fontSize:24, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
+        bodyTitle: {fontSize:24, paddingTop:2, paddingRight:15, paddingLeft:20, paddingBottom:30 },
         buttonAddInput:{position:'absolute', right:12, zIndex:1},
     
         //title bar buttons
