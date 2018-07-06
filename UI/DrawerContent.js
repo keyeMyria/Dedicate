@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, TouchableHighlight } from "react-native";
+import { View, StyleSheet, TouchableHighlight, ScrollView } from "react-native";
 import Text from 'text/Text';
 import AppStyles from 'dedicate/AppStyles';
 import IconOverview from 'icons/IconOverview';
@@ -21,12 +21,14 @@ export default class DrawerContent extends React.Component{
         <View style={this.styles.header}>
           <Logo width="129" height="25" color={AppStyles.headerTextColor}/>
         </View>
-        <DrawerItem {...this.props} text="Overview" screen="Overview" icon={<IconOverview size="small"/>} />
-        <DrawerItem {...this.props} text="Tasks" screen="Tasks" icon={<IconTasks size="small"/>} />
-        <DrawerItem {...this.props} text="Events" screen="Events" icon={<IconEvents size="small"/>} />
-        <DrawerItem {...this.props} text="Analytics" screen="Analytics" icon={<IconAnalytics size="small"/>} />
-        <DrawerItem {...this.props} text="Settings" screen="Settings" icon={<IconSettings size="small"/>} />
-        <DrawerItem {...this.props} text="Databases" screen="Databases" icon={<IconDatabases size="small"/>} />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <DrawerItem {...this.props} text="Overview" screen="Overview" icon={<IconOverview size="small"/>} />
+          <DrawerItem {...this.props} text="Tasks" screen="Tasks" icon={<IconTasks size="small"/>} />
+          <DrawerItem {...this.props} text="Events" screen="Events" icon={<IconEvents size="small"/>} />
+          <DrawerItem {...this.props} text="Analytics" screen="Analytics" icon={<IconAnalytics size="small"/>} />
+          <DrawerItem {...this.props} text="Settings" screen="Settings" icon={<IconSettings size="small"/>} />
+          <DrawerItem {...this.props} text="Databases" screen="Databases" icon={<IconDatabases size="small"/>} />
+        </ScrollView>
       </View>
     );
   }

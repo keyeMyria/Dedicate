@@ -22,7 +22,7 @@ export default class ChartScreen extends React.Component {
         let dbTasks = new DbTasks();
 
         this.state = {
-            chart:{
+            chart: {
                 id:null,
                 name:'',
                 type:1,
@@ -43,7 +43,9 @@ export default class ChartScreen extends React.Component {
             ButtonInTitleBar: false,
             visibleHeight:0,
             contentOffset:0,
-            edited:true
+            edited:true,
+            layoutWidth:0,
+            update:1
         }
 
         this.chartType = [
@@ -52,8 +54,44 @@ export default class ChartScreen extends React.Component {
             {label:'Pie Chart', value:3}
         ];
 
+        //load existing chart
+        let chart = null;
+        let info = this.props.navigation.getParam('chart', null);
+        if(info != null){
+            chart = {
+                id: info.id,
+                name:info.name,
+                type: info.type,
+                featured: info.featured,
+                index: info.index,
+                sources: []
+            }
+
+            for(let x = 0; x < info.sources.length; x++){
+                let source = info.sources[x];
+                chart.sources.push({
+                    id: source.id,
+                    style: source.style,
+                    color: source.color,
+                    taskId: source.taskId,
+                    task: source.task || global.realm.objects('Task').filtered('id = $0', source.taskId)[0],
+                    inputId: source.inputId,
+                    input: source.input,
+                    dayoffset: source.dayoffsest,
+                    monthoffset: source.monthoffsest,
+                    filter: source.filter
+                });
+            }
+            this.state.chart = chart;
+        }
+
+        //update layout width
+        const {width} = Dimensions.get('screen');
+        this.state.layoutWidth = width;
+
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.onLayout = this.onLayout.bind(this);
         this.onChartNameChange = this.onChartNameChange.bind(this);
         this.onChartTypeChange = this.onChartTypeChange.bind(this);
         this.onFeaturedChange = this.onFeaturedChange.bind(this);
@@ -70,6 +108,9 @@ export default class ChartScreen extends React.Component {
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////
     componentWillMount(){
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        if(this.state.chart.id != null){
+            this.renderSources();
+        }
     }
 
     componentWillUnmount () {
@@ -80,6 +121,17 @@ export default class ChartScreen extends React.Component {
         const goback = this.props.navigation.getParam('goback', 'Analytics');
         this.props.navigation.navigate(goback);
         return true;
+    }
+
+    // Layout Changes ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    onLayout(){
+        const {width} = Dimensions.get('screen');
+        if(this.state.layoutWidth != width){
+            this.setState({layoutWidth:width}, () => {
+                this.renderSources();
+            });
+        }
     }
 
     // Input Changes //////////////////////////////////////////////////////////////////////////////////////////
@@ -284,14 +336,14 @@ export default class ChartScreen extends React.Component {
             let source = chart.sources[x];
             records.push(dbRecords.GetList({taskId:source.taskId, startDate:new Date(date.setDate(date.getDate() - 14))}));
         }
-        this.setState({chartItem:(
+        this.setState({update:this.state.update+1, chartItem:(
             <LineChart key={'chart' + x}
             chart={chart}
             records={records}
             days={14}
             width={width}
             height={120}
-            update={Math.round(999 * Math.random())}
+            update={this.state.update+1}
             />
         )});
     }
@@ -316,7 +368,7 @@ export default class ChartScreen extends React.Component {
             );
         }
         return (
-            <Form {...this.props} title={this.state.title} screen="Chart" bodyTitle="Data Sources"
+            <Form {...this.props} title={this.state.title} screen="Chart" bodyTitle="Data Sources" onLayout={this.onLayout}
             edited={this.state.edited} onPressAddInput={this.state.chart.sources.length >= 8 ? null : this.onPressAddInput} onPressSave={this.onPressButtonSave}>
                 <FormHeader>
                     <View style={this.styles.chartContainer}>

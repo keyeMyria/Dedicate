@@ -71,9 +71,10 @@ export default class OverviewScreen extends React.Component {
     // Layout Changes ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     onLayout(){
-        const {width} = Dimensions.get('window');
+        const {width} = Dimensions.get('screen');
         if(this.state.layoutWidth != width){
             this.setState({layoutWidth:width});
+            this.getTimers();
             this.getCharts();
         }
     }
@@ -191,6 +192,7 @@ export default class OverviewScreen extends React.Component {
                         days={14}
                         width={width}
                         height={120}
+                        update={Math.round(999 * Math.random())}
                         />
                     );
                     charts.push(<View key={'sep' + x} style={this.styles.separator}></View>);

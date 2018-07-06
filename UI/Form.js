@@ -75,7 +75,7 @@ export default class Form extends React.Component {
     }  
 
     // Screen Orientation changes  //////////////////////////////////////////////////////////////////////////////////////
-    onLayoutChange = () => {
+    onLayoutChange = (event) => {
         const {height, width} = Dimensions.get('window');
         if(width > height){
             //landscape
@@ -83,6 +83,9 @@ export default class Form extends React.Component {
         }else{
             //portrait
             this.setState({styles: stylesPortrait});
+        }
+        if(this.props.onLayout){
+            this.props.onLayout(event);
         }
     }
 

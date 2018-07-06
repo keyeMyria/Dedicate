@@ -61,7 +61,7 @@ export default class LineChart extends React.Component{
                 datestart: this.props.dateStart || (new Date()).setDate((new Date()).getDate() - 14),
                 days: this.props.days || 14,
                 chart: this.props.chart || {name:'Unknown'},
-                records: this.props.records || [],
+                records: this.props.records || this.state.records,
                 width: this.props.width || 300,
                 height: this.props.height || 120,
                 padding: this.props.padding || 30,
@@ -275,6 +275,12 @@ export default class LineChart extends React.Component{
                         <Text style={this.styles.chartName}>{this.state.chart.name}</Text>
                     </View>
                 </View>
+                {this.props.extraPage && 
+                    <View style={[this.styles.legendContainer, {width:this.state.width, height:this.state.height + 5, padding:this.state.padding}]}>
+                        {this.props.extraPage}
+                        <Text style={this.styles.legendName}>{this.state.chart.name}</Text>
+                    </View>
+                }
                 <View style={[this.styles.legendContainer, {width:this.state.width, height:this.state.height + 5, padding:this.state.padding}]}>
                     {this.state.legend}
                     <Text style={this.styles.legendName}>{this.state.chart.name}</Text>
@@ -286,7 +292,7 @@ export default class LineChart extends React.Component{
     styles = StyleSheet.create({
         chartContainer: {paddingBottom:20, paddingTop:5, width:'100%'},
         chart:{top:15, left:-5},
-        chartName: {position:'absolute', bottom:0, fontSize:20, width:'100%', textAlign:'center'},
+        chartName: {position:'absolute', bottom:0, fontSize:20, width:'100%', left:-10, textAlign:'center'},
         chartLine:{position:'absolute', height:'100%'},
         chartLineMax:{position:'absolute', top:0},
         chartLineMin:{position:'absolute', bottom:0},
@@ -296,11 +302,11 @@ export default class LineChart extends React.Component{
         chartLabelEnd:{textAlign:'right'},
         chartDots:{position:'absolute'},
 
-        legendContainer:{flexDirection:'row', flexWrap:'wrap'},
+        legendContainer:{flexWrap:'wrap'},
         legendItem:{flex:1, alignSelf:'flex-start', flexDirection:'row'},
         legendItemIcon:{paddingRight:10, paddingTop:7, height:20},
         legendItemLabel:{},
         legendItemText:{fontSize:17},
-        legendName:{position:'absolute', width:'100%', bottom:0, paddingLeft:55, fontSize:20, textAlign:'center', alignSelf:'center'}
+        legendName:{position:'absolute', width:'100%', bottom:0, fontSize:20, textAlign:'center', alignSelf:'center'}
     });
 }
