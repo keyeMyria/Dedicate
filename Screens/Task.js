@@ -72,6 +72,7 @@ export default class TaskScreen extends React.Component {
     // Component Events  //////////////////////////////////////////////////////////////////////////////////////
     componentWillMount(){
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
     }
 
     componentWillUnmount () {
@@ -81,7 +82,24 @@ export default class TaskScreen extends React.Component {
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Tasks');
         this.props.navigation.navigate(goback);
+        global.refreshOverview();
+        if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Tasks',
+            buttonAdd:false, 
+            buttonRecord:true, 
+            bottomFade:true, 
+            hasTasks:true, 
+            hasRecords:true,
+            footerMessage: ''
+        });
     }
 
     // Database Calls ////////////////////////////////////////////////////////////////////////////////////////
@@ -410,6 +428,7 @@ export default class TaskScreen extends React.Component {
                     </View>
                 </FormHeader>
                 <FormBody>
+                    <View style={this.styles.inputsContainer}>
                     {inputFields}
 
                     {this.state.task.id != null && (
@@ -417,6 +436,7 @@ export default class TaskScreen extends React.Component {
                             <Button text="Delete Task" onPress={this.onDeleteTask}/>
                         </View>
                     )}
+                    </View>
                 </FormBody>
             </Form>
         );
@@ -424,6 +444,7 @@ export default class TaskScreen extends React.Component {
 
     styles = StyleSheet.create({
         body:{backgroundColor:AppStyles.altBackgroundColor},
+        
         //task form
         headerContainer: {padding:20},
         keyboardavoidingview:{},
@@ -439,7 +460,7 @@ export default class TaskScreen extends React.Component {
         createCategoryButton:{paddingTop:20, alignSelf:'center'},
     
         // inputs form
-        containerInputs: {minHeight:100, paddingTop:15, paddingBottom:70},
+        inputsContainer:{paddingBottom:100},
         inputsTitle: {fontSize:24, paddingTop:2, paddingRight:15, paddingLeft:30, paddingBottom:30 },
         containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
         inputsDescription: { fontSize:16, paddingHorizontal:10, position:'relative', color: AppStyles.color },

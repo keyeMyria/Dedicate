@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, BackHandler, Dimensions, Alert } from 'react-native';
+import { View, StyleSheet, BackHandler, Dimensions, Alert, Platform } from 'react-native';
 import Text from 'text/Text';
 import Body from 'ui/Body';
 import IconAnalytics from 'icons/IconAnalytics';
@@ -7,6 +7,7 @@ import ButtonClose from 'buttons/ButtonClose';
 import ButtonOutline from 'buttons/ButtonOutline';
 import DbCharts from 'db/DbCharts';
 import LineChart from 'charts/LineChart';
+import AppLink from 'react-native-app-link';
 
 
 export default class AnalyticsScreen extends React.Component {
@@ -14,7 +15,7 @@ export default class AnalyticsScreen extends React.Component {
         super(props);
 
         this.state = {
-            charts:[],
+            charts:this.dbCharts.GetList(),
             layoutWidth:0,
             update:1
         }
@@ -23,9 +24,13 @@ export default class AnalyticsScreen extends React.Component {
         const {width} = Dimensions.get('screen');
         this.state.layoutWidth = width;
 
+        //bind global methods
+        global.updatePrevScreen = this.updateScreen.bind(this);
+
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
         this.onLayout = this.onLayout.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
         this.showCreateChart = this.showCreateChart.bind(this);
         this.removeChart = this.removeChart.bind(this);
         this.editChart = this.editChart.bind(this);
@@ -35,7 +40,7 @@ export default class AnalyticsScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
-        this.setState({charts:this.dbCharts.GetList()});
+        this.loadToolbar();
     }
 
     componentWillUnmount(){
@@ -44,7 +49,12 @@ export default class AnalyticsScreen extends React.Component {
 
     hardwareBackPress() {
         this.props.navigation.navigate('Overview');
+        global.refreshOverview();
         return true;
+    }
+
+    updateScreen(){
+        this.loadToolbar();
     }
 
     // Layout Changes ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +64,23 @@ export default class AnalyticsScreen extends React.Component {
         if(this.state.layoutWidth != width){
             this.setState({layoutWidth:width, update:this.state.update+1});
         }
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Tasks',
+            buttonAdd:true, 
+            buttonRecord:true, 
+            bottomFade:true, 
+            hasTasks:true, 
+            hasRecords:true,
+            footerMessage: '',
+            onAdd: global.proVersion == true ? this.showCreateChart : null,
+            addToolTip: global.proVersion == true && this.state.charts.length == 0 ? 'Start by adding a newly customized chart' : null,
+        });
     }
 
     // Charts ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +107,14 @@ export default class AnalyticsScreen extends React.Component {
         this.props.navigation.navigate('Chart', {goback:'Analytics', chart:chart});
     }
 
+    // Purchase Pro Version ////////////////////////////////////////////////////////////////////////////////////////
+    onPressPurchase(){
+        //TODO: Get App Store & Play Store IDs for Dedicate
+        AppLink.openInStore('appStoreId', 'playStoreId').then(() => {
+
+        });
+    }
+
     render() {
         let {width} = Dimensions.get('window');
         return (
@@ -87,43 +122,62 @@ export default class AnalyticsScreen extends React.Component {
                 footerMessage={this.state.charts.length == 0 ? "Create your first chart and track what is most important to you" : ''}
                 onLayout={this.onLayout}
             >
-                {this.state.charts.length == 0 ? 
+                {global.proVersion == true ? 
+                    this.state.charts.length == 0 ? 
+                        <View style={this.styles.introContainer}>
+                            <View style={this.styles.largeIcon}><IconAnalytics size="gigantic"/></View>
+                            <Text style={this.styles.introText}>
+                                You can build charts to visualize the data that you've been collecting over time. 
+                            </Text>
+                            <Text style={this.styles.introText}>
+                                This will help you understand emerging trends and allow you to make neccessary
+                                changes to maximize the performance of your experiments.
+                            </Text>
+                        </View>
+                    :
+                        <View style={this.styles.chartsContainer}>
+                            {this.state.charts.map( chart => {
+                                return (
+                                    <View key={chart.name}>
+                                        <LineChart
+                                        chart={chart}
+                                        days={14}
+                                        width={width}
+                                        height={120}
+                                        update={this.state.update}
+                                        extraPage={
+                                            <View>
+                                                <View style={this.styles.removeChartContainer}>
+                                                    <ButtonClose size="xxsmall" color={AppStyles.color} onPress={() => this.removeChart(chart)}/>
+                                                </View>
+                                                <View style={this.styles.editChartContainer}>
+                                                    <ButtonOutline style={{alignSelf:'flex-start'}} onPress={() => this.editChart(chart)} text="Edit Chart"/>
+                                                </View>
+                                            </View>
+                                        }
+                                        />
+                                        <View key={'sep' + chart.name} style={this.styles.separator}></View>
+                                    </View>
+                                )
+                            })}
+                        </View>
+                    : //Free Version
+
                     <View style={this.styles.introContainer}>
                         <View style={this.styles.largeIcon}><IconAnalytics size="gigantic"/></View>
                         <Text style={this.styles.introText}>
-                            You can build charts to visualize the data that you've been collecting over time. 
+                            You can design custom charts to visualize the data that 
+                            you've been collecting over time, allowing you to 
+                            maximize the performance of your experiments. 
                         </Text>
                         <Text style={this.styles.introText}>
-                            This will help you understand emerging trends and allow you to make neccessary
-                            changes to maximize the performance of your experiments.
+                            In order to unlock Analytics, you should first export your database, then purchase
+                            the Pro version of Dedicate on the {Platform.OS === 'ios' ? 'App Store' : 'Play Store'}
+                            and import your database within the Pro version.
                         </Text>
-                    </View>
-                :
-                    <View style={this.styles.chartsContainer}>
-                        {this.state.charts.map( chart => {
-                            return (
-                                <View key={chart.name}>
-                                    <LineChart
-                                    chart={chart}
-                                    days={14}
-                                    width={width}
-                                    height={120}
-                                    update={this.state.update}
-                                    extraPage={
-                                        <View>
-                                            <View style={this.styles.removeChartContainer}>
-                                                <ButtonClose size="xxsmall" color={AppStyles.color} onPress={() => this.removeChart(chart)}/>
-                                            </View>
-                                            <View style={this.styles.editChartContainer}>
-                                                <ButtonOutline style={{alignSelf:'flex-start'}} onPress={() => this.editChart(chart)} text="Edit Chart"/>
-                                            </View>
-                                        </View>
-                                    }
-                                    />
-                                    <View key={'sep' + chart.name} style={this.styles.separator}></View>
-                                </View>
-                            )
-                        })}
+                        <View style={this.styles.purchaseContainer}>
+                            <ButtonOutline text="Purchase Dedicate Pro" onPress={this.onPressPurchase}/>
+                        </View>
                     </View>
                 }
             </Body>
@@ -132,10 +186,11 @@ export default class AnalyticsScreen extends React.Component {
 
     styles = StyleSheet.create({
         body:{position:'absolute', top:0, bottom:0, left:0, right:0},
-        introContainer:{width:380, alignSelf:'center', paddingBottom:110},
-        largeIcon:{paddingTop:30, width:'100%', flexDirection:'row', justifyContent:'center'},
+        introContainer:{width:380, alignSelf:'center', paddingBottom:100},
+        largeIcon:{paddingTop:20, width:'100%', flexDirection:'row', justifyContent:'center'},
         introText:{paddingTop:20, fontSize:20, color:AppStyles.textColor, textAlign:'justify'},
         separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10},
+        purchaseContainer:{paddingTop:30, alignSelf:'center'},
 
         chartsContainer:{paddingTop:20},
         removeChartContainer:{position:'absolute', right:0, top:-20},

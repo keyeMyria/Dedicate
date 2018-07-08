@@ -87,6 +87,7 @@ export default class OverviewScreen extends React.Component {
 
         global.updateToolbar({
             ...this.props, 
+            screen:'Overview',
             buttonAdd:true, 
             buttonRecord:true, 
             bottomFade:true, 
@@ -253,7 +254,7 @@ export default class OverviewScreen extends React.Component {
         const {height} = Dimensions.get('window');
         if(this.state.totalTasks > 0){
             return (
-                <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={this.styles.body} onLayout={this.onLayout}
+                <Body {...this.props} title="Overview" noscroll={true} style={this.styles.body} onLayout={this.onLayout}
                 titleBarButtons={
                     <View style={this.styles.titleBarButton}>
                         <TouchableOpacity onPress={this.onTitleBarSettingsPress}>

@@ -83,6 +83,7 @@ export default class ChartScreen extends React.Component {
                 });
             }
             this.state.chart = chart;
+            this.state.title = 'Edit Chart';
         }
 
         //update layout width
@@ -92,6 +93,7 @@ export default class ChartScreen extends React.Component {
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
         this.onLayout = this.onLayout.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
         this.onChartNameChange = this.onChartNameChange.bind(this);
         this.onChartTypeChange = this.onChartTypeChange.bind(this);
         this.onFeaturedChange = this.onFeaturedChange.bind(this);
@@ -111,6 +113,7 @@ export default class ChartScreen extends React.Component {
         if(this.state.chart.id != null){
             this.renderSources();
         }
+        this.loadToolbar();
     }
 
     componentWillUnmount () {
@@ -120,6 +123,7 @@ export default class ChartScreen extends React.Component {
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Analytics');
         this.props.navigation.navigate(goback);
+        global.updatePrevScreen();
         return true;
     }
 
@@ -132,6 +136,22 @@ export default class ChartScreen extends React.Component {
                 this.renderSources();
             });
         }
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Tasks',
+            buttonAdd:true, 
+            buttonRecord:true, 
+            bottomFade:true, 
+            hasTasks:true, 
+            hasRecords:true,
+            footerMessage: '',
+            onAdd: global.proVersion == true ? this.showCreateChart : null
+        });
     }
 
     // Input Changes //////////////////////////////////////////////////////////////////////////////////////////
@@ -420,7 +440,7 @@ export default class ChartScreen extends React.Component {
         inputField:{fontSize:20},
         pickerStyle:{},
         pickerItemStyle:{fontSize:20},
-        containerDescription: {paddingTop:50, paddingHorizontal:30, flexDirection:'column',  alignItems:'center'},
+        containerDescription: {paddingTop:20, paddingHorizontal:30, paddingBottom:100, flexDirection:'column',  alignItems:'center'},
 
         //Sources
         iconArrow:{position:'absolute', left:0, paddingTop:13},

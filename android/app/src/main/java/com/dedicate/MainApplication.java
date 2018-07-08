@@ -35,6 +35,9 @@ import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
 //File Utilities Imports
 import com.anumang.rnfileutils.RNFUPackage;
 
+//Overflow View Component
+import com.entria.views.RNViewOverflowPackage;
+
 //Java Imports
 import java.util.Arrays;
 import java.util.List;
@@ -59,7 +62,8 @@ public class MainApplication extends Application implements ReactApplication {
           new RNGeocoderPackage(),
           new RNZipArchivePackage(),
           new ReactNativeDocumentPicker(),
-          new RNFUPackage()
+          new RNFUPackage(),
+          new RNViewOverflowPackage()
       );
     }
 

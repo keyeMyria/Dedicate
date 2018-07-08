@@ -33,6 +33,7 @@ class DefaultScreen extends React.Component {
 
     hardwareBackPress() {
         this.props.navigation.navigate("Overview");
+        global.refreshOverview();
         return true;
     }
 

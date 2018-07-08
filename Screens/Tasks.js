@@ -13,8 +13,12 @@ export default class TasksScreen extends React.Component {
             tasks: []
         };
 
-        //bind events
+        //bind global methods
+        global.updatePrevScreen = this.updateScreen.bind(this);
+
+        //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
     }
 
     dbTasks = new DbTasks()
@@ -23,6 +27,7 @@ export default class TasksScreen extends React.Component {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
         //get list of tasks
         this.setState({tasks:this.dbTasks.GetList()});
+        this.loadToolbar();
     }
 
     componentWillUnmount(){
@@ -31,7 +36,27 @@ export default class TasksScreen extends React.Component {
 
     hardwareBackPress() {
         this.props.navigation.navigate('Overview');
+        global.refreshOverview();
         return true;
+    }
+
+    updateScreen(){
+        this.loadToolbar();
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Tasks',
+            buttonAdd:true, 
+            buttonRecord:true, 
+            bottomFade:true, 
+            hasTasks:true, 
+            hasRecords:true,
+            footerMessage: ''
+        });
     }
 
     render() {

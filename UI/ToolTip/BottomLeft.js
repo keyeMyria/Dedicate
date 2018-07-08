@@ -4,7 +4,7 @@ import Text from 'text/Text';
 import {Svg, Path} from 'react-native-svg';
 import AppStyles from 'dedicate/AppStyles';
 
-export default class ToolTipBottom extends React.Component {
+export default class ToolTipBottomLeft extends React.Component {
     constructor(props){
         super(props);
     }
@@ -14,9 +14,9 @@ export default class ToolTipBottom extends React.Component {
         var bg = this.props.background || AppStyles.backgroundColor;
         return (
             <View style={{position:'relative'}}>
-                <Svg viewBox="0 0 350 65" width="350" height="65">
-                    <Path fill={bg} d="M347.5 48.5v-46H2.5v46h164l8 13 10-13h163z"/>
-                    <Path fill={color} d="M350.05 6q0-5.35-4.8-5.95-.55-.05-1.2-.05H6Q0 0 0 6v39q0 6 6 6h159.5l9.65 13.5L184.8 51h159.25q.75 0 1.45-.1 4.55-.65 4.55-5.9V6m-4.8-1.75q.8.5.8 1.75v39q0 1.25-.8 1.7-.45.3-1.2.3h-161l-7.9 10.5-7-10.5H6q-2 0-2-2V6q0-2 2-2h338.05q.75 0 1.2.25z"/>
+                <Svg viewBox="0 0 350 85" width="350" height="85">
+                    <Path fill={bg} d="M347.5 68.5v-66H2.5v66h12.8l10.25 12.6 9.2-12.6H347.5z"/>
+                    <Path fill={color} d="M350 6q0-6-6-6H5.95q-.65 0-1.2.05Q-.05.65-.05 6v59q0 5.25 4.55 5.9.7.1 1.45.1h9.75l9.65 13.5L35 71h309q6 0 6-6V6m-6-2q2 0 2 2v59q0 2-2 2H32.35l-7 10.5-7.9-10.5H5.95q-.75 0-1.2-.3-.8-.45-.8-1.7V6q0-1.25.8-1.75Q5.2 4 5.95 4H344z"/>
                 </Svg>
                 <Text style={{position:'absolute', paddingTop:12, paddingLeft:20, width:335, color:AppStyles.color, fontSize:17, zIndex:1}}>{this.props.text}</Text>
             </View>

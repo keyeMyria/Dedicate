@@ -87,6 +87,7 @@ dependencies {
     implementation project(':react-native-zip-archive')
     implementation project(':react-native-document-picker')
     implementation project(':react-native-file-utils')
+    implementation project(':react-native-view-overflow')
 }
 
 // Run this once to be able to run the application with BUCK

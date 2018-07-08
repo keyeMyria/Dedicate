@@ -47,6 +47,9 @@ export class Record extends React.Component {
         const dbCategories = new DbCategories();
         this.state.categories = dbCategories.GetCategoriesList();
 
+        //bind global methods
+        global.updatePrevScreen = this.updateScreen.bind(this);
+
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
         this.onTitleBarEventsPress = this.onTitleBarEventsPress.bind(this);
@@ -56,6 +59,7 @@ export class Record extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
     }
 
     componentWillUnmount(){
@@ -64,8 +68,8 @@ export class Record extends React.Component {
 
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Overview');
-        console.warn(goback);
-        //this.props.navigation.navigate(goback);
+        this.props.navigation.navigate(goback);
+        global.refreshOverview();
         return true;
     }
 
@@ -79,6 +83,25 @@ export class Record extends React.Component {
 
     onTitleBarEventsPress(){
         this.props.navigation.navigate('Events');
+    }
+
+    updateScreen(){
+        this.loadToolbar();
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Record',
+            buttonAdd:true, 
+            buttonRecord:false, 
+            bottomFade:true, 
+            hasTasks:true, 
+            hasRecords:true,
+            footerMessage: ''
+        });
     }
     
     render() {
@@ -282,6 +305,7 @@ export class RecordDetails extends React.Component{
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
         this.TitleBarButtons = this.TitleBarButtons.bind(this);
         this.onRecordedDateStartChange = this.onRecordedDateStartChange.bind(this);
         this.onRecordedDateEndChange = this.onRecordedDateEndChange.bind(this);
@@ -296,6 +320,7 @@ export class RecordDetails extends React.Component{
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
         this.validateForm();
     }
 
@@ -307,6 +332,7 @@ export class RecordDetails extends React.Component{
         const goback = this.props.navigation.getParam('goback', 'Record');
         const params = this.props.navigation.getParam('gobackParams', null);
         this.props.navigation.navigate(goback, params);
+        if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
     }
 
@@ -314,7 +340,23 @@ export class RecordDetails extends React.Component{
         this.setState({ layoutChange:!this.state.layoutChange });
     }
 
-    //validate form
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'RecordDetails',
+            buttonAdd:true, 
+            buttonRecord:false, 
+            bottomFade:true, 
+            hasTasks:true, 
+            hasRecords:true,
+            footerMessage: ''
+        });
+    }
+
+    // Validate Form ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     validateForm = () => {
         let show = true;
         const inputs = this.state.task.inputs;
@@ -860,12 +902,12 @@ export class RecordDetails extends React.Component{
                         }
                         return (<View key={input.id}></View>)
                     })}
+                    {typeof this.state.record.id != 'undefined' && this.state.record.id > 0 && (
+                        <View style={this.styles.buttonDeleteContainer}>
+                            <Button text="Delete Event" onPress={this.DeleteRecord}/>
+                        </View>
+                    )}
                 </View>
-                {typeof this.state.record.id != 'undefined' && this.state.record.id > 0 && (
-                    <View style={this.styles.buttonDeleteContainer}>
-                        <Button text="Delete Event" onPress={this.DeleteRecord}/>
-                    </View>
-                )}
             </Body>
         );
     }
@@ -878,7 +920,7 @@ export class RecordDetails extends React.Component{
         
         //Task Input fields
         taskInfo:{backgroundColor:AppStyles.backgroundColor, paddingTop:20},
-        inputsContainer:{backgroundColor:AppStyles.altBackgroundColor, paddingTop:20},
+        inputsContainer:{backgroundColor:AppStyles.altBackgroundColor, paddingTop:20, paddingBottom:100},
         inputFieldContainer:{paddingBottom:15},
         padding:{marginHorizontal:20},
         fieldTitle: {fontSize:16, fontWeight:'bold'},

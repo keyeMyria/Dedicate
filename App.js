@@ -20,6 +20,7 @@ import SettingsScreen from 'screens/Settings';
 import TaskScreen from 'screens/Task';
 import TasksScreen from 'screens/Tasks';
 
+global.proVersion = true;
 
 export default class App extends React.Component{
     constructor(props) {
