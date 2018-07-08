@@ -15,7 +15,7 @@ import { zip, unzip } from 'react-native-zip-archive';
 import { DocumentPicker, DocumentPickerUtil } from 'react-native-document-picker';
 import FileUtils from 'react-native-file-utils';
 
-export default class DatabaseScreen extends React.Component {
+export default class DatabasesScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -152,9 +152,10 @@ export default class DatabaseScreen extends React.Component {
     // Open Database //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     openDatabase = (name) => {
+        Schema(name);
         let config = new UserConfig();
         config.setDefaultDatabase(name);
-        Schema(name);
+        global.refreshOverview();
     }
     
     // Create Database //////////////////////////////////////////////////////////////////////////////////////////////////////

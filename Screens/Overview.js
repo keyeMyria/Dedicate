@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableHighlight, Dimensions, ScrollView, BackHandler } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, TouchableOpacity, Dimensions, ScrollView, BackHandler } from 'react-native';
 import Text from 'text/Text';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
@@ -10,6 +10,7 @@ import DropShadow from 'ui/DropShadow';
 import IconTasks from 'icons/IconTasks';
 import IconEvents from 'icons/IconEvents';
 import IconDatabases from 'icons/IconDatabases';
+import IconSettings from 'icons/IconSettings';
 import Timer from 'fields/Timer';
 import Logo from 'ui/Logo';
 import Loading from 'ui/Loading';
@@ -19,14 +20,10 @@ export default class OverviewScreen extends React.Component {
     constructor(props) {
         super(props);
 
-        let dbTasks = new DbTasks();
-        let dbRecords = new DbRecords();
-
         this.state = {
             styles: null,
-            totalTasks:dbTasks.TotalTasks(),
-            totalRecords:dbRecords.TotalRecords(),
-            hasTasks:dbTasks.HasTasks(),
+            totalTasks:0,
+            totalRecords:0,
             charts:[],
             timers:[],
             chartList:[],
@@ -35,17 +32,22 @@ export default class OverviewScreen extends React.Component {
             loading:false,
             layoutWidth:0
         };
+
+        //bind global methods
+        global.refreshOverview = this.refreshOverview.bind(this);
+
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
         this.getTimers = this.getTimers.bind(this);
         this.getCharts = this.getCharts.bind(this);
         this.onLayout = this.onLayout.bind(this);
         this.onTimerPress = this.onTimerPress.bind(this);
+        this.onTitleBarSettingsPress = this.onTitleBarSettingsPress.bind(this);
     }
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
-        this.loadContent();
+        this.refreshOverview();
     }
 
     componentWillUnmount(){
@@ -56,6 +58,45 @@ export default class OverviewScreen extends React.Component {
         BackHandler.exitApp();
         return true;
     }
+
+    // Global Refresh Method
+
+    refreshOverview(){
+        let dbTasks = new DbTasks();
+        let dbRecords = new DbRecords();
+        this.setState({
+            totalTasks:dbTasks.TotalTasks(),
+            totalRecords:dbRecords.TotalRecords(),
+        }, () => {
+            this.loadToolbar();
+            this.loadContent();
+        });
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        var hasTasks = this.state.totalTasks > 0;
+        var hasRecords = false;
+        //var dbTasks = new DbTasks();
+        //hasTasks = dbTasks.HasTasks();
+        if(hasTasks == true){
+            var dbRecords = new DbRecords();
+            hasRecords = dbRecords.hasRecords();
+        }
+
+        global.updateToolbar({
+            ...this.props, 
+            buttonAdd:true, 
+            buttonRecord:true, 
+            bottomFade:true, 
+            hasTasks:hasTasks, 
+            hasRecords:hasRecords,
+            footerMessage: hasTasks == false ? "To begin, create a task that you'd like to dedicate yourself to."  : ''
+        });
+    }
+
+    // Load Content ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     loadContent(){
         let dbRecords = new DbRecords();
@@ -121,7 +162,7 @@ export default class OverviewScreen extends React.Component {
     }
 
     onTimerPress = (id) => {
-        this.props.navigation.navigate('RecordTask', {goback:'Overview', recordId:id}, { type: "Navigate", routeName: "Record", params: { }});
+        this.props.navigation.navigate('RecordDetails', {goback:'Overview', recordId:id});
     }
 
     onTimerStop = (datestart, dateend, record) => {
@@ -202,13 +243,24 @@ export default class OverviewScreen extends React.Component {
         this.setState({chartList:charts});
     }
 
+    // Buttons ///////////////////////////////////////////////////////////////////////////////////////
+
+    onTitleBarSettingsPress(){
+        this.props.navigation.navigate('Settings');
+    }
+
     render() {
         const {height} = Dimensions.get('window');
-        if(this.state.hasTasks === true){
+        if(this.state.totalTasks > 0){
             return (
-                <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={this.styles.body}
-                    buttonAdd={true} buttonRecord={true} bottomFade={true} onLayout={this.onLayout}
-                    >
+                <Body {...this.props} title="Overview" screen="Overview" noscroll={true} style={this.styles.body} onLayout={this.onLayout}
+                titleBarButtons={
+                    <View style={this.styles.titleBarButton}>
+                        <TouchableOpacity onPress={this.onTitleBarSettingsPress}>
+                        <IconSettings color={AppStyles.headerTextColor} size="xsmall"/>
+                        </TouchableOpacity>
+                    </View>
+                }>
                     <View style={this.styles.counters}>
                         <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
                             <View style={this.styles.counterContainer}>
@@ -259,9 +311,14 @@ export default class OverviewScreen extends React.Component {
         }else{
             // Show Message instead of Overview of tasks
             return (
-                <Body {...this.props} title="Overview" screen="Overview" style={this.styles.body} buttonAdd={true} onLayout={this.onLayout}
-                    footerMessage="To begin, create a task that you'd like to dedicate yourself to." 
-                >
+                <Body {...this.props} title="Overview" screen="Overview" style={this.styles.body} onLayout={this.onLayout}
+                titleBarButtons={
+                    <View style={this.styles.titleBarButton}>
+                        <TouchableOpacity onPress={()=>{this.props.navigation.navigate('Databases')}}>
+                            <IconDatabases size="xsmall" color={AppStyles.headerTextColor}/>
+                        </TouchableOpacity>
+                    </View>
+                }>
                     <View style={[this.styles.container]}>
                         <View style={this.styles.logo}><Logo width="200" height="38.65"></Logo></View>
                         <View style={this.styles.text}>
@@ -283,6 +340,8 @@ export default class OverviewScreen extends React.Component {
     styles = StyleSheet.create({
         container: {padding: 30 },
         body:{position:'absolute', top:0, bottom:0, left:0, right:0},
+        titleBarButton:{paddingTop:15, paddingRight:15},
+        titleBarDatabases:{paddingTop:12, paddingRight:15},
         logo: { paddingTop:30, paddingBottom:50, flexDirection:'row', justifyContent:'center', width:'100%' },
         text: {alignSelf:'center'},
         h4: {fontSize:20},

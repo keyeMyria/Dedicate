@@ -44,6 +44,9 @@ export default class EventsScreen extends React.Component {
         if(filter != null){
             this.state.filter = filter;
         }
+        
+        //bind global methods
+        global.refreshEvents = this.refreshEvents.bind(this);
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -78,7 +81,17 @@ export default class EventsScreen extends React.Component {
 
     // Get Records from Database ///////////////////////////////////
 
-    getEvents = (callback) => {
+    refreshEvents(){
+        this.setState({events:[], start:0, nomore:false}, 
+        () => {
+            this.getEvents(() => {
+                //after reloading events, refresh flat list
+                this.setState({refresh:this.state.refresh+1});
+            });
+        });
+    }
+
+    getEvents(callback){
         //get events from database
         if(this.state.nomore == true || this.state.refreshing == true){return;}
         this.setState({refreshing:true});
@@ -177,7 +190,7 @@ export default class EventsScreen extends React.Component {
             bottomFade={true}
             titleBarButtons={
                 <View style={this.styles.titlebarButtons}>
-                    <ButtonSearch size="xsmall" onPress={() => this.toggleFilterForm()}></ButtonSearch>
+                    <ButtonSearch size="xsmall" color={AppStyles.headerTextColor} onPress={() => this.toggleFilterForm()}></ButtonSearch>
                 </View>
             }>
                 <Collapsible collapsed={!this.state.filterForm}>
@@ -234,7 +247,7 @@ export default class EventsScreen extends React.Component {
                                     var d2 = DayInYear(today);
                                     items.push(
                                         <View key={'date_' + today.getMonth() + '_' + today.getDate()} style={this.styles.dateContainer}>
-                                            <View style={{opacity:0.35}}><IconEvents size="xsmall" color={AppStyles.textColor}></IconEvents></View>
+                                            <View style={{opacity:0.35}}><IconEvents size="xsmall" color={AppStyles.textColor} backgroundColor={AppStyles.altBackgroundColor}></IconEvents></View>
                                             <Text style={this.styles.dateName}>{DateSentence(today)}</Text>
                                             <Text style={this.styles.dateCount}>{d1 - d2}d</Text>
                                         </View>
@@ -309,16 +322,14 @@ export default class EventsScreen extends React.Component {
                                     <View key={item.id}>
                                         <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} 
                                             onPress={() => {
-                                                this.props.navigation.navigate('RecordTask', {
+                                                this.props.navigation.navigate('RecordDetails', {
                                                     goback:'Events', 
                                                     gobackParams:{
                                                         filter:this.state.filter,
                                                         filterForm: this.state.filterForm,
                                                         filterDates: this.state.filterDates
                                                     }, 
-                                                    recordId:item.id}, 
-                                                    { type: "Navigate", routeName: "Record", params: { }
-                                                });
+                                                    recordId:item.id});
                                             }}
                                         >
                                             <View style={this.styles.eventItemContainer}>

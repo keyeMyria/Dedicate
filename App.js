@@ -1,27 +1,38 @@
 
 import React from 'react';
 import {View, Dimensions, StyleSheet} from 'react-native';
-import { createDrawerNavigator } from 'react-navigation';
-import DrawerContent from 'ui/DrawerContent';
-import OverviewScreen from 'screens/Overview';
-import Screens from 'ui/Screens';
+import { createStackNavigator } from 'react-navigation';
 import ScreenTransition from 'ui/ScreenTransition';
+import Toolbar from 'ui/Toolbar';
 import Schema from 'db/Schema';
 import {getUserConfig} from 'dedicate/UserConfig';
-import Logo from 'ui/Logo';
 import SplashScreen from 'react-native-splash-screen'
+import Modal from 'ui/Modal';
+import Logo from 'ui/Logo';
+
+import AnalyticsScreen from 'screens/Analytics';
+import ChartScreen from 'screens/Chart';
+import DatabaseScreen from 'screens/Databases';
+import EventsScreen from 'screens/Events';
+import OverviewScreen from 'screens/Overview';
+import {Record, RecordDetails} from 'screens/Record';
+import SettingsScreen from 'screens/Settings';
+import TaskScreen from 'screens/Task';
+import TasksScreen from 'screens/Tasks';
+
 
 export default class App extends React.Component{
     constructor(props) {
         super(props);
 
         this.state = {
+            toolbar:[],
             reload: false
         }
 
         //set up global refresh
-        this.reload = this.reload.bind(this);
-        global.reload = this.reload;
+        global.reload = this.reload.bind(this);
+        global.updateToolbar = this.updateToolbar.bind(this);
 
         //check for existing database
         getUserConfig().then(e => {
@@ -39,37 +50,45 @@ export default class App extends React.Component{
         }, 10);
     }
 
+    updateToolbar(props){
+        this.setState({toolbar:<Toolbar key="toolbar" {...props}/>});
+    }
+
     render(){
         if(global.config && global.config.database && this.state.reload == false){
             //show application
-            return (<Navigator></Navigator>)
+            return [<Navigator key="nav"/>, this.state.toolbar, <Modal key="modal"/>];
         }else{
             //show loading screen
             var {height} = Dimensions.get('window');
             return (
-                <View style={[styles.container, {paddingTop:(height / 2) - 27}]}>
+                <View style={[this.styles.loadingContainer, {paddingTop:(height / 2) - 27}]}>
                     <Logo width="280" height="54"></Logo>
                 </View>
             );
         }
     }
+
+    styles = StyleSheet.create({
+        loadingContainer:{flexDirection:'row', justifyContent:'center', width:'100%', height:'100%', backgroundColor:'#222'},
+    });
 } 
 
-const styles = StyleSheet.create({
-    container:{flexDirection:'row', justifyContent:'center', width:'100%', height:'100%', backgroundColor:'#222'}
+const Navigator = createStackNavigator(
+{
+    Analytics: { screen: AnalyticsScreen },
+    Chart: { screen: ChartScreen },
+    Databases: { screen: DatabaseScreen },
+    Events: { screen: EventsScreen },
+    Overview: { screen: OverviewScreen },
+    Record: { screen: Record },
+    RecordDetails: { screen: RecordDetails },
+    Settings: { screen: SettingsScreen },
+    Task: { screen: TaskScreen },
+    Tasks: { screen: TasksScreen },
+}, 
+{
+    headerMode: 'none',
+    initialRouteName: 'Overview',
+    transitionConfig: ScreenTransition
 });
-
-Navigator = createDrawerNavigator(
-    {
-        Overview: { screen: OverviewScreen, path: '' },
-        ...Screens
-    },
-    {
-        initialRouteName: 'Overview',
-        contentComponent: DrawerContent
-    }
-);
-
-
-
-

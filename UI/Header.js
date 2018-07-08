@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import AppStyles from 'dedicate/AppStyles';
 import StatusBarComponent from 'ui/StatusBarComponent';
 import TitleBar from 'ui/TitleBar';
@@ -24,5 +24,3 @@ const styles = StyleSheet.create({
         backgroundColor:AppStyles.color
     }
 });
-
-AppRegistry.registerComponent("Header", () => Header);

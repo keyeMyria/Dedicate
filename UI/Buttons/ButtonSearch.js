@@ -10,9 +10,7 @@ export default class ButtonSearch extends React.Component {
     }
 
     render() {
-        var color = '#fff';
-        if(this.props.color){color = this.props.color;}
-
+        const color = this.props.color || AppStyles.backgroundColor;
         return (
             <View style={this.props.style}>
                 <TouchableOpacity onPress={this.props.onPress}>

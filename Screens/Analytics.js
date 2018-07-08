@@ -99,7 +99,7 @@ export default class AnalyticsScreen extends React.Component {
                         </Text>
                     </View>
                 :
-                    <View>
+                    <View style={this.styles.chartsContainer}>
                         {this.state.charts.map( chart => {
                             return (
                                 <View key={chart.name}>
@@ -137,7 +137,8 @@ export default class AnalyticsScreen extends React.Component {
         introText:{paddingTop:20, fontSize:20, color:AppStyles.textColor, textAlign:'justify'},
         separator:{borderTopWidth:1, borderTopColor:AppStyles.separatorColor, paddingBottom:10},
 
-        removeChartContainer:{position:'absolute', right:0},
+        chartsContainer:{paddingTop:20},
+        removeChartContainer:{position:'absolute', right:0, top:-20},
         editChartContainer:{alignSelf:'center'}
     });
 }

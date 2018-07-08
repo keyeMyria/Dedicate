@@ -124,13 +124,13 @@ export default class Form extends React.Component {
                 <View style={this.styles.titleBarButtons}>
                     {this.state.ButtonInTitleBar && this.props.onPressAddInput && (
                         <View key="buttonAdd" style={this.styles.titleBarButtonAddInput}>
-                            <ButtonAdd onPress={this.onPressAddInput}
+                            <ButtonAdd color={AppStyles.headerTextColor} onPress={this.onPressAddInput}
                             />
                         </View>
                     )}
                     {this.props.edited == true && (
                         <View key="buttonSave" style={this.styles.buttonSaveContainer}>
-                            <ButtonSave size="smaller" style={this.styles.buttonSave} onPress={this.onPressSave} />
+                            <ButtonSave color={AppStyles.headerTextColor} size="smaller" style={this.styles.buttonSave} onPress={this.onPressSave} />
                         </View>
                     )}
                 </View>

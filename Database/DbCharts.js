@@ -19,7 +19,7 @@ export default class DbCharts extends Db{
                 }
                 //delete any unused data sources
                 if(uchart.sources.length > 0){
-                    var sources = uchart.sources.filter(a => chart.sources.map(a => a.key).indexOf(a.id) >= 0);
+                    var sources = uchart.sources.filter(a => chart.sources.map(a => a.id).indexOf(a.id) >= 0);
                     if(sources.length < uchart.sources.length){
                         global.realm.write(() => {
                             uchart.sources = sources;
@@ -37,8 +37,8 @@ export default class DbCharts extends Db{
                             task:source.task,
                             style:source.style,
                             color:source.color,
-                            inputId:source.inputId || null,
-                            input:source.input != null ? source.input : null,
+                            inputId:source.inputId,
+                            input:source.input,
                             dayoffset:source.dayoffset,
                             monthoffset:source.monthoffset,
                             filter:source.filter
@@ -52,14 +52,11 @@ export default class DbCharts extends Db{
                     }else{
                         //update existing data source info
                         let existing = global.realm.objects('DataSource').filtered('id = $0', source.id)[0];
-
                         global.realm.write(() => {
-                            existing.taskId = source.taskId;
-                            existing.task = source.task;
                             existing.style = source.style,
                             existing.color = source.color,
-                            existing.inputId = source.inputId || null;
-                            existing.input = source.input != null ? source.input : null,
+                            existing.inputId = source.inputId;
+                            existing.input = source.input,
                             existing.dayoffset = source.dayoffset;
                             existing.monthoffset = source.monthoffset;
                             existing.filter = source.filter;
@@ -101,8 +98,8 @@ export default class DbCharts extends Db{
                         task:source.task,
                         style:source.style,
                         color:source.color,
-                        inputId:source.inputId || null,
-                        input:source.input != null ? source.input : null,
+                        inputId:source.inputId,
+                        input:source.input,
                         dayoffset:source.dayoffset,
                         monthoffset:source.monthoffset,
                         filter:source.filter

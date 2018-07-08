@@ -88,6 +88,11 @@ export default class Modal extends React.Component {
         if(this.state.visible === true){
             return (
                 <View style={[styles.container]}>
+                    <View style={[styles.darkBackgroundContainer, this.state.styles.darkBackgroundContainer]}>
+                        <TouchableWithoutFeedback onPress={this.onPressDarkBackground}>
+                            <View style={[styles.darkBackground, this.state.styles.darkBackground]}></View>
+                        </TouchableWithoutFeedback>
+                    </View>
                     <View elevation={10} style={[styles.modalContainer, this.state.styles.modalContainer, {backgroundColor:AppStyles.backgroundColor}]}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>{this.state.title}</Text>
@@ -95,11 +100,6 @@ export default class Modal extends React.Component {
                         <ScrollView onLayout={this.onLayoutChange}>
                             {this.state.content}
                         </ScrollView>
-                    </View>
-                    <View style={[styles.darkBackgroundContainer, this.state.styles.darkBackgroundContainer]}>
-                        <TouchableWithoutFeedback onPress={this.onPressDarkBackground}>
-                            <View style={[styles.darkBackground, this.state.styles.darkBackground]}></View>
-                        </TouchableWithoutFeedback>
                     </View>
                 </View>
             );
@@ -114,5 +114,5 @@ const styles = StyleSheet.create({
     title:{fontSize:20},
     darkBackgroundContainer:{position:'absolute', top:0, right:0, bottom:0, left:0},
     darkBackground:{backgroundColor:'rgba(0,0,0,0.7)', position:'absolute', top:0, right:0, bottom:0, left:0, zIndex:5000},
-    modalContainer:{position:'absolute', zIndex:5001, borderRadius:7, overflow:'hidden'}
+    modalContainer:{position:'absolute', zIndex:9999, borderRadius:7, overflow:'hidden'}
 });

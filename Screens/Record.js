@@ -1,12 +1,10 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions, BackHandler, Alert } from 'react-native';
 import Text from 'text/Text';
-import { createStackNavigator } from 'react-navigation';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
 import AppLang from 'dedicate/AppLang';
 import Textbox from 'fields/Textbox';
-import Picker from 'fields/Picker';
 import CheckBox from 'fields/CheckBox';
 import StopWatch from 'fields/StopWatch';
 import LocationPicker from 'fields/LocationPicker';
@@ -21,10 +19,9 @@ import DbCategories from 'db/DbCategories';
 import DbRecords from 'db/DbRecords';
 import TimeLength from 'utility/TimeLength';
 import IconTasks from 'icons/IconTasks';
-import IconEvents from 'icons/IconEvents';
 import ToolTipBottom from 'tooltip/Bottom';
 
-class DefaultScreen extends React.Component {
+export class Record extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -67,7 +64,8 @@ class DefaultScreen extends React.Component {
 
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Overview');
-        this.props.navigation.navigate(goback);
+        console.warn(goback);
+        //this.props.navigation.navigate(goback);
         return true;
     }
 
@@ -86,15 +84,7 @@ class DefaultScreen extends React.Component {
     render() {
         // Show List of Tasks to Choose From /////////////////////////////////////////////////////////////////////////////////////
         return (
-            <Body {...this.props} style={this.styles.body} title="Record Event" screen="Record"
-                titleBarButtons={
-                <View style={this.styles.titleBarEvents}>
-                    <TouchableOpacity onPress={this.onTitleBarEventsPress}>
-                    <IconEvents color={AppStyles.headerTextColor} size="xsmall"/>
-                    </TouchableOpacity>
-                </View>
-                }
-            >
+            <Body {...this.props} style={this.styles.body} title="Record Event" screen="Record">
                 <View style={this.styles.listContainer}>
                     <View style={this.styles.tasksTitle}>
                         <ToolTipBottom text="Select a task to record your event with."/>
@@ -143,7 +133,7 @@ class DefaultScreen extends React.Component {
 
     taskItem = (task, catId) => {
         return (
-            <TouchableOpacity key={task.id} onPress={()=>{this.props.navigation.navigate('RecordTask', {task:task})}}>
+            <TouchableOpacity key={task.id} onPress={()=>{this.props.navigation.navigate('RecordDetails', {task:task})}}>
                 <View style={this.styles.taskContainer}>
                     {catId > 0 && <View style={this.styles.subTaskGutter}></View>}
                     <View style={catId > 0 ? this.styles.taskSubItem : this.styles.taskItem}>
@@ -160,7 +150,6 @@ class DefaultScreen extends React.Component {
         container:{paddingVertical:30, paddingBottom:70},
         listContainer:{paddingBottom:75, backgroundColor:AppStyles.backgroundColor},
         tasksTitle:{flexDirection:'row', justifyContent:'center', width:'100%', paddingTop:20},
-        titleBarEvents:{paddingTop:15, paddingRight:15},
     
         //Categories & Tasks List
         catItem:{
@@ -184,7 +173,7 @@ class DefaultScreen extends React.Component {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class RecordTaskScreen extends React.Component{ ///////////////////////////////////////////////////////////////////
+export class RecordDetails extends React.Component{
     constructor(props){
         super(props);
 
@@ -290,7 +279,6 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         }else{
             console.error("Please specify a task to record");
         }
-        
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
@@ -316,7 +304,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
     }
 
     hardwareBackPress() {
-        const goback = this.props.navigation.getParam('goback', 'RecordDefault');
+        const goback = this.props.navigation.getParam('goback', 'Record');
         const params = this.props.navigation.getParam('gobackParams', null);
         this.props.navigation.navigate(goback, params);
         return true;
@@ -600,6 +588,10 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             const db = new DbRecords();
             db.CreateRecord(this.state.record);
         }
+        if(typeof global.refreshEvents != 'undefined'){
+            global.refreshEvents();
+        }
+        global.updateOverview();
         this.hardwareBackPress();
     }
 
@@ -627,7 +619,7 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
             <View style={this.styles.titleBarButtons}>
                 {this.state.edited == true && (
                     <View key="buttonSave" style={this.styles.buttonSaveContainer}>
-                        <ButtonSave size="smaller" style={this.styles.buttonSave} onPress={this.SaveRecord} />
+                        <ButtonSave size="smaller" style={this.styles.buttonSave} color={AppStyles.headerTextColor} onPress={this.SaveRecord} />
                     </View>
                 )}
             </View>
@@ -920,13 +912,3 @@ class RecordTaskScreen extends React.Component{ ////////////////////////////////
         buttonDeleteContainer:{paddingTop:30, paddingBottom:15, alignItems:'center'}
     });
 }
-
-export default createStackNavigator(
-    {
-        RecordDefault: {screen: DefaultScreen},
-        RecordTask: {screen: RecordTaskScreen}
-    },
-    {
-        headerMode:'none'
-    }
-);
