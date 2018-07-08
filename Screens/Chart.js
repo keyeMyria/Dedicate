@@ -374,6 +374,7 @@ export default class ChartScreen extends React.Component {
         var dbCharts = new DbCharts();
         dbCharts.CreateChart(this.state.chart);
         this.props.navigation.navigate('Analytics')
+        global.updatePrevScreen();
     }
 
     render() {
@@ -422,7 +423,9 @@ export default class ChartScreen extends React.Component {
                     </View>
                 </FormHeader>
                 <FormBody>
-                    {sources}
+                    <View style={this.styles.sourcesContainer}>
+                        {sources}
+                    </View>
                 </FormBody>
             </Form>
         );
@@ -443,6 +446,7 @@ export default class ChartScreen extends React.Component {
         containerDescription: {paddingTop:20, paddingHorizontal:30, paddingBottom:100, flexDirection:'column',  alignItems:'center'},
 
         //Sources
+        sourcesContainer:{paddingBottom:100},
         iconArrow:{position:'absolute', left:0, paddingTop:13},
         sourceContainer:{paddingVertical:10, paddingHorizontal:20, borderBottomColor:AppStyles.altSeparatorColor, borderBottomWidth:1},
         sourceHeader:{flex:1, flexDirection:'row', justifyContent:'space-between', paddingBottom:20},

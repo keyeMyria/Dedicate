@@ -142,6 +142,9 @@ export default class DbCharts extends Db{
         }else{
             charts = charts.sorted('id', true);
         }
+        if(options.featured === true){
+            charts = charts.filtered('featured = $0', true);
+        }
         if(options.filtered != null){
             if(typeof options.filtered == 'string'){
                 charts = charts.filtered(options.filtered);
@@ -151,6 +154,10 @@ export default class DbCharts extends Db{
             
         }
         return charts;
+    }
+
+    GetFeaturedCharts(){
+        return this.GetList({featured:true});
     }
 
     TotalCharts(filtered){

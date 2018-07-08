@@ -55,6 +55,7 @@ export default class AnalyticsScreen extends React.Component {
 
     updateScreen(){
         this.loadToolbar();
+        this.setState({charts:this.dbCharts.GetList(), update:this.state.update + 1});
     }
 
     // Layout Changes ////////////////////////////////////////////////////////////////////////////////////////////////////

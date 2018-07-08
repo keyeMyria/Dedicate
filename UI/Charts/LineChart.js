@@ -40,13 +40,7 @@ export default class LineChart extends React.Component{
     componentWillMount(){
         if(this.state.records.length == 0){
             //get records for chart
-            var dbRecords = new DbRecords();
-            var chart = this.state.chart;
-            var records = [];
-            for(var x = 0; x < chart.sources.length; x++){
-                let source = chart.sources[x];
-                records.push(dbRecords.GetList({taskId:source.taskId, startDate:this.state.datestart}));
-            }
+            var records = this.getRecords();
             this.setState({records:records}, () => {
                 this.getChart();
             });
@@ -61,7 +55,7 @@ export default class LineChart extends React.Component{
                 datestart: this.props.dateStart || (new Date()).setDate((new Date()).getDate() - 14),
                 days: this.props.days || 14,
                 chart: this.props.chart || {name:'Unknown'},
-                records: this.props.records || this.state.records,
+                records: this.props.records || this.getRecords(),
                 width: this.props.width || 300,
                 height: this.props.height || 120,
                 padding: this.props.padding || 30,
@@ -70,6 +64,17 @@ export default class LineChart extends React.Component{
                 this.getChart();
             });
         }
+    }
+
+    getRecords(){
+        var dbRecords = new DbRecords();
+        var chart = this.state.chart;
+        var records = [];
+        for(var x = 0; x < chart.sources.length; x++){
+            let source = chart.sources[x];
+            records.push(dbRecords.GetList({taskId:source.taskId, startDate:this.state.datestart}));
+        }
+        return records;
     }
 
     getChart(){

@@ -40,14 +40,14 @@ export default class Toolbar extends React.Component{
             //Drop Shadow
             this.props.bottomFade == true && 
             <View key="shadow" style={[this.styles.bottomFade, {width:width}]} pointerEvents="none">
-                <Svg width={width} height="110">
+                <Svg width={width} height="125">
                     <Defs>
-                        <LinearGradient id="fade" x1="0" y1="0" x2="0" y2="110">
+                        <LinearGradient id="fade" x1="0" y1="0" x2="0" y2="125">
                             <Stop offset="0" stopColor={AppStyles.backgroundColor} stopOpacity="0" />
-                            <Stop offset="0.9" stopColor={AppStyles.backgroundColor} stopOpacity="1" />
+                            <Stop offset="0.75" stopColor={AppStyles.backgroundColor} stopOpacity="1" />
                         </LinearGradient>
                     </Defs>
-                    <Rect x="0" y="0" width={width} height="110" fill="url(#fade)" />
+                    <Rect x="0" y="0" width={width} height="125" fill="url(#fade)" />
                 </Svg>
             </View>
             ,
@@ -120,6 +120,6 @@ export default class Toolbar extends React.Component{
         buttonRecord:{alignSelf:'flex-end', zIndex:100, position:'relative', marginTop: -5, marginRight:-10, width:64, height:64},
         footerMessageContainer:{position:'absolute', bottom:20, left:80, zIndex:100},
         footerMessage:{paddingLeft:30, textAlign:'left', fontSize:16},
-        bottomFade:{position:'absolute', left:0, bottom:-1, height:110}
+        bottomFade:{position:'absolute', left:0, bottom:-1, height:125}
     });
 }

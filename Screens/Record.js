@@ -225,6 +225,7 @@ export class RecordDetails extends React.Component{
                     this.state.task = this.state.record.task;
                     this.state.stopWatch.show = record.timer;
                     this.state.stopWatch.datestart = record.timer ? record.datestart : null;
+                    this.state.changedDateEnd = true;
                 }
 
                 //check all task inputs and create missing inputs for record
@@ -630,10 +631,6 @@ export class RecordDetails extends React.Component{
             const db = new DbRecords();
             db.CreateRecord(this.state.record);
         }
-        if(typeof global.refreshEvents != 'undefined'){
-            global.refreshEvents();
-        }
-        global.updateOverview();
         this.hardwareBackPress();
     }
 

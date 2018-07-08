@@ -46,7 +46,7 @@ export default class EventsScreen extends React.Component {
         }
         
         //bind global methods
-        global.refreshEvents = this.refreshEvents.bind(this);
+        global.updatePrevScreen = this.refreshEvents.bind(this);
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);

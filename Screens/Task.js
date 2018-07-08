@@ -300,7 +300,7 @@ export default class TaskScreen extends React.Component {
         const dbTasks = new DbTasks();
         let task = Object.assign({},this.state.task);
         task = dbTasks.CreateTask(task);
-        global.updateOverview();
+        global.refreshOverview();
         this.props.navigation.navigate('Tasks')
     }
 

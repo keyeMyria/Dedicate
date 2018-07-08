@@ -6,6 +6,7 @@ import AppStyles from 'dedicate/AppStyles';
 import TouchableBox from 'ui/Touchable/Box';
 import DbTasks from 'db/DbTasks';
 import DbRecords from 'db/DbRecords';
+import DbCharts from 'db/DbCharts';
 import DropShadow from 'ui/DropShadow';
 import IconTasks from 'icons/IconTasks';
 import IconEvents from 'icons/IconEvents';
@@ -25,6 +26,7 @@ export default class OverviewScreen extends React.Component {
             totalTasks:0,
             totalRecords:0,
             charts:[],
+            featuredCharts:[],
             timers:[],
             chartList:[],
             timerList:[],
@@ -78,8 +80,6 @@ export default class OverviewScreen extends React.Component {
     loadToolbar(){
         var hasTasks = this.state.totalTasks > 0;
         var hasRecords = false;
-        //var dbTasks = new DbTasks();
-        //hasTasks = dbTasks.HasTasks();
         if(hasTasks == true){
             var dbRecords = new DbRecords();
             hasRecords = dbRecords.hasRecords();
@@ -101,8 +101,10 @@ export default class OverviewScreen extends React.Component {
 
     loadContent(){
         let dbRecords = new DbRecords();
+        let dbCharts = new DbCharts();
         this.setState({
             charts:dbRecords.GetListByTask(),
+            featuredCharts:dbCharts.GetFeaturedCharts(),
             timers:dbRecords.GetActiveTimers()
         }, () => {
             this.getTimers();
@@ -178,7 +180,7 @@ export default class OverviewScreen extends React.Component {
 
     getCharts() {
         const {width} = Dimensions.get('window');
-        let charts = [];
+        let charts = this.getFeaturedCharts();
         for(let x = 0; x < this.state.charts.length; x++){
             //get data sources for chart
             let task = this.state.charts[x];
@@ -242,6 +244,25 @@ export default class OverviewScreen extends React.Component {
             }
         }
         this.setState({chartList:charts});
+    }
+
+    getFeaturedCharts(){
+        const {width} = Dimensions.get('window');
+        var charts = this.state.featuredCharts.map( chart => {
+            return (
+                <View key={chart.name}>
+                    <LineChart
+                    chart={chart}
+                    days={14}
+                    width={width}
+                    height={120}
+                    update={Math.round(999 * Math.random())}
+                    />
+                    <View key={'sep' + chart.name} style={this.styles.separator}></View>
+                </View>
+            )
+        });
+        return charts;
     }
 
     // Buttons ///////////////////////////////////////////////////////////////////////////////////////
@@ -314,10 +335,17 @@ export default class OverviewScreen extends React.Component {
             return (
                 <Body {...this.props} title="Overview" screen="Overview" style={this.styles.body} onLayout={this.onLayout}
                 titleBarButtons={
-                    <View style={this.styles.titleBarButton}>
-                        <TouchableOpacity onPress={()=>{this.props.navigation.navigate('Databases')}}>
-                            <IconDatabases size="xsmall" color={AppStyles.headerTextColor}/>
-                        </TouchableOpacity>
+                    <View style={this.styles.titleBarButtons}>
+                        <View style={this.styles.titleBarButton}>
+                            <TouchableOpacity onPress={()=>{this.props.navigation.navigate('Databases')}}>
+                                <IconDatabases size="xsmall" color={AppStyles.headerTextColor}/>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={this.styles.titleBarButton}>
+                            <TouchableOpacity onPress={this.onTitleBarSettingsPress}>
+                            <IconSettings color={AppStyles.headerTextColor} size="xsmall"/>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 }>
                     <View style={[this.styles.container]}>
@@ -341,6 +369,7 @@ export default class OverviewScreen extends React.Component {
     styles = StyleSheet.create({
         container: {padding: 30 },
         body:{position:'absolute', top:0, bottom:0, left:0, right:0},
+        titleBarButtons:{flexDirection:'row'},
         titleBarButton:{paddingTop:15, paddingRight:15},
         titleBarDatabases:{paddingTop:12, paddingRight:15},
         logo: { paddingTop:30, paddingBottom:50, flexDirection:'row', justifyContent:'center', width:'100%' },
