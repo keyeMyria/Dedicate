@@ -43,17 +43,23 @@ export default class AnalyticsScreen extends React.Component {
         this.loadToolbar();
     }
 
+    componentDidMount(){
+        this.mounted = true;
+    }
+
     componentWillUnmount(){
         BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.mounted = false;
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate('Overview');
+        global.navigate(this, 'Overview');
         global.refreshOverview();
         return true;
     }
 
     updateScreen(){
+        if(this.mounted == false){return;}
         this.loadToolbar();
         this.setState({charts:this.dbCharts.GetList(), update:this.state.update + 1});
     }
@@ -87,7 +93,7 @@ export default class AnalyticsScreen extends React.Component {
     // Charts ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     showCreateChart(){
-        this.props.navigation.navigate('Chart', {goback:'Analytics'});
+        global.navigate(this, 'Chart', {goback:'Analytics'});
     }
 
     removeChart(chart){
@@ -105,7 +111,7 @@ export default class AnalyticsScreen extends React.Component {
     }
 
     editChart(chart){
-        this.props.navigation.navigate('Chart', {goback:'Analytics', chart:chart});
+        global.navigate(this, 'Chart', {goback:'Analytics', chart:chart});
     }
 
     // Purchase Pro Version ////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +127,7 @@ export default class AnalyticsScreen extends React.Component {
         return (
             <Body {...this.props} style={this.styles.body} title="Analytics" screen="Analytics" buttonAdd={true} onAdd={this.showCreateChart}
                 footerMessage={this.state.charts.length == 0 ? "Create your first chart and track what is most important to you" : ''}
-                onLayout={this.onLayout}
+                onLayout={this.onLayout} backButton={this.hardwareBackPress}
             >
                 {global.proVersion == true ? 
                     this.state.charts.length == 0 ? 

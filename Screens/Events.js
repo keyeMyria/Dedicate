@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableHighlight, BackHandler, FlatList, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, BackHandler, FlatList, Dimensions, NativeEventEmitter } from 'react-native';
 import Text from 'text/Text';
 import Picker from 'fields/Picker';
 import Body from 'ui/Body';
@@ -40,16 +40,18 @@ export default class EventsScreen extends React.Component {
             loading:false
         };
 
-        var filter = this.props.navigation.getParam('filter', null);
+        let filter = this.props.navigation.getParam('filter', null);
         if(filter != null){
             this.state.filter = filter;
         }
         
         //bind global methods
-        global.updatePrevScreen = this.refreshEvents.bind(this);
+        global.updatePrevScreen = this.updateScreen.bind(this);
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.navigate = this.navigate.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
         this.filterTasks = this.filterTasks.bind(this);
         this.toggleFilterForm = this.toggleFilterForm.bind(this);
         this.filterDates = this.filterDates.bind(this);
@@ -64,26 +66,55 @@ export default class EventsScreen extends React.Component {
     
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
 
         //get initial list of events
         this.setState({tasks:this.dbTasks.GetList()});
         this.getEvents();
+
+        //listen to navigation emitter
+        this.navigatorEmitter = new NativeEventEmitter();
+        this.navigatorSubscription = this.navigatorEmitter.addListener('navigate', this.navigate);
     }
 
     componentWillUnmount(){
+        //remove all listeners
         BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.navigatorSubscription.remove();
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate('Overview');
+        global.navigate(this, 'Overview');
         global.refreshOverview();
         return true;
     }
 
-    // Get Records from Database ///////////////////////////////////
+    navigate(screen, props, prevScreen){
+        if(screen == 'Events' && prevScreen != screen){
+            this.updateScreen();
+        }
+    }
 
-    refreshEvents(){
-        this.setState({events:[], start:0, nomore:false}, 
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Events',
+            buttonAdd:true, 
+            buttonRecord:true, 
+            bottomFade:true, 
+            hasTasks:true, 
+            hasRecords:true,
+            footerMessage: ''
+        });
+    }
+
+    // Update Screen after Navigation ///////////////////////////////////
+
+    updateScreen(){
+        this.loadToolbar();
+        this.setState({events:[], start:0, nomore:false, refreshing:false}, 
         () => {
             this.getEvents(() => {
                 //after reloading events, refresh flat list
@@ -92,11 +123,13 @@ export default class EventsScreen extends React.Component {
         });
     }
 
+    // Get Records from Database ///////////////////////////////////
+
     getEvents(callback){
         //get events from database
         if(this.state.nomore == true || this.state.refreshing == true){return;}
         this.setState({refreshing:true});
-        var results = this.dbRecords.GetList({
+        let records = this.dbRecords.GetList({
             start:this.state.start, 
             length:this.paging, 
             sorted:'datestart', 
@@ -105,6 +138,34 @@ export default class EventsScreen extends React.Component {
             startDate: this.state.filter.datestart,
             endDate: this.state.filter.dateend
         });
+        //detatch results from realm object
+        var results = [];
+        records.map(record => {
+            let rec = {
+                id: record.id,
+                taskId: record.taskId,
+                datestart: record.datestart,
+                dateend: record.dateend,
+                time: record.time,
+                timer: record.timer,
+                inputs: [],
+                task: record.task
+            }
+            for(let x = 0; x < record.inputs.length; x++){
+                const input = record.inputs[x];
+                rec.inputs.push({
+                    number: input.number,
+                    text: input.text,
+                    date: input.date,
+                    type: input.type,
+                    taskId: input.taskId,
+                    inputId: input.inputId,
+                    input: input.input
+                })
+            }
+            results.push(rec);
+        });
+        
         this.setState({
             events:this.state.events.concat(results),
             nomore: results.length < this.paging, 
@@ -137,7 +198,7 @@ export default class EventsScreen extends React.Component {
     // Filter Tasks /////////////////////////////////////////////////
 
     filterTasks = (value) => {
-        var filter = this.state.filter;
+        let filter = this.state.filter;
         filter.taskId = value;
         this.updateFilter(filter);
     }
@@ -149,8 +210,8 @@ export default class EventsScreen extends React.Component {
         () => {
             if(this.state.filterDates == true){
                 //update filter with initial dates
-                var dateend = new Date();
-                var datestart = new Date((new Date()).setDate(dateend.getDate() - 1));
+                let dateend = new Date();
+                let datestart = new Date((new Date()).setDate(dateend.getDate() - 1));
                 this.filterDates(datestart, dateend);
             }
         });
@@ -158,14 +219,14 @@ export default class EventsScreen extends React.Component {
 
     cancelDateFilter = () => {
         this.toggleDateFilter();
-        var filter = this.state.filter;
+        let filter = this.state.filter;
         filter.datestart = null;
         filter.dateend = null;
         this.updateFilter(filter);
     }
 
     filterDates = (datestart, dateend) => {
-        var filter = this.state.filter;
+        let filter = this.state.filter;
         filter.datestart = datestart;
         filter.dateend = dateend;
         this.updateFilter(filter);
@@ -179,16 +240,12 @@ export default class EventsScreen extends React.Component {
     }
 
     render() {
-        var today = new Date();
+        let today = new Date();
         today.setDate(today.getDate() + 10);
-        var inputIndex = 0;
-        var {height} = Dimensions.get('window');
+        let inputIndex = 0;
+        let {height} = Dimensions.get('window');
         return (
-            <Body {...this.props} style={this.styles.body} title="Events" screen="Events" 
-            buttonAdd={true} 
-            buttonRecord={true} 
-            noscroll={true} 
-            bottomFade={true}
+            <Body {...this.props} style={this.styles.body} title="Events" noscroll={true} backButton={this.hardwareBackPress}
             titleBarButtons={
                 <View style={this.styles.titlebarButtons}>
                     <ButtonSearch size="xsmall" color={AppStyles.headerTextColor} onPress={() => this.toggleFilterForm()}></ButtonSearch>
@@ -239,13 +296,13 @@ export default class EventsScreen extends React.Component {
                         extraData={this.state.refresh}
                         renderItem={
                             ({item}) => {
-                                var items = [];
-                                var inputs = [];
+                                let items = [];
+                                let inputs = [];
                                 if(!DatesMatch(today, item.datestart)){
                                     //render date header
                                     today = new Date(item.datestart);
-                                    var d1 = DayInYear(new Date());
-                                    var d2 = DayInYear(today);
+                                    let d1 = DayInYear(new Date());
+                                    let d2 = DayInYear(today);
                                     items.push(
                                         <View key={'date_' + today.getMonth() + '_' + today.getDate()} style={this.styles.dateContainer}>
                                             <View style={{opacity:0.35}}><IconEvents size="xsmall" color={AppStyles.textColor} backgroundColor={AppStyles.altBackgroundColor}></IconEvents></View>
@@ -256,10 +313,10 @@ export default class EventsScreen extends React.Component {
                                 }
                     
                                 //render inputs for item
-                                for(var x = 0; x < item.inputs.length; x++){
-                                    var input = item.inputs[x];
-                                    var val = '';
-                                    var extraStyles = {};
+                                for(let x = 0; x < item.inputs.length; x++){
+                                    let input = item.inputs[x];
+                                    let val = '';
+                                    let extraStyles = {};
                                     inputIndex++;
 
                                     //get value for input
@@ -323,7 +380,7 @@ export default class EventsScreen extends React.Component {
                                     <View key={item.id}>
                                         <TouchableHighlight underlayColor={AppStyles.listItemPressedColor} 
                                             onPress={() => {
-                                                this.props.navigation.navigate('RecordDetails', {
+                                                global.navigate(this, 'RecordDetails', {
                                                     goback:'Events', 
                                                     gobackParams:{
                                                         filter:this.state.filter,

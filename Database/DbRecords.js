@@ -3,8 +3,8 @@ import Db from 'db/Db';
 export default class DbRecords extends Db{
     CreateRecord(record){
         //generate id for Record
-        var id = 1;
-        var exists = false;
+        let id = 1;
+        let exists = false;
         if(typeof record.id != 'undefined' && record.id != null && record.id > 0){
             id = record.id;
             exists = true;
@@ -15,12 +15,12 @@ export default class DbRecords extends Db{
             record.id = id;
         }
         
-        var time = (record.dateend - record.datestart) / 1000;
+        const time = (record.dateend - record.datestart) / 1000;
 
         //validate input content
-        for(var x = 0; x < record.inputs.length; x++){
+        for(let x = 0; x < record.inputs.length; x++){
             //update all inputs for record
-            var input = record.inputs[x];
+            let input = record.inputs[x];
             switch(input.type){
                 case 0: case 6: case 7: //number, yes/no, 5 stars
                     if(input.number == null){
@@ -57,33 +57,33 @@ export default class DbRecords extends Db{
             });
         }else{
             //record exists in database
-            var rec = global.realm.objects('Record').filtered('id = $0', id)[0];
+            let rec = global.realm.objects('Record').filtered('id = $0', id)[0];
+            
             global.realm.write(() => {
                 rec.datestart = record.datestart;
                 rec.dateend = record.dateend;
                 rec.time = time;
                 rec.timer = record.timer;
 
-                for(var x = 0; x < record.inputs.length; x++){
+                for(let x = 0; x < record.inputs.length; x++){
                     //update all inputs for record
-                    var input = record.inputs[x];
-                    var i = rec.inputs.map(a => a.id).indexOf(input.id);
+                    let input = record.inputs[x];
+                    const i = rec.inputs.map(a => a.inputId).indexOf(input.inputId);
                     if(i >= 0){
                         //input exists in record
-                        var inp = rec.inputs[i];
-                        inp.number = input.number;
-                        inp.text = input.text;
-                        inp.date = input.date;
+                        rec.inputs[i].number = input.number;
+                        rec.inputs[i].text = input.text;
+                        rec.inputs[i].date = input.date;
+                        if(rec.inputs[i].input == null){
+                            rec.inputs[i].input = global.realm.objects('Input').filtered('id = $0', input.inputId)[0];
+                        }
                     }else{
                         //input doesn't exist in record yet
                         rec.inputs.push(input);
                     }
                 }
             });
-            record = rec;
         }
-
-        return record;
     }
 
     hasRecords(){
@@ -91,7 +91,7 @@ export default class DbRecords extends Db{
     }
 
     GetRecord(id){
-        var result = global.realm.objects('Record').filtered('id = $0', id);
+        let result = global.realm.objects('Record').filtered('id = $0', id);
         if(result.length == 1){
             return result[0];
         }else{
@@ -100,8 +100,8 @@ export default class DbRecords extends Db{
     }
 
     GetList(options){
-        var dateend = new Date();
-        var datestart = new Date(dateend.getDate());
+        let dateend = new Date();
+        let datestart = new Date(dateend.getDate());
         datestart.setYear(datestart.getFullYear() - 100);
         dateend.setYear(dateend.getFullYear() + 100);
         if(!options){
@@ -121,7 +121,7 @@ export default class DbRecords extends Db{
             options.endDate = dateend;
         }
         
-        var records = global.realm.objects('Record')   
+        let records = global.realm.objects('Record')   
         .filtered('datestart >= $0 AND dateend <= $1', options.startDate, options.endDate);
 
         if(typeof options.taskId != 'undefined'){
@@ -146,11 +146,11 @@ export default class DbRecords extends Db{
     }
 
     GetListByTask(options){
-        var records = this.GetList(options);
-        var tasks = [];
-        for(var x = 0; x < records.length; x++){
-            var rec = records[x];
-            var index = tasks.map(a => a.id).indexOf(rec.taskId);
+        let records = this.GetList(options);
+        let tasks = [];
+        for(let x = 0; x < records.length; x++){
+            let rec = records[x];
+            let index = tasks.map(a => a.id).indexOf(rec.taskId);
             if(index < 0){
                 tasks.push({
                     name:rec.task.name,
@@ -159,7 +159,7 @@ export default class DbRecords extends Db{
                     records: []
                 });
             }
-            var task = tasks[tasks.map(a => a.id).indexOf(rec.taskId)];
+            let task = tasks[tasks.map(a => a.id).indexOf(rec.taskId)];
             task.records.push(rec);
         }
         return tasks;
@@ -170,7 +170,7 @@ export default class DbRecords extends Db{
     }
 
     TotalRecords(filtered){
-        var records = global.realm.objects('Record');
+        let records = global.realm.objects('Record');
         if(filtered){
             records = records.filtered(filtered);
         }
@@ -180,7 +180,7 @@ export default class DbRecords extends Db{
     DeleteRecord(record){
         global.realm.write(() => {
             if(typeof record.inputs != 'undefined' && record.inputs != null && record.inputs.length > 0){
-                for(var x = 0; x < record.inputs.length;x++){
+                for(let x = 0; x < record.inputs.length;x++){
                     //delete all input records within record
                     global.realm.delete(record.inputs[x]);
                     x--;

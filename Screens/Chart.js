@@ -122,7 +122,7 @@ export default class ChartScreen extends React.Component {
 
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Analytics');
-        this.props.navigation.navigate(goback);
+        global.navigate(this, goback);
         global.updatePrevScreen();
         return true;
     }
@@ -373,7 +373,7 @@ export default class ChartScreen extends React.Component {
     onPressButtonSave(){
         var dbCharts = new DbCharts();
         dbCharts.CreateChart(this.state.chart);
-        this.props.navigation.navigate('Analytics')
+        global.navigate(this, 'Analytics')
         global.updatePrevScreen();
     }
 
@@ -390,7 +390,8 @@ export default class ChartScreen extends React.Component {
         }
         return (
             <Form {...this.props} title={this.state.title} screen="Chart" bodyTitle="Data Sources" onLayout={this.onLayout}
-            edited={this.state.edited} onPressAddInput={this.state.chart.sources.length >= 8 ? null : this.onPressAddInput} onPressSave={this.onPressButtonSave}>
+            edited={this.state.edited} onPressAddInput={this.state.chart.sources.length >= 8 ? null : this.onPressAddInput} 
+            onPressSave={this.onPressButtonSave} backButton={this.hardwareBackPress}>
                 <FormHeader>
                     <View style={this.styles.chartContainer}>
                         {this.state.chartItem}

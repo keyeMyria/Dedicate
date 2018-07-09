@@ -27,5 +27,3 @@ export default class ButtonPlus extends React.Component {
         );
     }
 }
-
-AppRegistry.registerComponent("ButtonPlus", () => ButtonPlus);

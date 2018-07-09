@@ -6,8 +6,8 @@ export default class DbCategories extends Db{
     CreateCategory(category, updateExisting){
         try {
             //generate id for Category
-            var id = 1;
-            var len = global.realm.objects('Category').length
+            let id = 1;
+            let len = global.realm.objects('Category').length
             if(category.id){
                 id = category.id;
             }else{
@@ -16,7 +16,7 @@ export default class DbCategories extends Db{
                 }
             }
             if(len > 0){
-                var hasname = global.realm.objects('Category').filtered('name = "' + category.name + '"');
+                let hasname = global.realm.objects('Category').filtered('name = "' + category.name + '"');
                 if(hasname.length > 0){
                     Alert.alert('Error Creating Category', 'The category "' + category.name + '" already exists');
                     return;
@@ -46,7 +46,7 @@ export default class DbCategories extends Db{
             options = {sorted:'name', descending:false, filtered:null}
         }
         
-        var categories = global.realm.objects('Category').sorted('id', true)
+        let categories = global.realm.objects('Category').sorted('id', true)
         if(options.sorted){
             categories.sorted(options.sorted, options.descending ? options.descending : false)
         }
@@ -62,13 +62,13 @@ export default class DbCategories extends Db{
     }
 
     TotalCategories(filtered){
-        var categories = global.realm.objects('Category');
+        let categories = global.realm.objects('Category');
         if(filtered){categories.filtered(...filtered);}
         return categories.length;
     }
 
     GetCategory(categoryId){
-        var category = global.realm.objects('Category').filtered('id=' + categoryId);
+        let category = global.realm.objects('Category').filtered('id=' + categoryId);
         return category ? category[0] : null;
     }
 

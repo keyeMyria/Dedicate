@@ -68,8 +68,8 @@ export class Record extends React.Component {
 
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Overview');
-        this.props.navigation.navigate(goback);
-        global.refreshOverview();
+        global.navigate(this, goback);
+        if(goback == 'Overview'){global.refreshOverview();}
         return true;
     }
 
@@ -82,7 +82,7 @@ export class Record extends React.Component {
     }
 
     onTitleBarEventsPress(){
-        this.props.navigation.navigate('Events');
+        global.navigate(this, 'Events');
     }
 
     updateScreen(){
@@ -107,7 +107,7 @@ export class Record extends React.Component {
     render() {
         // Show List of Tasks to Choose From /////////////////////////////////////////////////////////////////////////////////////
         return (
-            <Body {...this.props} style={this.styles.body} title="Record Event" screen="Record">
+            <Body {...this.props} style={this.styles.body} title="Record Event" backButton={this.hardwareBackPress}>
                 <View style={this.styles.listContainer}>
                     <View style={this.styles.tasksTitle}>
                         <ToolTipBottom text="Select a task to record your event with."/>
@@ -156,7 +156,7 @@ export class Record extends React.Component {
 
     taskItem = (task, catId) => {
         return (
-            <TouchableOpacity key={task.id} onPress={()=>{this.props.navigation.navigate('RecordDetails', {task:task})}}>
+            <TouchableOpacity key={task.id} onPress={()=>{global.navigate(this, 'RecordDetails', {task:task})}}>
                 <View style={this.styles.taskContainer}>
                     {catId > 0 && <View style={this.styles.subTaskGutter}></View>}
                     <View style={catId > 0 ? this.styles.taskSubItem : this.styles.taskItem}>
@@ -209,7 +209,6 @@ export class RecordDetails extends React.Component{
                 inputs:[],
                 timer:false
             },
-            islive:false,
             stopWatch:{show:false, datestart:null, dateend:null},
             layoutChange:false,
             changedDateEnd: false
@@ -218,14 +217,37 @@ export class RecordDetails extends React.Component{
         if(props.navigation.state.params){
             if(typeof props.navigation.state.params.recordId != 'undefined'){
                 const db = new DbRecords();
-                let record = db.GetRecord(props.navigation.state.params.recordId)
+                let record = db.GetRecord(props.navigation.state.params.recordId);
                 if(record != null){
-                    this.state.record = record;
-                    this.state.islive = true;
-                    this.state.task = this.state.record.task;
-                    this.state.stopWatch.show = record.timer;
-                    this.state.stopWatch.datestart = record.timer ? record.datestart : null;
+                    //build record object from realm object
+                    let rec = {
+                        id: record.id,
+                        taskId: record.taskId,
+                        datestart: record.datestart,
+                        dateend: record.dateend,
+                        time: record.time,
+                        timer: record.timer,
+                        inputs: [],
+                        task: record.task
+                    }
+                    for(let x = 0; x < record.inputs.length; x++){
+                        const input = record.inputs[x];
+                        rec.inputs.push({
+                            number: input.number,
+                            text: input.text,
+                            date: input.date,
+                            type: input.type,
+                            taskId: input.taskId,
+                            inputId: input.inputId,
+                            input: input.input
+                        })
+                    }
+                    this.state.record = rec;
+                    this.state.task = rec.task;
+                    this.state.stopWatch.show = rec.timer;
+                    this.state.stopWatch.datestart = rec.timer ? rec.datestart : null;
                     this.state.changedDateEnd = true;
+                    record = this.state.record;
                 }
 
                 //check all task inputs and create missing inputs for record
@@ -239,32 +261,31 @@ export class RecordDetails extends React.Component{
                         case 2: case 3: case 4: date = new Date(); break;
                         case 6: number = 0; break;
                     }
-                    global.realm.write(() => {
-                        record.inputs.push({
-                            number:number, 
-                            text:null, 
-                            date:date, 
-                            type:input.type, 
-                            taskId:this.state.task.id,
-                            inputId:input.id, 
-                            input:input
-                        });
+                    record.inputs.push({
+                        number:number, 
+                        text:null, 
+                        date:date, 
+                        type:input.type, 
+                        taskId:this.state.task.id,
+                        inputId:input.id, 
+                        input:input
                     });
                 }
             }
         }
         if(typeof this.state.task != 'undefined' && this.state.task.id != null){
-            //select task exists
+            //selected task exists
             if(typeof this.state.record.task == 'undefined'){
                 this.state.record.task = this.state.task;
                 this.state.record.taskId = this.state.task.id;
             }
 
             if(this.state.task.inputs.length > 0 && this.state.record.inputs.length == 0){
+                //update record with missing inputs from task
                 for(let x = 0; x < this.state.task.inputs.length; x++){
                     const input = this.state.task.inputs[x];
                     
-                    //set default value for input
+                    //set default values for input
                     let number = null;
                     let text = null;
                     let date = null;
@@ -274,30 +295,15 @@ export class RecordDetails extends React.Component{
                         case 6: number = 0; break;
                     }
 
-                    if(this.state.islive == true){
-                        global.realm.write(() => {
-                            this.state.record.inputs.push({
-                                type: input.type,
-                                number:number,
-                                text:text,
-                                date:date,
-                                input:input,
-                                inputId: input.id,
-                                taskId: this.state.task.id
-                            });
-                        });
-                    }else{
-                        this.state.record.inputs.push({
-                            type: input.type,
-                            number:number,
-                            text:text,
-                            date:date,
-                            input:input,
-                            inputId: input.id,
-                            taskId: this.state.task.id
-                        });
-                    }
-                    
+                    this.state.record.inputs.push({
+                        type: input.type,
+                        number:number,
+                        text:text,
+                        date:date,
+                        input:input,
+                        inputId: input.id,
+                        taskId: this.state.task.id
+                    });
                 }
             }
         }else{
@@ -332,7 +338,8 @@ export class RecordDetails extends React.Component{
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Record');
         const params = this.props.navigation.getParam('gobackParams', null);
-        this.props.navigation.navigate(goback, params);
+        global.navigate(this, goback, params);
+        if(goback == 'Overview'){global.refreshOverview();}
         if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
     }
@@ -418,34 +425,15 @@ export class RecordDetails extends React.Component{
                 const number = typeof value == 'number' ? value : 
                     (typeof value == 'string' ? 
                     (value == '' ? null : parseInt(value)) : value);
-                if(this.state.islive == true){
-                    global.realm.write(() => {
-                        record.inputs[i].number = number;
-                    });
-                }else{
-                    record.inputs[i].number = number;
-                }
+                record.inputs[i].number = number;
                 break;
 
             case 2: // Text data type
-                if(this.state.islive == true){
-                    global.realm.write(() => {
-                        record.inputs[i].text = value.toString();
-                    });
-                }else{
-                    record.inputs[i].text = value.toString();
-                }
-                
+                record.inputs[i].text = value.toString();
                 break;
 
             case 3: // Date/Time data type
-                if(this.state.islive == true){
-                    global.realm.write(() => {
-                        record.inputs[i].text = value.toString();
-                    });
-                }else{
-                    record.inputs[i].text = value.toString();
-                }
+                record.inputs[i].text = value.toString();
                 break;
         }
         this.setState({record:record});
@@ -456,14 +444,8 @@ export class RecordDetails extends React.Component{
         let record = this.state.record;
         const i = record.inputs.map(a => a.inputId).indexOf(id);
         if(i < 0){return;} //record doesn't contain input
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                record.inputs[i].date = date;
-            });
-        }else{
-            if(record.inputs == null){record.inputs = [];}
-            record.inputs[i].date = date;
-        }
+        if(record.inputs == null){record.inputs = [];}
+        record.inputs[i].date = date;
         this.setState(record);
         this.validateForm();
     }
@@ -492,13 +474,7 @@ export class RecordDetails extends React.Component{
         let record = this.state.record;
         if(this.state.changedDateEnd == false){
             //also change end date + 10 minutes
-            if(this.state.islive == true){
-                global.realm.write(() => {
-                    record.dateend = new Date(date);
-                });
-            }else{
-                record.dateend = new Date(date);
-            }
+            record.dateend = new Date(date);
         }else{
             if(record.dateend < date){
                 Alert.alert("Date Range Error", "Your starting date must use a date that comes before your ending date.");
@@ -506,13 +482,7 @@ export class RecordDetails extends React.Component{
                 return;
             }
         }
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                record.datestart = date;
-            });
-        }else{
-            record.datestart = date;
-        }
+        record.datestart = date;
         this.setState({record:record}, () => {
             this.validateForm();
         });
@@ -525,13 +495,7 @@ export class RecordDetails extends React.Component{
             this.setState({record:record});
             return;
         }
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                record.dateend = date;
-            });
-        }else{
-            record.dateend = date;
-        }
+        record.dateend = date;
         this.setState({record:record, changedDateEnd:true},
         () => {
             this.validateForm();
@@ -550,25 +514,13 @@ export class RecordDetails extends React.Component{
         const date = new Date(datestart);
         let stopWatch = this.state.stopWatch;
         stopWatch.datestart = date;
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                record.time = 0;
-                record.timer = true;
-                record.datestart = date;
-                record.dateend = date;
-            });
-            this.setState({stopWatch:stopWatch}, ()=>{
-                this.validateForm();
-            });
-        }else{
-            record.time = 0;
-            record.timer = true;
-            record.datestart = date;
-            record.dateend = date;
-            this.setState({record:db.CreateRecord(record), islive:true, stopWatch:stopWatch}, () => {
-                this.validateForm();
-            });
-        }
+        record.time = 0;
+        record.timer = true;
+        record.datestart = date;
+        record.dateend = date;
+        this.setState({record:db.CreateRecord(record), islive:true, stopWatch:stopWatch}, () => {
+            this.validateForm();
+        });
     }
 
     onStopWatchStop = (datestart, dateend) => {
@@ -576,18 +528,10 @@ export class RecordDetails extends React.Component{
         let stopWatch = this.state.stopWatch;
         let record = this.state.record;
         stopWatch.show = false;
-        if(this.state.islive == true){
-            global.realm.write(() => {
-                record.datestart = datestart;
-                record.dateend = dateend;
-                record.timer = false;
-            });
-        }else{
-            record.datestart = datestart;
-            record.dateend = dateend;
-            record.timer = false;
-            record = db.CreateRecord(record);
-        }
+        record.datestart = datestart;
+        record.dateend = dateend;
+        record.timer = false;
+        record = db.CreateRecord(record);
         this.setState({
             stopWatch:stopWatch, 
             record:record,
@@ -599,9 +543,7 @@ export class RecordDetails extends React.Component{
         let stopWatch = this.state.stopWatch;
         let record = this.state.record;
         stopWatch.show = false;
-        global.realm.write(() => {
-            record.timer = false;
-        });
+        record.timer = false;
         this.setState({stopWatch:stopWatch, record:record});
     }
 
@@ -611,13 +553,7 @@ export class RecordDetails extends React.Component{
         let record = this.state.record;
         const i = record.inputs.map(a => a.inputId).indexOf(id);
         if(i < 0){return;} //record doesn't contain input
-        if(this.state.islive){
-            global.realm.write(() => {
-                record.inputs[i].number = value;
-            });
-        }else{
-            record.inputs[i].number = value;
-        }
+        record.inputs[i].number = value;
         this.setState({record:record}, () => {
             this.validateForm();
         });
@@ -627,10 +563,9 @@ export class RecordDetails extends React.Component{
 
     SaveRecord = () => {
         //save to database
-        if(this.state.islive == false){
-            const db = new DbRecords();
-            db.CreateRecord(this.state.record);
-        }
+        const db = new DbRecords();
+        db.CreateRecord(this.state.record);
+        global.overviewChanged = true;
         this.hardwareBackPress();
     }
 
@@ -644,7 +579,8 @@ export class RecordDetails extends React.Component{
             {text: 'Cancel', style: 'cancel'},
             {text: 'Delete Event', onPress: () => {
                 const db = new DbRecords();
-                db.DeleteRecord(this.state.record);
+                db.DeleteRecord(global.realm.objects('Record').filtered('id = $0', this.state.record.id)[0]);
+                global.overviewChanged = true;
                 this.hardwareBackPress();
             }}
         ],
@@ -669,7 +605,8 @@ export class RecordDetails extends React.Component{
         const {width, height} = Dimensions.get('window');
         let i = 0;
         return (
-            <Body {...this.props} style={this.styles.body} title="Record Event" onLayout={this.onLayoutChange} titleBarButtons={this.state.titleBarButtons}>
+            <Body {...this.props} style={this.styles.body} title="Record Event" onLayout={this.onLayoutChange} 
+            titleBarButtons={this.state.titleBarButtons} backButton={this.hardwareBackPress}>
                 <View style={this.styles.taskInfo}>
                     <View style={this.styles.labelContainer}>
                         <View style={this.styles.labelIcon}><IconTasks size="small"></IconTasks></View>

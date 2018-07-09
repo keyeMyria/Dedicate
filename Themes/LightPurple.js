@@ -45,5 +45,11 @@ export default LightPurple =
     // chart styling /////////////////////////
     chartLine1Stroke: '#cccccc',
     chartLine2Stroke: '#e6e6e6',
+    chartLine3Stroke: '#6666CC',
+    chartLine4Stroke: '#353554',
+    chartLine5Stroke: '#3366FF',
+    chartLine6Stroke: '#263563',
+    chartLine7Stroke: '#009933',
+    chartLine8Stroke: '#174526',
     chartDotFill: '#b3e6ff'
 }

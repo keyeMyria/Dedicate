@@ -81,8 +81,8 @@ export default class TaskScreen extends React.Component {
 
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Tasks');
-        this.props.navigation.navigate(goback);
-        global.refreshOverview();
+        global.navigate(this, goback);
+        if(goback == 'Overview') {global.refreshOverview();}
         if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
     }
@@ -92,7 +92,7 @@ export default class TaskScreen extends React.Component {
     loadToolbar(){
         global.updateToolbar({
             ...this.props, 
-            screen:'Tasks',
+            screen:'Task',
             buttonAdd:false, 
             buttonRecord:true, 
             bottomFade:true, 
@@ -271,7 +271,8 @@ export default class TaskScreen extends React.Component {
             {text: 'Delete Task', onPress: () => {
                 const db = new DbTasks();
                 db.DeleteTask(this.state.task.id);
-                this.props.navigation.navigate('Tasks')
+                global.overviewChanged = true;
+                global.navigate(this, 'Tasks')
             }}
         ],
         { cancelable: true }
@@ -300,8 +301,8 @@ export default class TaskScreen extends React.Component {
         const dbTasks = new DbTasks();
         let task = Object.assign({},this.state.task);
         task = dbTasks.CreateTask(task);
-        global.refreshOverview();
-        this.props.navigation.navigate('Tasks')
+        global.overviewChanged = true;
+        global.navigate(this, 'Tasks')
     }
 
     // Placehold Random Names ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -377,11 +378,8 @@ export default class TaskScreen extends React.Component {
         }
         return (
             <Form {...this.props} 
-            title={this.state.title} screen="Task"
-            bodyTitle="Input Fields"
-            edited={this.state.edited}
-            onPressAddInput={this.onPressAddInput}
-            onPressSave={this.onPressButtonSave}
+            title={this.state.title} screen="Task" bodyTitle="Input Fields" edited={this.state.edited}
+            onPressAddInput={this.onPressAddInput} onPressSave={this.onPressButtonSave} backButton={this.hardwareBackPress}
             >
                 <FormHeader>
                     <View style={this.styles.headerContainer}>

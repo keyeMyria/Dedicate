@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, View, TouchableOpacity} from 'react-native';
+import { View, TouchableOpacity} from 'react-native';
 import {G, Path} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
 import AppStyles from 'dedicate/AppStyles';
@@ -10,7 +10,7 @@ export default class ButtonClose extends React.Component {
     }
 
     render() {
-        var color = this.props.color || "#cc0000";
+        var color = this.props.color || AppStyles.color;
         return (
             <View style={this.props.style}>
                 <TouchableOpacity onPress={this.props.onPress}>
@@ -27,5 +27,3 @@ export default class ButtonClose extends React.Component {
         );
     }
 }
-
-AppRegistry.registerComponent("ButtonClose", () => ButtonClose);

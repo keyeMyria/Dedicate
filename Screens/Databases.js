@@ -26,6 +26,7 @@ export default class DatabasesScreen extends React.Component {
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
         this.openDatabase = this.openDatabase.bind(this);
         this.showDatabaseMenu = this.showDatabaseMenu.bind(this);
         this.showImportDatabase = this.showImportDatabase.bind(this);
@@ -45,6 +46,7 @@ export default class DatabasesScreen extends React.Component {
     
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
         //get list of databases
         setTimeout(() => {
             this.getFiles();
@@ -56,9 +58,25 @@ export default class DatabasesScreen extends React.Component {
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate('Overview');
+        global.navigate(this, 'Overview');
         global.refreshOverview();
         return true;
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Databases',
+            buttonAdd:true, 
+            buttonRecord:false, 
+            bottomFade:true, 
+            hasTasks:false, 
+            hasRecords:false,
+            footerMessage: 'Create a new database and start recording a separate experiment',
+            onAdd:this.showAddDatabase
+        });
     }
 
     Path = () => {
@@ -81,7 +99,7 @@ export default class DatabasesScreen extends React.Component {
                             <TouchableHighlight key={file.name} underlayColor={AppStyles.listItemPressedColor} 
                                 onPress={() => {
                                     this.openDatabase(name); 
-                                    this.props.navigation.navigate('Overview');}
+                                    global.navigate(this, 'Overview');}
                                 }
                             >
                                 <View style={this.styles.databaseItemContainer}>
@@ -156,6 +174,7 @@ export default class DatabasesScreen extends React.Component {
         Schema(name);
         let config = new UserConfig();
         config.setDefaultDatabase(name);
+        global.overviewChanged = true;
         global.refreshOverview();
     }
     
@@ -502,10 +521,8 @@ export default class DatabasesScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} style={this.styles.body} title="Available Databases" screen="Databases" buttonAdd={true} buttonRecord={false} onAdd={this.showAddDatabase}
-                titleBarButtons={<ButtonDots style={this.styles.titlebarOptions} size="small" fill={AppStyles.headerTextColor} onPress={() => this.onPressOptions()}/>}
-                footerMessage={this.state.fileList.length <= 3 ? "Create a new database and start recording a separate experiment" : ''}
-            >
+            <Body {...this.props} style={this.styles.body} title="Available Databases" backButton={this.hardwareBackPress}
+                titleBarButtons={<ButtonDots style={this.styles.titlebarOptions} size="small" fill={AppStyles.headerTextColor} onPress={() => this.onPressOptions()}/>}>
                 <ScrollView>
                     {this.state.fileList}
                 </ScrollView>

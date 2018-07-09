@@ -2,24 +2,24 @@ import Db from 'db/Db';
 
 export default class DbCharts extends Db{
     CreateChart(chart){
-        var id = 1;
-        var isnew = true;
+        let id = 1;
+        let isnew = true;
         if(chart.id){
             //chart already exists in database
             id = chart.id;
             isnew = false;
-            var uchart = global.realm.objects('Chart').filtered('id = $0', id)[0];
+            let uchart = global.realm.objects('Chart').filtered('id = $0', id)[0];
 
             if(chart.sources.length > 0){
                 //update data sources
-                var sourceid = 1;
+                let sourceid = 1;
                 if(global.realm.objects('DataSource').length > 0){
                     //increment new data source id
                     sourceid = global.realm.objects('DataSource').sorted('id', true).slice(0,1)[0].id + 1;
                 }
                 //delete any unused data sources
                 if(uchart.sources.length > 0){
-                    var sources = uchart.sources.filter(a => chart.sources.map(a => a.id).indexOf(a.id) >= 0);
+                    let sources = uchart.sources.filter(a => chart.sources.map(a => a.id).indexOf(a.id) >= 0);
                     if(sources.length < uchart.sources.length){
                         global.realm.write(() => {
                             uchart.sources = sources;
@@ -27,8 +27,8 @@ export default class DbCharts extends Db{
                     }
                 }
 
-                for(var x = 0; x < chart.sources.length; x++){
-                    var source = chart.sources[x];
+                for(let x = 0; x < chart.sources.length; x++){
+                    let source = chart.sources[x];
                     if(source.isnewkey == true){
                         //generate id for new data source
                         source = {
@@ -44,7 +44,7 @@ export default class DbCharts extends Db{
                             filter:source.filter
                         };
                         global.realm.write(() => {
-                            var sources = uchart.sources;
+                            let sources = uchart.sources;
                             sources.push(global.realm.create('DataSource', source));
                             uchart.sources = sources;
                         });
@@ -86,12 +86,12 @@ export default class DbCharts extends Db{
 
             //generate ids for Data Sources
             if(chart.sources.length > 0){
-                var sourceid = 1;
+                let sourceid = 1;
                 if(global.realm.objects('DataSource').length > 0){
                     sourceid = global.realm.objects('DataSource').sorted('id', true).slice(0,1)[0].id + 1;
                 }
-                for(var x = 0; x < chart.sources.length; x++){
-                    var source = chart.sources[x];
+                for(let x = 0; x < chart.sources.length; x++){
+                    let source = chart.sources[x];
                     source = {
                         id:sourceid,
                         taskId:source.taskId,
@@ -136,7 +136,7 @@ export default class DbCharts extends Db{
             options = {sorted:'index', descending:false, filtered:null}
         }
         
-        var charts = global.realm.objects('Chart');
+        let charts = global.realm.objects('Chart');
         if(options.sorted){
             charts = charts.sorted(options.sorted, options.descending ? options.descending : false)
         }else{
@@ -161,18 +161,18 @@ export default class DbCharts extends Db{
     }
 
     TotalCharts(filtered){
-        var charts = global.realm.objects('Chart');
+        let charts = global.realm.objects('Chart');
         if(filtered){charts = charts.filtered(...filtered);}
         return charts.length;
     }
 
     GetChart(chartId){
-        var chart = global.realm.objects('Chart').filtered('id=' + chartId);
+        let chart = global.realm.objects('Chart').filtered('id=' + chartId);
         return chart ? chart[0] : null;
     }
 
     DeleteChart(chartId){
-        var chart = global.realm.objects('Chart').filtered('id=' + chartId)
+        let chart = global.realm.objects('Chart').filtered('id=' + chartId)
       
         global.realm.write(() => {
             //delete chart data sources

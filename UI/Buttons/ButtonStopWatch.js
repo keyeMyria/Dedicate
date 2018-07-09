@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, View, TouchableOpacity} from 'react-native';
+import { View, TouchableOpacity} from 'react-native';
 import {G, Path} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
 import AppStyles from 'dedicate/AppStyles';
@@ -10,8 +10,7 @@ export default class ButtonStopWatch extends React.Component {
     }
         
     render() {
-        var color = '#6666cc';
-        if(this.props.color){color = this.props.color;}
+        var color = this.props.color || AppStyles.color;
         
         return (
             <View style={this.props.style}>
@@ -27,8 +26,3 @@ export default class ButtonStopWatch extends React.Component {
         );
     }
 }
-
-AppRegistry.registerComponent("ButtonStopWatch", () => ButtonStopWatch);
-
-// 
-//

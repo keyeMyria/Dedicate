@@ -3,6 +3,7 @@ import {View, ScrollView, StyleSheet} from 'react-native';
 import Text from 'text/Text';
 import AppStyles from 'dedicate/AppStyles';
 import {Svg, Line, Polyline, Circle} from 'react-native-svg';
+import IconSwipeArrow from 'icons/IconSwipeArrow';
 import DbRecords from '../../Database/DbRecords';
 
 export default class LineChart extends React.Component{
@@ -81,7 +82,9 @@ export default class LineChart extends React.Component{
         let info = [];
         let lines = [];
         let dots = [];
+        let legends = [];
         let legend = [];
+        let legendIds = [];
         let line1 = {min:0, max:1};
         let line2 = {min:0, max:1};
         let linecount = 1;
@@ -91,11 +94,17 @@ export default class LineChart extends React.Component{
             let source = this.state.chart.sources[x];
             let input = source.input;
             if(input != null){
+                if(legendIds.indexOf(source.taskId) < 0){
+                    //create legend for new task
+                    legendIds.push(source.taskId);
+                    legends.push({name:source.task.name, items:[]});
+                }
+                let legendIndex = legendIds.indexOf(source.taskId);
                 if(input.type == 0 || input.type == 7){ //number
                     let color = this.getColor(source.color);
                     info = this.getPoints(records, input);
                     lines = [this.getLine(info.points, info.min, info.max, x, color)].concat(lines);
-                    legend.push(this.getLegendLine((this.state.showLegendTaskNames ? source.task.name + ': ' : '') + input.name, color));
+                    legends[legendIndex].items.push(this.getLegendLine((this.state.showLegendTaskNames ? source.task.name + ': ' : '') + input.name, color));
                     if(linecount == 1){
                         line1 = {min:info.min, max:info.max};
                     }else{
@@ -105,9 +114,23 @@ export default class LineChart extends React.Component{
                 }else if(input.type == 6){ //yes/no
                     let color = AppStyles.chartDotFill;
                     dots.push(this.getDots(records, input, color));
-                    legend.push(this.getLegendDot((this.state.showLegendTaskNames ? source.task.name + ': ' : '') + input.name, color));
+                    legends[legendIndex].items.push(this.getLegendDot((this.state.showLegendTaskNames ? source.task.name + ': ' : '') + input.name, color));
                 }
             }
+        }
+
+        for(let x = 0; x < legends.length; x++){
+            legend.push(
+                <View key={'legend' + x} style={[this.styles.legendContainer, {width:this.state.width, height:this.state.height + 5, padding:this.state.padding}]}>
+                    {legends[x].items}
+                    <Text style={this.styles.legendName}>{legends[x].name}</Text>
+                    <View style={this.styles.legendArrows}>
+                        {x < legends.length - 1 && 
+                            <IconSwipeArrow direction="next" size="xxsmall" opacity={0.15}/>
+                        }
+                    </View>
+                </View>
+            );
         }
         this.setState({lines:lines, dots:dots, legend:legend, line1:line1, line2:line2});
     }
@@ -281,15 +304,15 @@ export default class LineChart extends React.Component{
                     </View>
                 </View>
                 {this.props.extraPage && 
-                    <View style={[this.styles.legendContainer, {width:this.state.width, height:this.state.height + 5, padding:this.state.padding}]}>
+                    <View style={[{width:this.state.width, height:this.state.height + 5, padding:this.state.padding}]}>
                         {this.props.extraPage}
                         <Text style={this.styles.legendName}>{this.state.chart.name}</Text>
+                        <View style={this.styles.legendArrows}>
+                            <IconSwipeArrow direction="next" size="xxsmall" opacity={0.15}/>
+                        </View>
                     </View>
                 }
-                <View style={[this.styles.legendContainer, {width:this.state.width, height:this.state.height + 5, padding:this.state.padding}]}>
-                    {this.state.legend}
-                    <Text style={this.styles.legendName}>{this.state.chart.name}</Text>
-                </View>
+                {this.state.legend}
             </ScrollView>
         );
     }
@@ -307,11 +330,14 @@ export default class LineChart extends React.Component{
         chartLabelEnd:{textAlign:'right'},
         chartDots:{position:'absolute'},
 
-        legendContainer:{flexWrap:'wrap'},
+        legendContainer:{flexDirection:'row', flexWrap:'wrap'},
         legendItem:{flex:1, alignSelf:'flex-start', flexDirection:'row'},
         legendItemIcon:{paddingRight:10, paddingTop:7, height:20},
         legendItemLabel:{},
         legendItemText:{fontSize:17},
-        legendName:{position:'absolute', width:'100%', bottom:0, fontSize:20, textAlign:'center', alignSelf:'center'}
+        legendName:{position:'absolute', width:'100%', bottom:0, fontSize:20, left:30, textAlign:'center', alignSelf:'center'},
+        legendArrows:{position:'absolute', width:'100%', bottom:0, flexDirection:'row', justifyContent:'flex-end', left:30},
+        legendArrowBack:{opacity:0.3},
+        legendArrowNext:{opacity:0.3}
     });
 }

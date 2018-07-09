@@ -52,5 +52,3 @@ export default class ButtonAdd extends React.Component {
         );
     }
 }
-
-AppRegistry.registerComponent("ButtonAdd", () => ButtonAdd);

@@ -1,13 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Keyboard, Dimensions } from 'react-native';
 import Text from 'text/Text';
-import Textbox from 'fields/Textbox';
-import Picker from 'fields/Picker';
-import CheckBox from 'fields/CheckBox';
 import ButtonAdd from 'buttons/ButtonAdd';
 import ButtonSave from 'buttons/ButtonSave';
-import ButtonClose from 'buttons/ButtonClose';
-import ButtonPlus from 'buttons/ButtonPlus';
 import ScreenBody from 'ui/Body';
 
 
@@ -19,7 +14,6 @@ export default class Form extends React.Component {
             form:{
                 height:250
             },
-            islive:false,
             title:this.props.title,
             screenTitle:this.props.title,
             ButtonAddShow: true,

@@ -26,7 +26,7 @@ export default class Timer extends React.Component{
     updateCounter(){
         var ms = new Date() - this.props.startDate;
         var seconds = ms / 1000;
-        var modMs = Math.floor(ms % 1000);
+        //var modMs = Math.floor(ms % 1000);
         var modSecs = Math.floor(seconds % 60);
         var modMins = Math.floor((seconds / 60) % 60);
         var modHours = Math.floor((seconds / 3600) % 24);
@@ -35,7 +35,7 @@ export default class Timer extends React.Component{
             (modDays > 0 ? modDays + ':' : '') + 
             (modDays > 0 || modHours > 0 ? ('0' + modHours).slice(-2) + ':' : '') + 
             (modDays > 0 || modHours > 0 || modMins > 0 ? ('0' + modMins).slice(-2) + ':' : '') + 
-            ('0' + modSecs).slice(-2) + ':' + ('00' + modMs.toString()).slice(-3).slice(0,2);
+            ('0' + modSecs).slice(-2);// + ':' + ('00' + modMs.toString()).slice(-3).slice(0,2);
 
         this.setState({time:time});
         return ms;

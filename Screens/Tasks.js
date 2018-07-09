@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, TouchableHighlight, BackHandler } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableHighlight, BackHandler, NativeEventEmitter } from 'react-native';
 import Text from 'text/Text';
 import Body from 'ui/Body';
 import AppStyles from 'dedicate/AppStyles';
@@ -18,6 +18,7 @@ export default class TasksScreen extends React.Component {
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.navigate = this.navigate.bind(this);
         this.loadToolbar = this.loadToolbar.bind(this);
     }
 
@@ -25,23 +26,41 @@ export default class TasksScreen extends React.Component {
     
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
+
+        //listen to navigation emitter
+        this.navigatorEmitter = new NativeEventEmitter();
+        this.navigatorSubscription = this.navigatorEmitter.addListener('navigate', this.navigate);
+
         //get list of tasks
         this.setState({tasks:this.dbTasks.GetList()});
-        this.loadToolbar();
+    }
+
+    componentDidMount(){
+        this.mounted = true;
     }
 
     componentWillUnmount(){
+        this.mounted = false;
         BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate('Overview');
+        global.navigate(this, 'Overview');
         global.refreshOverview();
         return true;
     }
 
     updateScreen(){
+        if(this.mounted == false){return;}
+        this.setState({tasks:this.dbTasks.GetList()});
         this.loadToolbar();
+    }
+
+    navigate(screen, props, prevScreen){
+        if(screen == 'Tasks' && prevScreen != screen){
+            this.updateScreen();
+        }
     }
 
     // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,10 +80,10 @@ export default class TasksScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} style={this.styles.body} title="Tasks" screen="Tasks" buttonAdd={true} buttonRecord={true}>
+            <Body {...this.props} style={this.styles.body} title="Tasks" backButton={this.hardwareBackPress}>
                 <ScrollView>
                     {this.state.tasks.map((task) => 
-                        <TouchableHighlight key={task.id} underlayColor={AppStyles.listItemPressedColor} onPress={() => {this.props.navigation.navigate('Task', {taskId:task.id})}}>
+                        <TouchableHighlight key={task.id} underlayColor={AppStyles.listItemPressedColor} onPress={() => {global.navigate(this, 'Task', {taskId:task.id})}}>
                             <View style={this.styles.taskItemContainer}>
                                 <View style={this.styles.taskIcon}><IconTasks size="xsmall"></IconTasks></View>
                                 <Text style={this.styles.taskName}>{task.name}</Text>

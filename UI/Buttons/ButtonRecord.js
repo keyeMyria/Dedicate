@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, View, TouchableOpacity} from 'react-native';
+import { View, TouchableOpacity} from 'react-native';
 import {G, Circle, Path} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
 import AppStyles from 'dedicate/AppStyles';
@@ -9,8 +9,7 @@ export default class ButtonRecord extends React.Component {
         super(props);
     }
     render() {
-        var color = '#6666cc';
-        if(this.props.color){color = this.props.color;}
+        var color = this.props.color || AppStyles.color;
 
         var Icon = () => {
             if(this.props.buttonType == 'rec'){
@@ -41,5 +40,3 @@ export default class ButtonRecord extends React.Component {
         );
     }
 }
-
-AppRegistry.registerComponent("ButtonRecord", () => ButtonRecord);

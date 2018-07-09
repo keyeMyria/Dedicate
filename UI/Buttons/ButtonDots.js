@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, StyleSheet, View, TouchableOpacity} from 'react-native';
+import { View, TouchableOpacity} from 'react-native';
 import {Circle, G} from 'react-native-svg';
 import SvgIcon from 'ui/SvgIcon';
 import AppStyles from 'dedicate/AppStyles';
@@ -10,7 +10,7 @@ export default class ButtonDots extends React.Component {
     }
 
     render() {
-        var fill = this.props.fill || "#6666cc";
+        var fill = this.props.fill || AppStyles.color;
         return (
             <View style={this.props.style}>
                 <TouchableOpacity onPress={this.props.onPress}>
@@ -32,5 +32,3 @@ export default class ButtonDots extends React.Component {
         );
     }
 }
-
-AppRegistry.registerComponent("ButtonAdd", () => ButtonAdd);

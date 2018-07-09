@@ -1,6 +1,7 @@
 import React from 'react';
-import { AppRegistry, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import AppStyles from '../AppStyles';
+import ButtonBack from 'buttons/ButtonBack';
 
 export default class TitleBar extends React.Component {
     constructor(props){
@@ -17,6 +18,11 @@ export default class TitleBar extends React.Component {
                 </View>
                 
                 <View style={this.styles.container_leftbtns}>
+                    {typeof this.props.backButton === 'function' &&
+                        <View style={this.styles.button}>
+                            <ButtonBack size="xxsmall" color={AppStyles.headerTextColor} onPress={this.props.backButton}/>
+                        </View>
+                    }
                     {this.props.titleBarLeftButtons}
                 </View>
                 <View style={this.styles.container_buttons}>
@@ -30,10 +36,9 @@ export default class TitleBar extends React.Component {
         container: { zIndex:100, height:55},
         container_menu: { alignSelf: 'flex-start', padding: 15 },
         container_title: { position:'absolute', top: 12, alignSelf: 'center' },
-        container_leftbtns:{position: 'absolute', top:0, left:0, height:55},
+        container_leftbtns:{position: 'absolute', top:0, left:5, height:55},
         container_buttons: {position: 'absolute', top:0, right:0, height:55},
-        title:{ fontSize:22, color:AppStyles.headerTextColor }
+        title:{ fontSize:22, color:AppStyles.headerTextColor },
+        button:{paddingLeft:15, paddingTop:18}
     });
 }
-
-AppRegistry.registerComponent("TitleBar", () => TitleBar);

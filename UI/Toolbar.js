@@ -76,24 +76,24 @@ export default class Toolbar extends React.Component{
                             if(this.props.onAdd != null){
                                 this.props.onAdd();
                             }else{
-                                this.props.navigation.navigate('Task', {taskId:null, goback:this.props.screen});
+                                global.navigate(this, 'Task', {taskId:null, goback:this.props.screen});
                             }
                         }}/>
                         : <View style={this.styles.buttonAdd}></View>
                     }
 
                     {this.props.hasTasks && this.props.hasRecords &&
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Tasks')}>
+                        <TouchableOpacity onPress={() => global.navigate(this, 'Tasks')}>
                             <IconTasks/>
                         </TouchableOpacity>
                     }
                     {this.props.hasTasks && this.props.hasRecords &&
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Events')}>
+                        <TouchableOpacity onPress={() => global.navigate(this, 'Events')}>
                             <IconEvents/>
                         </TouchableOpacity>
                     }
                     {this.props.hasTasks && this.props.hasRecords &&
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Analytics')}>
+                        <TouchableOpacity onPress={() => global.navigate(this, 'Analytics')}>
                             <IconAnalytics/>
                         </TouchableOpacity>
                     }
@@ -101,7 +101,7 @@ export default class Toolbar extends React.Component{
                     {this.props.buttonRecord == true && this.props.hasTasks ? 
                         <ButtonRecord key="btnrec" {...this.props} style={this.styles.buttonRecord} buttonType="rec" size="large"
                             onPress={() => {
-                                this.props.navigation.navigate('Record', {goback:this.props.screen});
+                                global.navigate(this, 'Record', {goback:this.props.screen});
                             }}
                         />
                          : <View style={this.styles.buttonRecord}></View>

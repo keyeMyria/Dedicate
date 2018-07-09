@@ -1,6 +1,6 @@
 
 import React from 'react';
-import {View, Dimensions, StyleSheet} from 'react-native';
+import {View, Dimensions, StyleSheet, NativeEventEmitter} from 'react-native';
 import { createStackNavigator } from 'react-navigation';
 import ScreenTransition from 'ui/ScreenTransition';
 import Toolbar from 'ui/Toolbar';
@@ -31,9 +31,13 @@ export default class App extends React.Component{
             reload: false
         }
 
-        //set up global refresh
+        //set up global methods
         global.reload = this.reload.bind(this);
         global.updateToolbar = this.updateToolbar.bind(this);
+        global.navigate = this.navigate.bind(this);
+
+        //set up event emitters
+        this.navigatorEmitter = new NativeEventEmitter();
 
         //check for existing database
         getUserConfig().then(e => {
@@ -41,6 +45,12 @@ export default class App extends React.Component{
             this.forceUpdate();
             SplashScreen.hide();
         }).catch(err => {});
+    }
+
+    navigate(sender, screen, props){
+        sender.props.navigation.navigate(screen, props);
+        this.navigatorEmitter.emit('navigate', screen, props, this.prevScreen);
+        this.prevScreen = screen;
     }
 
     reload(){

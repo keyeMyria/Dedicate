@@ -40,8 +40,10 @@ export default class OverviewScreen extends React.Component {
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.loadOverview = this.loadOverview.bind(this);
         this.getTimers = this.getTimers.bind(this);
         this.getCharts = this.getCharts.bind(this);
+        this.addChart = this.addChart.bind(this);
         this.onLayout = this.onLayout.bind(this);
         this.onTimerPress = this.onTimerPress.bind(this);
         this.onTitleBarSettingsPress = this.onTitleBarSettingsPress.bind(this);
@@ -49,7 +51,7 @@ export default class OverviewScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
-        this.refreshOverview();
+        this.loadOverview();
     }
 
     componentWillUnmount(){
@@ -61,9 +63,8 @@ export default class OverviewScreen extends React.Component {
         return true;
     }
 
-    // Global Refresh Method
-
-    refreshOverview(){
+    loadOverview(){
+        global.overviewChanged = false;
         let dbTasks = new DbTasks();
         let dbRecords = new DbRecords();
         this.setState({
@@ -73,6 +74,17 @@ export default class OverviewScreen extends React.Component {
             this.loadToolbar();
             this.loadContent();
         });
+    }
+
+    // Global Refresh Method
+
+    refreshOverview(){
+        if(global.overviewChanged == true){
+            this.loadOverview();
+        }else{
+            //no changes made to database that would affect overview screen
+            this.loadToolbar();
+        }
     }
 
     // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +177,7 @@ export default class OverviewScreen extends React.Component {
     }
 
     onTimerPress = (id) => {
-        this.props.navigation.navigate('RecordDetails', {goback:'Overview', recordId:id});
+        global.navigate(this, 'RecordDetails', {goback:'Overview', recordId:id});
     }
 
     onTimerStop = (datestart, dateend, record) => {
@@ -179,77 +191,36 @@ export default class OverviewScreen extends React.Component {
     // Charts ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     getCharts() {
+        //asynchronously get charts
         const {width} = Dimensions.get('window');
-        let charts = this.getFeaturedCharts();
+        let charts = [];
+        const offset = this.state.featuredCharts.length;
+        const total = offset + this.state.charts.length;
+        let count = 0;
+
+        for(let x = 0; x < this.state.featuredCharts.length; x++){
+            this.addFeaturedChart(this.state.featuredCharts[x], width, x).then(result => {
+                charts[result.index] = result.chart;
+                count++;
+                if(count == total){this.setState({chartList:charts});}
+            }).catch(ex => {});
+        };
+
         for(let x = 0; x < this.state.charts.length; x++){
-            //get data sources for chart
-            let task = this.state.charts[x];
-            let sources = [];
-            let records = [];
-            let line = 1;
-            let dots = false;
-            if(task.records && task.records.length > 0){
-                for(let y = 0; y < task.records[0].inputs.length; y++){
-                    let input = task.records[0].inputs[y];
-                    let found = false;
-                    let isline = false;
-                    if(input.input.type == 0 || input.input.type == 7){
-                        if(line <= 2){
-                            found = true;
-                            isline = true;
-                            line++;
-                        }
-                    }else if(input.input.type == 6 && dots == false){
-                        found = true;
-                        dots = true;
-                    }else if(line > 2 && dots == true){break;}
-                    if(found == true){
-                        sources.push({
-                            id:0,
-                            style:1,
-                            color:isline ? line - 1 : 1,
-                            taskId: task.id,
-                            task:task.task,
-                            inputId:input.inputId,
-                            input:input.input,
-                            dayoffset:0,
-                            monthoffset:0,
-                            filter:''
-                        });
-                        records.push(task.records);
-                    }
+            this.addChart(this.state.charts[x], width, x).then(result => {
+                if(result != null){
+                    charts[result.index + offset] = result.chart;
                 }
-    
-                //build chart info
-                if(records.length > 0){
-                    charts.push(
-                        <LineChart key={'chart' + x}
-                        chart={{
-                            id:0,
-                            name:task.name,
-                            type:1,
-                            featured:true,
-                            index:0,
-                            sources:sources
-                        }}
-                        records={records}
-                        days={14}
-                        width={width}
-                        height={120}
-                        update={Math.round(999 * Math.random())}
-                        />
-                    );
-                    charts.push(<View key={'sep' + x} style={this.styles.separator}></View>);
-                }
-            }
+                count++;
+                if(count == total){this.setState({chartList:charts});}
+            }).catch(ex => {});
         }
-        this.setState({chartList:charts});
     }
 
-    getFeaturedCharts(){
-        const {width} = Dimensions.get('window');
-        var charts = this.state.featuredCharts.map( chart => {
-            return (
+    async addFeaturedChart(chart, width, index){
+        return {
+            index:index,
+            chart:
                 <View key={chart.name}>
                     <LineChart
                     chart={chart}
@@ -260,15 +231,78 @@ export default class OverviewScreen extends React.Component {
                     />
                     <View key={'sep' + chart.name} style={this.styles.separator}></View>
                 </View>
-            )
-        });
-        return charts;
+        };
+    }
+
+    async addChart(task, width, index){
+        let sources = [];
+        let records = [];
+        let line = 1;
+        let dots = false;
+        if(task.records && task.records.length > 0){
+            for(let y = 0; y < task.records[0].inputs.length; y++){
+                let input = task.records[0].inputs[y];
+                let found = false;
+                let isline = false;
+                if(input.input.type == 0 || input.input.type == 7){
+                    if(line <= 2){
+                        found = true;
+                        isline = true;
+                        line++;
+                    }
+                }else if(input.input.type == 6 && dots == false){
+                    found = true;
+                    dots = true;
+                }else if(line > 2 && dots == true){break;}
+                if(found == true){
+                    sources.push({
+                        id:0,
+                        style:1,
+                        color:isline ? line - 1 : 1,
+                        taskId: task.id,
+                        task:task.task,
+                        inputId:input.inputId,
+                        input:input.input,
+                        dayoffset:0,
+                        monthoffset:0,
+                        filter:''
+                    });
+                    records.push(task.records);
+                }
+            }
+
+            //build chart info
+            if(records.length > 0){
+                return {
+                    index:index,
+                    chart:[
+                    <LineChart key={'chart' + index}
+                    chart={{
+                        id:0,
+                        name:task.name,
+                        type:1,
+                        featured:true,
+                        index:0,
+                        sources:sources
+                    }}
+                    records={records}
+                    days={14}
+                    width={width}
+                    height={120}
+                    update={Math.round(999 * Math.random())}
+                    />,
+                    <View key={'sep' + index} style={this.styles.separator}></View>
+                ]};
+            }else{
+                return null;
+            }
+        }
     }
 
     // Buttons ///////////////////////////////////////////////////////////////////////////////////////
 
     onTitleBarSettingsPress(){
-        this.props.navigation.navigate('Settings');
+        global.navigate(this, 'Settings');
     }
 
     render() {
@@ -284,7 +318,7 @@ export default class OverviewScreen extends React.Component {
                     </View>
                 }>
                     <View style={this.styles.counters}>
-                        <TouchableBox onPress={() => this.props.navigation.navigate('Tasks')}>
+                        <TouchableBox onPress={() => global.navigate(this, 'Tasks')}>
                             <View style={this.styles.counterContainer}>
                                 <View style={this.styles.counterIcon}>
                                     <IconTasks size="small"></IconTasks>
@@ -295,7 +329,7 @@ export default class OverviewScreen extends React.Component {
                                 </View>
                             </View>
                         </TouchableBox>
-                        <TouchableBox onPress={() => this.props.navigation.navigate('Events')}>
+                        <TouchableBox onPress={() => global.navigate(this, 'Events')}>
                         <View style={this.styles.counterContainer}>
                             <View style={this.styles.counterIcon}>
                                 <IconEvents size="small"></IconEvents>
@@ -306,7 +340,7 @@ export default class OverviewScreen extends React.Component {
                             </View>
                         </View>
                         </TouchableBox>
-                        <TouchableBox onPress={() => this.props.navigation.navigate('Databases')}>
+                        <TouchableBox onPress={() => global.navigate(this, 'Databases')}>
                         <View style={this.styles.counterContainer}>
                             <View style={this.styles.counterIcon}>
                                 <IconDatabases size="small"></IconDatabases>
@@ -337,7 +371,7 @@ export default class OverviewScreen extends React.Component {
                 titleBarButtons={
                     <View style={this.styles.titleBarButtons}>
                         <View style={this.styles.titleBarButton}>
-                            <TouchableOpacity onPress={()=>{this.props.navigation.navigate('Databases')}}>
+                            <TouchableOpacity onPress={()=>{global.navigate(this, 'Databases')}}>
                                 <IconDatabases size="xsmall" color={AppStyles.headerTextColor}/>
                             </TouchableOpacity>
                         </View>

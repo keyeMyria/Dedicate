@@ -9,10 +9,12 @@ export default class CategoriesScreen extends React.Component {
 
         //bind events
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
     }
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
     }
 
     componentWillUnmount(){
@@ -20,15 +22,31 @@ export default class CategoriesScreen extends React.Component {
     }
 
     hardwareBackPress() {
-        this.props.navigation.dispatch({ type: 'Navigation/BACK' });
+        global.navigate(this, 'Settings');
+        if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Task Catgories',
+            buttonAdd:true, 
+            buttonRecord:false, 
+            bottomFade:true, 
+            hasTasks:false, 
+            hasRecords:false,
+            footerMessage: ''
+        });
     }
 
     render() {
         return (
-            <Body {...this.props} style={this.styles.body} title="Categories" screen="Settings">
+            <Body {...this.props} style={this.styles.body} title="Categories">
                 <View style={this.styles.container}>
-                    <Text>Categories used to organize Tasks</Text>
+                    <Text>Categories used for organizing Tasks</Text>
                 </View>
             </Body>
         )

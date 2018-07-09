@@ -15,9 +15,13 @@ class DefaultScreen extends React.Component {
         this.state = {
             theme:global.config.theme
         }
+        
+        //bind global methods
+        global.updatePrevScreen = this.updateScreen.bind(this);
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
         this.onThemeChange = this.onThemeChange.bind(this);
     }
 
@@ -25,6 +29,7 @@ class DefaultScreen extends React.Component {
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.loadToolbar();
     }
 
     componentWillUnmount(){
@@ -32,9 +37,28 @@ class DefaultScreen extends React.Component {
     }
 
     hardwareBackPress() {
-        this.props.navigation.navigate("Overview");
+        global.navigate(this, "Overview");
         global.refreshOverview();
         return true;
+    }
+
+    updateScreen(){
+        this.loadToolbar();
+    }
+
+    // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    loadToolbar(){
+        global.updateToolbar({
+            ...this.props, 
+            screen:'Settings',
+            buttonAdd:false, 
+            buttonRecord:false, 
+            bottomFade:false, 
+            hasTasks:false, 
+            hasRecords:false,
+            footerMessage: ''
+        });
     }
 
     onThemeChange(value){
@@ -44,7 +68,7 @@ class DefaultScreen extends React.Component {
 
     render() {
         return (
-            <Body {...this.props} style={this.styles.body} title="Settings" screen="Settings">
+            <Body {...this.props} style={this.styles.body} title="Settings" backButton={this.hardwareBackPress}>
                 <View style={this.styles.listItem}>
                     <Text style={this.styles.listTitle}>Current Theme</Text>
                     <Picker
@@ -57,7 +81,7 @@ class DefaultScreen extends React.Component {
                         title="Select Theme"
                     />
                 </View>
-                <TouchableOpacity onPress={()=> this.props.navigation.navigate('Categories')}>
+                <TouchableOpacity onPress={()=> global.navigate(this, 'Categories')}>
                     <View style={this.styles.listItem}>
                         <Text style={this.styles.listText}>Manage Categories</Text>
                     </View>
