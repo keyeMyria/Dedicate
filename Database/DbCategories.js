@@ -4,36 +4,31 @@ import Db from 'db/Db';
 
 export default class DbCategories extends Db{
     CreateCategory(category, updateExisting){
-        try {
-            //generate id for Category
-            let id = 1;
-            let len = global.realm.objects('Category').length
-            if(category.id){
-                id = category.id;
-            }else{
-                if(len > 0){
-                    id = (global.realm.objects('Category').sorted('id', true).slice(0,1)[0].id) + 1;
-                }
-            }
+        //generate id for Category
+        let id = 1;
+        let len = global.realm.objects('Category').length
+        if(category.id != null){
+            id = category.id;
+        }else{
             if(len > 0){
-                let hasname = global.realm.objects('Category').filtered('name = "' + category.name + '"');
-                if(hasname.length > 0){
-                    Alert.alert('Error Creating Category', 'The category "' + category.name + '" already exists');
-                    return;
-                };
+                id = (global.realm.objects('Category').sorted('id', true).slice(0,1)[0].id) + 1;
             }
-
-            //save category into the database
-            global.realm.write(() => {
-                global.realm.create('Category', {
-                    id:id, 
-                    name: category.name
-                }, updateExisting || false);
-            });
-        } catch (e) {
-            console.log("Error on creating category");
-            console.log(e);
         }
+        if(len > 0){
+            let hasname = global.realm.objects('Category').filtered('name = "' + category.name + '"');
+            if(hasname.length > 0){
+                Alert.alert('Error Creating Category', 'The category "' + category.name + '" already exists');
+                return;
+            };
+        }
+
+        //save category into the database
+        global.realm.write(() => {
+            global.realm.create('Category', {
+                id:id, 
+                name: category.name
+            }, updateExisting || false);
+        });
         return id;
     }
 

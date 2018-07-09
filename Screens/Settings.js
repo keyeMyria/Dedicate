@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
+import { createStackNavigator } from 'react-navigation';
+import ScreenTransition from 'ui/ScreenTransition';
+import AppStyles from 'dedicate/AppStyles';
+import Body from 'ui/Body';
 import Text from 'text/Text';
 import Picker from 'fields/Picker';
-import { createStackNavigator } from 'react-navigation';
-import Body from 'ui/Body';
-import AppStyles from 'dedicate/AppStyles';
 import CategoriesScreen from 'screens/Settings/Categories';
 import {UserConfig} from 'dedicate/UserConfig';
 
@@ -108,6 +109,7 @@ export default createStackNavigator(
     },
     {
         initialRouteName: 'Default',
-        headerMode:'none'
+        headerMode:'none',
+        transitionConfig: ScreenTransition
     }
 );;

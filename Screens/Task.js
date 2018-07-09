@@ -102,19 +102,18 @@ export default class TaskScreen extends React.Component {
         });
     }
 
-    // Database Calls ////////////////////////////////////////////////////////////////////////////////////////
+    // Categories ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    categories = ['Personal Tasks', 'Side Projects', 'Exercise Routines', 'Dieting', 'Shopping', 'Research', 
+    'Web Design', 'College', 'Cooking Recipes', 'Video Games', 'Vacation', 'Before Bed', 'Good Morning', 
+    'Finances', 'Vehicle Maintenance', 'Medicine', 'Cleaning', 'Conventions', 'Concerts', 'Weekend Projects'];
+    
     getDbCategories(){
         const dbCat = new DbCategories;
         return dbCat.GetCategoriesList().map((cat) => {
             return {id:cat.id, name:cat.name}  
         });
     }
-
-    // Categories ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    categories = ['Personal Tasks', 'Side Projects', 'Exercise Routines', 'Dieting', 'Shopping', 'Research', 
-    'Web Design', 'College', 'Cooking Recipes', 'Video Games', 'Vacation', 'Before Bed', 'Good Morning', 
-    'Finances', 'Vehicle Maintenance', 'Medicine', 'Cleaning', 'Conventions', 'Concerts', 'Weekend Projects'];
 
     getCategoriesForPicker(){
         return this.state.categories.length > 0 ? 
