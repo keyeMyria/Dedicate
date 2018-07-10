@@ -24,9 +24,6 @@ export default class AnalyticsScreen extends React.Component {
         const {width} = Dimensions.get('screen');
         this.state.layoutWidth = width;
 
-        //bind global methods
-        global.updatePrevScreen = this.updateScreen.bind(this);
-
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
         this.navigate = this.navigate.bind(this);

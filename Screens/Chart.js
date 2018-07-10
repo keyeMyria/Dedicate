@@ -123,7 +123,6 @@ export default class ChartScreen extends React.Component {
     hardwareBackPress() {
         const goback = this.props.navigation.getParam('goback', 'Analytics');
         global.navigate(this, goback);
-        global.updatePrevScreen();
         return true;
     }
 
@@ -373,8 +372,7 @@ export default class ChartScreen extends React.Component {
     onPressButtonSave(){
         var dbCharts = new DbCharts();
         dbCharts.CreateChart(this.state.chart);
-        global.navigate(this, 'Analytics')
-        global.updatePrevScreen();
+        global.navigate(this, 'Analytics');
     }
 
     render() {

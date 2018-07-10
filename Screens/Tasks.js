@@ -13,9 +13,6 @@ export default class TasksScreen extends React.Component {
             tasks: []
         };
 
-        //bind global methods
-        global.updatePrevScreen = this.updateScreen.bind(this);
-
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
         this.navigate = this.navigate.bind(this);

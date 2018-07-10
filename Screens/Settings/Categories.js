@@ -41,7 +41,6 @@ export default class CategoriesScreen extends React.Component {
 
     hardwareBackPress() {
         this.props.navigation.navigate('Default');
-        if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
     }
 

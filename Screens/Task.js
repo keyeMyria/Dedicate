@@ -90,7 +90,6 @@ export default class TaskScreen extends React.Component {
         const goback = this.props.navigation.getParam('goback', 'Tasks');
         global.navigate(this, goback);
         if(goback == 'Overview') {global.refreshOverview();}
-        if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
     }
 

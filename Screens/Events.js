@@ -44,9 +44,6 @@ export default class EventsScreen extends React.Component {
         if(filter != null){
             this.state.filter = filter;
         }
-        
-        //bind global methods
-        global.updatePrevScreen = this.updateScreen.bind(this);
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);

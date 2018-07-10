@@ -162,7 +162,6 @@ export default class RecordDetails extends React.Component{
         const params = this.props.navigation.getParam('gobackParams', null);
         global.navigate(this, goback, params);
         if(goback == 'Overview'){global.refreshOverview();}
-        if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
     }
 
@@ -388,7 +387,7 @@ export default class RecordDetails extends React.Component{
         const db = new DbRecords();
         db.CreateRecord(this.state.record);
         global.overviewChanged = true;
-        this.hardwareBackPress();
+        global.navigate(this, 'Events');
     }
 
     // Delete Event /////////////////////////////////////////////////////////////////////////////////////////////

@@ -16,9 +16,6 @@ class DefaultScreen extends React.Component {
         this.state = {
             theme:global.config.theme
         }
-        
-        //bind global methods
-        global.updatePrevScreen = this.updateScreen.bind(this);
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
