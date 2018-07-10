@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions, Alert, BackHandler  } from 'react-native';
+import { View, StyleSheet, Dimensions, Alert, BackHandler, NativeEventEmitter  } from 'react-native';
 import Text from 'text/Text';
 import Form, {FormHeader, FormBody} from 'ui/Form';
 import AppStyles from 'dedicate/AppStyles';
@@ -58,6 +58,8 @@ export default class TaskScreen extends React.Component {
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.navigate = this.navigate.bind(this);
+        this.loadToolbar = this.loadToolbar.bind(this);
         this.onPressCreateCategory = this.onPressCreateCategory.bind(this);
         this.shouldFocusInputField = this.shouldFocusInputField.bind(this);
         this.onFocusInputField = this.onFocusInputField.bind(this);
@@ -73,10 +75,15 @@ export default class TaskScreen extends React.Component {
     componentWillMount(){
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
         this.loadToolbar();
+
+        //listen to navigation emitter
+        this.navigatorEmitter = new NativeEventEmitter();
+        this.navigatorSubscription = this.navigatorEmitter.addListener('navigate', this.navigate);
     }
 
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.navigatorSubscription.remove();
     }
 
     hardwareBackPress() {
@@ -85,6 +92,12 @@ export default class TaskScreen extends React.Component {
         if(goback == 'Overview') {global.refreshOverview();}
         if(typeof global.updatePrevScreen != 'undefined'){ global.updatePrevScreen(); }
         return true;
+    }
+
+    navigate(screen, props, prevScreen){
+        if(screen == 'Task' && prevScreen != screen){
+            this.loadToolbar();
+        }
     }
 
     // Load Toolbar ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, BackHandler, Dimensions, Alert, Platform } from 'react-native';
+import { View, StyleSheet, BackHandler, Dimensions, Alert, Platform, NativeEventEmitter } from 'react-native';
 import Text from 'text/Text';
 import Body from 'ui/Body';
 import IconAnalytics from 'icons/IconAnalytics';
@@ -29,6 +29,7 @@ export default class AnalyticsScreen extends React.Component {
 
         //bind methods
         this.hardwareBackPress = this.hardwareBackPress.bind(this);
+        this.navigate = this.navigate.bind(this);
         this.onLayout = this.onLayout.bind(this);
         this.loadToolbar = this.loadToolbar.bind(this);
         this.showCreateChart = this.showCreateChart.bind(this);
@@ -41,6 +42,10 @@ export default class AnalyticsScreen extends React.Component {
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
         this.loadToolbar();
+
+        //listen to navigation emitter
+        this.navigatorEmitter = new NativeEventEmitter();
+        this.navigatorSubscription = this.navigatorEmitter.addListener('navigate', this.navigate);
     }
 
     componentDidMount(){
@@ -48,14 +53,21 @@ export default class AnalyticsScreen extends React.Component {
     }
 
     componentWillUnmount(){
-        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
         this.mounted = false;
+        BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.navigatorSubscription.remove();
     }
 
     hardwareBackPress() {
         global.navigate(this, 'Overview');
         global.refreshOverview();
         return true;
+    }
+
+    navigate(screen, props, prevScreen){
+        if(screen == 'Analytics' && prevScreen != screen){
+            this.updateScreen();
+        }
     }
 
     updateScreen(){

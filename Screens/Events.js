@@ -68,13 +68,13 @@ export default class EventsScreen extends React.Component {
         BackHandler.addEventListener('hardwareBackPress', this.hardwareBackPress);
         this.loadToolbar();
 
-        //get initial list of events
-        this.setState({tasks:this.dbTasks.GetList()});
-        this.getEvents();
-
         //listen to navigation emitter
         this.navigatorEmitter = new NativeEventEmitter();
         this.navigatorSubscription = this.navigatorEmitter.addListener('navigate', this.navigate);
+
+        //get initial list of events
+        this.setState({tasks:this.dbTasks.GetList()});
+        this.getEvents();
     }
 
     componentWillUnmount(){

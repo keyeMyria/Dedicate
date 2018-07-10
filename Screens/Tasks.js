@@ -43,6 +43,7 @@ export default class TasksScreen extends React.Component {
     componentWillUnmount(){
         this.mounted = false;
         BackHandler.removeEventListener('hardwareBackPress', this.hardwareBackPress);
+        this.navigatorSubscription.remove();
     }
 
     hardwareBackPress() {
@@ -53,8 +54,8 @@ export default class TasksScreen extends React.Component {
 
     updateScreen(){
         if(this.mounted == false){return;}
-        this.setState({tasks:this.dbTasks.GetList()});
         this.loadToolbar();
+        this.setState({tasks:this.dbTasks.GetList()});
     }
 
     navigate(screen, props, prevScreen){
